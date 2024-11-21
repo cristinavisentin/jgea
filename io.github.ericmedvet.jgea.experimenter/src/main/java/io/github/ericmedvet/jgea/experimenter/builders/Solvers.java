@@ -24,10 +24,7 @@ import io.github.ericmedvet.jgea.core.InvertibleMapper;
 import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
-import io.github.ericmedvet.jgea.core.problem.Problem;
-import io.github.ericmedvet.jgea.core.problem.ProblemWithExampleSolution;
-import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
-import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
+import io.github.ericmedvet.jgea.core.problem.*;
 import io.github.ericmedvet.jgea.core.representation.graph.*;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Constant;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Input;
@@ -175,7 +172,6 @@ public class Solvers {
   @SuppressWarnings("unused")
   @Cacheable
   public static <S,Q, P extends TotalOrderQualityBasedProblem<S,Q> & ProblemWithExampleSolution<S>> SolverBuilder<List<Double>,S,Q, P,DifferentialEvolution<S,Q>> differentialEvolution(
-  //public static <S, Q> Function<S, DifferentialEvolution<S, Q>> differentialEvolution(
       @Param(value = "name", dS = "de") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "initialMinV", dD = -1d) double initialMinV,
@@ -241,19 +237,19 @@ public class Solvers {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q> Function<S, MultiArchiveMapElites<G, S, Q>> maMapElites2(
+  public static <G,S,Q, P extends QualityBasedProblem<S, Q>> SolverBuilder<G,S,Q,P,MultiArchiveMapElites<G,S,Q>> maMapElites2(
       @Param(value = "name", dS = "maMe2") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
+      @Param("representation") Representations.RepresentationBuilder<G,S,P> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param("descriptors1") List<MapElites.Descriptor<G, S, Q>> descriptors1,
       @Param("descriptors2") List<MapElites.Descriptor<G, S, Q>> descriptors2
   ) {
-    return exampleS -> {
-      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+    return p -> {
+      Representation<G> r = representation.apply(p, mapper::exampleFor);
       return new MultiArchiveMapElites<>(
-          mapper.mapperFor(exampleS),
+          mapper.mapperFor(example(p)),
           r.factory(),
           StopConditions.nOfFitnessEvaluations(nEval),
           r.mutations().getFirst(),
@@ -265,18 +261,18 @@ public class Solvers {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q> Function<S, MapElites<G, S, Q>> mapElites(
+  public static <G,S,Q, P extends QualityBasedProblem<S, Q>> SolverBuilder<G,S,Q,P,MapElites<G,S,Q>> mapElites(
       @Param(value = "name", dS = "me") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
+      @Param("representation") Representations.RepresentationBuilder<G,S,P> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors
   ) {
-    return exampleS -> {
-      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+    return p -> {
+      Representation<G> r = representation.apply(p, mapper::exampleFor);
       return new MapElites<>(
-          mapper.mapperFor(exampleS),
+          mapper.mapperFor(example(p)),
           r.factory(),
           StopConditions.nOfFitnessEvaluations(nEval),
           r.mutations().getFirst(),
@@ -288,9 +284,9 @@ public class Solvers {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S> Function<S, NsgaII<G, S>> nsga2(
+  public static <G,S, P extends MultiHomogeneousObjectiveProblem<S, Double>> SolverBuilder<G,S,List<Double>,P,NsgaII<G,S>> nsga2(
       @Param(value = "name", dS = "nsga2") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
+      @Param("representation") Representations.RepresentationBuilder<G,S,P> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
       @Param(value = "nPop", dI = 100) int nPop,
