@@ -24,6 +24,10 @@ import io.github.ericmedvet.jgea.core.InvertibleMapper;
 import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
+import io.github.ericmedvet.jgea.core.problem.Problem;
+import io.github.ericmedvet.jgea.core.problem.ProblemWithExampleSolution;
+import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
+import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.graph.*;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Constant;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Input;
@@ -53,6 +57,7 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -62,13 +67,20 @@ import java.util.stream.DoubleStream;
 @Discoverable(prefixTemplate = "ea.solver|s")
 public class Solvers {
 
-  private Solvers() {}
+  private Solvers() {
+  }
+
+  public interface SolverBuilder<G, S, Q, P extends QualityBasedProblem<S, Q>, A extends
+      AbstractPopulationBasedIterativeSolver<
+          ? extends POCPopulationState<?, G, S, Q, ? super P>, ? super P, ?, G, S, Q>> extends Function<
+      P,
+      A> {}
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q> Function<S, CellularAutomataBasedSolver<G, S, Q>> cabea(
+  public static <G,S,Q, P extends QualityBasedProblem<S, Q>> SolverBuilder<G,S,Q,P,CellularAutomataBasedSolver<G,S,Q>> cabea(
       @Param(value = "name", dS = "cabea") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
+      @Param("representation") Representations.RepresentationBuilder<G,S,P> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "keepProbability", dD = 0.00d) double keepProbability,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
@@ -77,43 +89,48 @@ public class Solvers {
       @Param(value = "toroidal", dB = true) boolean toroidal,
       @Param(value = "mooreRadius", dI = 1) int mooreRadius,
       @Param(value = "gridSize", dI = 11) int gridSize,
-      @Param(value = "substrate", dS = "empty") SubstrateFiller.Predefined substrate) {
-    return exampleS -> {
-      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      @Param(value = "substrate", dS = "empty") SubstrateFiller.Predefined substrate
+  ) {
+    return p -> {
+      Representation<G> r = representation.apply(p, mapper::exampleFor);
       return new CellularAutomataBasedSolver<>(
-          mapper.mapperFor(exampleS),
+          mapper.mapperFor(example(p)),
           r.factory(),
           StopConditions.nOfFitnessEvaluations(nEval),
           substrate.apply(Grid.create(gridSize, gridSize, true)),
           new CellularAutomataBasedSolver.MooreNeighborhood(mooreRadius, toroidal),
           keepProbability,
           r.geneticOperators(crossoverP),
-          new Tournament(nTour));
+          new Tournament(nTour)
+      );
     };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <S, Q> Function<S, CMAEvolutionaryStrategy<S, Q>> cmaEs(
+  public static <S,Q, P extends TotalOrderQualityBasedProblem<S,Q> & ProblemWithExampleSolution<S>> SolverBuilder<List<Double>,S,Q, P,CMAEvolutionaryStrategy<S,Q>> cmaEs(
       @Param(value = "name", dS = "cmaEs") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "initialMinV", dD = -1d) double initialMinV,
       @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
-      @Param(value = "nEval", dI = 1000) int nEval) {
-    return exampleS -> new CMAEvolutionaryStrategy<>(
-        mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, 0)
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
-        StopConditions.nOfFitnessEvaluations(nEval));
+      @Param(value = "nEval", dI = 1000) int nEval
+  ) {
+    return p -> {
+      Representations.ExampleBasedRepresentationBuilder<List<Double>, S> r = Representations.doubleString(initialMinV, initialMaxV, 0);
+      return new CMAEvolutionaryStrategy<>(
+          mapper.mapperFor(example(p)),
+          r.apply(p, mapper::exampleFor).factory(),
+          StopConditions.nOfFitnessEvaluations(nEval)
+      );
+    };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G1, G2, S1, S2, S, Q> Function<S, CoMapElites<G1, G2, S1, S2, S, Q>> coMapElites(
+  public static <G1, G2, S1, S2,S,Q, P extends TotalOrderQualityBasedProblem<S,Q> & ProblemWithExampleSolution<S>> SolverBuilder<Pair<G1,G2>,S,Q,P,CoMapElites<G1, G2, S1, S2, S, Q>> coMapElites(
       @Param(value = "name", iS = "coMe-{strategy}-{neighborRadius}-{maxNOfNeighbors}") String name,
-      @Param("representation1") Function<G1, Representation<G1>> representation1,
-      @Param("representation2") Function<G2, Representation<G2>> representation2,
+      @Param("representation1") Representations.RepresentationBuilder<G1,S,P> representation1,
+      @Param("representation2") Representations.RepresentationBuilder<G2,S,P> representation2,
       @Param(value = "mapper1", dNPM = "ea.m.identity()") InvertibleMapper<G1, S1> mapper1,
       @Param(value = "mapper2", dNPM = "ea.m.identity()") InvertibleMapper<G2, S2> mapper2,
       @Param("merger") InvertibleMapper<Pair<S1, S2>, S> invertibleMapperMerger,
@@ -124,13 +141,14 @@ public class Solvers {
       @Param(value = "nOfOffspring", dI = 50) int nOfOffspring,
       @Param(value = "strategy", dS = "identity") CoMEStrategy.Prepared strategy,
       @Param(value = "neighborRadius", dD = 2) double neighborRadius,
-      @Param(value = "maxNOfNeighbors", dI = 2) int maxNOfNeighbors) {
-    return exampleS -> {
-      Pair<S1, S2> splitExample = invertibleMapperMerger.exampleFor(exampleS);
-      Representation<G1> r1 = representation1.apply(mapper1.exampleFor(splitExample.first()));
-      Representation<G2> r2 = representation2.apply(mapper2.exampleFor(splitExample.second()));
+      @Param(value = "maxNOfNeighbors", dI = 2) int maxNOfNeighbors
+  ) {
+    return p -> {
+      Pair<S1, S2> splitExample = invertibleMapperMerger.exampleFor(p.example());
+      Representation<G1> r1 = representation1.apply(p, s -> mapper1.exampleFor(splitExample.first()));
+      Representation<G2> r2 = representation2.apply(p, s -> mapper2.exampleFor(splitExample.second()));
       BiFunction<S1, S2, S> merger =
-          (s1, s2) -> invertibleMapperMerger.mapperFor(exampleS).apply(new Pair<>(s1, s2));
+          (s1, s2) -> invertibleMapperMerger.mapperFor(p.example()).apply(new Pair<>(s1, s2));
       if (descriptors1.isEmpty() || descriptors2.isEmpty()) {
         throw new IllegalArgumentException("Descriptors for representations must be initialized.");
       }
@@ -149,13 +167,15 @@ public class Solvers {
           nOfOffspring,
           strategy,
           neighborRadius,
-          maxNOfNeighbors);
+          maxNOfNeighbors
+      );
     };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <S, Q> Function<S, DifferentialEvolution<S, Q>> differentialEvolution(
+  public static <S,Q, P extends TotalOrderQualityBasedProblem<S,Q> & ProblemWithExampleSolution<S>> SolverBuilder<List<Double>,S,Q, P,DifferentialEvolution<S,Q>> differentialEvolution(
+  //public static <S, Q> Function<S, DifferentialEvolution<S, Q>> differentialEvolution(
       @Param(value = "name", dS = "de") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "initialMinV", dD = -1d) double initialMinV,
@@ -164,24 +184,34 @@ public class Solvers {
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "differentialWeight", dD = 0.5) double differentialWeight,
       @Param(value = "crossoverP", dD = 0.8) double crossoverP,
-      @Param(value = "remap") boolean remap) {
-    return exampleS -> new DifferentialEvolution<>(
-        mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, 0)
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
-        populationSize,
-        StopConditions.nOfFitnessEvaluations(nEval),
-        differentialWeight,
-        crossoverP,
-        remap);
+      @Param(value = "remap") boolean remap
+  ) {
+    return p -> {
+      Representations.ExampleBasedRepresentationBuilder<List<Double>, S> r = Representations.doubleString(initialMinV, initialMaxV, 0);
+      return new DifferentialEvolution<>(
+          mapper.mapperFor(p.example()),
+          r.apply(p,mapper::exampleFor).factory(),
+          populationSize,
+          StopConditions.nOfFitnessEvaluations(nEval),
+          differentialWeight,
+          crossoverP,
+          remap
+      );
+    };
+  }
+
+  private static <S> S example(Problem<S> p) {
+    if (p instanceof ProblemWithExampleSolution<S> eP) {
+      return eP.example();
+    }
+    return null;
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q> Function<S, StandardEvolver<G, S, Q>> ga(
+  public static <G,S,Q, P extends QualityBasedProblem<S, Q>> SolverBuilder<G,S,Q,P,StandardEvolver<G,S,Q>> ga(
       @Param(value = "name", dS = "ga") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
+      @Param("representation") Representations.RepresentationBuilder<G,S,P> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
       @Param(value = "tournamentRate", dD = 0.05d) double tournamentRate,
@@ -189,11 +219,12 @@ public class Solvers {
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
-      @Param(value = "remap") boolean remap) {
-    return exampleS -> {
-      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      @Param(value = "remap") boolean remap
+  ) {
+    return p -> {
+      Representation<G> r = representation.apply(p, mapper::exampleFor);
       return new StandardEvolver<>(
-          mapper.mapperFor(exampleS),
+          mapper.mapperFor(example(p)),
           r.factory(),
           nPop,
           StopConditions.nOfFitnessEvaluations(nEval),
@@ -203,7 +234,8 @@ public class Solvers {
           nPop,
           true,
           maxUniquenessAttempts,
-          remap);
+          remap
+      );
     };
   }
 
@@ -216,7 +248,8 @@ public class Solvers {
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param("descriptors1") List<MapElites.Descriptor<G, S, Q>> descriptors1,
-      @Param("descriptors2") List<MapElites.Descriptor<G, S, Q>> descriptors2) {
+      @Param("descriptors2") List<MapElites.Descriptor<G, S, Q>> descriptors2
+  ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new MultiArchiveMapElites<>(
@@ -225,7 +258,8 @@ public class Solvers {
           StopConditions.nOfFitnessEvaluations(nEval),
           r.mutations().getFirst(),
           nPop,
-          List.of(descriptors1, descriptors2));
+          List.of(descriptors1, descriptors2)
+      );
     };
   }
 
@@ -237,7 +271,8 @@ public class Solvers {
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
-      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors) {
+      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors
+  ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new MapElites<>(
@@ -246,7 +281,8 @@ public class Solvers {
           StopConditions.nOfFitnessEvaluations(nEval),
           r.mutations().getFirst(),
           nPop,
-          descriptors);
+          descriptors
+      );
     };
   }
 
@@ -260,7 +296,8 @@ public class Solvers {
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
-      @Param(value = "remap") boolean remap) {
+      @Param(value = "remap") boolean remap
+  ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new NsgaII<>(
@@ -270,7 +307,8 @@ public class Solvers {
           StopConditions.nOfFitnessEvaluations(nEval),
           r.geneticOperators(crossoverP),
           maxUniquenessAttempts,
-          remap);
+          remap
+      );
     };
   }
 
@@ -279,14 +317,14 @@ public class Solvers {
   public static <S, Q> Function<S, SpeciatedEvolver<Graph<Node, OperatorGraph.NonValuedArc>, S, Q>> oGraphea(
       @Param(value = "name", dS = "oGraphea") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()")
-          InvertibleMapper<Graph<Node, OperatorGraph.NonValuedArc>, S> mapper,
+      InvertibleMapper<Graph<Node, OperatorGraph.NonValuedArc>, S> mapper,
       @Param(value = "minConst", dD = 0d) double minConst,
       @Param(value = "maxConst", dD = 5d) double maxConst,
       @Param(value = "nConst", dI = 10) int nConst,
       @Param(
-              value = "operators",
-              dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
-          List<BaseOperator> operators,
+          value = "operators",
+          dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
+      List<BaseOperator> operators,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "arcAdditionRate", dD = 3d) double arcAdditionRate,
@@ -294,26 +332,32 @@ public class Solvers {
       @Param(value = "nodeAdditionRate", dD = 1d) double nodeAdditionRate,
       @Param(value = "nPop", dI = 5) int minSpeciesSizeForElitism,
       @Param(value = "rankBase", dD = 0.75d) double rankBase,
-      @Param(value = "remap") boolean remap) {
+      @Param(value = "remap") boolean remap
+  ) {
     return exampleS -> {
       Map<GeneticOperator<Graph<Node, OperatorGraph.NonValuedArc>>, Double> geneticOperators = Map.ofEntries(
           Map.entry(
               new NodeAddition<Node, OperatorGraph.NonValuedArc>(
-                      OperatorNode.sequentialIndexFactory(operators.toArray(BaseOperator[]::new)),
-                      Mutation.copy(),
-                      Mutation.copy())
+                  OperatorNode.sequentialIndexFactory(operators.toArray(BaseOperator[]::new)),
+                  Mutation.copy(),
+                  Mutation.copy()
+              )
                   .withChecker(OperatorGraph.checker()),
-              nodeAdditionRate),
+              nodeAdditionRate
+          ),
           Map.entry(
               new ArcAddition<Node, OperatorGraph.NonValuedArc>(r -> OperatorGraph.NON_VALUED_ARC, false)
                   .withChecker(OperatorGraph.checker()),
-              arcAdditionRate),
+              arcAdditionRate
+          ),
           Map.entry(
               new ArcRemoval<Node, OperatorGraph.NonValuedArc>(node -> (node instanceof Input)
-                      || (node instanceof Constant)
-                      || (node instanceof Output))
+                  || (node instanceof Constant)
+                  || (node instanceof Output))
                   .withChecker(OperatorGraph.checker()),
-              arcRemovalRate));
+              arcRemovalRate
+          )
+      );
       Graph<Node, OperatorGraph.NonValuedArc> graph = mapper.exampleFor(exampleS);
       double constStep = (maxConst - minConst) / nConst;
       List<Double> constants = DoubleStream.iterate(minConst, d -> d + constStep)
@@ -333,7 +377,8 @@ public class Solvers {
                   .map(n -> ((Output) n).getName())
                   .distinct()
                   .toList(),
-              constants),
+              constants
+          ),
           StopConditions.nOfFitnessEvaluations(nEval),
           geneticOperators,
           nPop,
@@ -341,7 +386,8 @@ public class Solvers {
           minSpeciesSizeForElitism,
           new LazySpeciator<>(
               (new Jaccard<Node>()).on(i -> i.genotype().nodes()), 0.25),
-          rankBase);
+          rankBase
+      );
     };
   }
 
@@ -358,7 +404,8 @@ public class Solvers {
       @Param(value = "beta1", dD = 0.9d) double beta1,
       @Param(value = "beta2", dD = 0.999d) double beta2,
       @Param(value = "epsilon", dD = 1e-8) double epsilon,
-      @Param(value = "nEval", dI = 1000) int nEval) {
+      @Param(value = "nEval", dI = 1000) int nEval
+  ) {
     return exampleS -> new OpenAIEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
         Representations.doubleString(initialMinV, initialMaxV, 0)
@@ -370,7 +417,8 @@ public class Solvers {
         stepSize,
         beta1,
         beta2,
-        epsilon);
+        epsilon
+    );
   }
 
   @SuppressWarnings("unused")
@@ -384,7 +432,8 @@ public class Solvers {
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "w", dD = 0.8d) double w,
       @Param(value = "phiParticle", dD = 1.5d) double phiParticle,
-      @Param(value = "phiGlobal", dD = 1.5d) double phiGlobal) {
+      @Param(value = "phiGlobal", dD = 1.5d) double phiGlobal
+  ) {
     return exampleS -> new ParticleSwarmOptimization<>(
         mapper.mapperFor(exampleS),
         Representations.doubleString(initialMinV, initialMaxV, 0)
@@ -394,7 +443,8 @@ public class Solvers {
         nPop,
         w,
         phiParticle,
-        phiGlobal);
+        phiGlobal
+    );
   }
 
   @SuppressWarnings("unused")
@@ -403,7 +453,8 @@ public class Solvers {
       @Param(value = "name", dS = "rs") String name,
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
-      @Param(value = "nEval", dI = 1000) int nEval) {
+      @Param(value = "nEval", dI = 1000) int nEval
+  ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new RandomSearch<>(
@@ -417,14 +468,16 @@ public class Solvers {
       @Param(value = "name", dS = "rw") String name,
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
-      @Param(value = "nEval", dI = 1000) int nEval) {
+      @Param(value = "nEval", dI = 1000) int nEval
+  ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new RandomWalk<>(
           mapper.mapperFor(exampleS),
           r.factory(),
           StopConditions.nOfFitnessEvaluations(nEval),
-          r.mutations().getFirst());
+          r.mutations().getFirst()
+      );
     };
   }
 
@@ -440,7 +493,8 @@ public class Solvers {
       @Param(value = "nOfElites", dI = 1) int nOfElites,
       @Param(value = "nPop", dI = 30) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
-      @Param(value = "remap") boolean remap) {
+      @Param(value = "remap") boolean remap
+  ) {
     return exampleS -> new SimpleEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
         Representations.doubleString(initialMinV, initialMaxV, 0)
@@ -451,6 +505,7 @@ public class Solvers {
         nOfElites,
         (int) Math.round(nPop * parentsRate),
         sigma,
-        remap);
+        remap
+    );
   }
 }

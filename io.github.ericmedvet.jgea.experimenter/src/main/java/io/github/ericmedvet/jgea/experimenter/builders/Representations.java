@@ -22,6 +22,8 @@ package io.github.ericmedvet.jgea.experimenter.builders;
 import io.github.ericmedvet.jgea.core.IndependentFactory;
 import io.github.ericmedvet.jgea.core.operator.Crossover;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
+import io.github.ericmedvet.jgea.core.problem.Problem;
+import io.github.ericmedvet.jgea.core.problem.ProblemWithExampleSolution;
 import io.github.ericmedvet.jgea.core.representation.sequence.FixedLengthListFactory;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitStringFactory;
@@ -41,62 +43,90 @@ import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Pair;
+
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "ea.representation|r")
 public class Representations {
-  private Representations() {}
+  private Representations() {
+  }
+
+  public interface ExampleBasedRepresentationBuilder<G, S> extends RepresentationBuilder<G, S, ProblemWithExampleSolution<S>> {  }
+
+  public interface RepresentationBuilder<G, S, P extends Problem<S>> extends BiFunction<P, Function<S,G>, Representation<G>> {}
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<BitString, Representation<BitString>> bitString(
-      @Param(value = "pMutRate", dD = 1d) double pMutRate) {
-    return g -> new Representation<>(
-        new BitStringFactory(g.size()),
-        new BitStringFlipMutation(pMutRate / (double) g.size()),
-        Crossover.from(new BitStringUniformCrossover()
-            .andThen(new BitStringFlipMutation(pMutRate / (double) g.size()))));
+  public static <S> ExampleBasedRepresentationBuilder<BitString, S> bitString(
+      @Param(value = "pMutRate", dD = 1d) double pMutRate
+  ) {
+    return (p, im) -> {
+      BitString g = im.apply(p.example());
+      return new Representation<>(
+          new BitStringFactory(g.size()),
+          new BitStringFlipMutation(pMutRate / (double) g.size()),
+          Crossover.from(new BitStringUniformCrossover()
+              .andThen(new BitStringFlipMutation(pMutRate / (double) g.size())))
+      );
+    };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<List<Double>, Representation<List<Double>>> doubleString(
+  public static <S> ExampleBasedRepresentationBuilder<List<Double>, S> doubleString(
       @Param(value = "initialMinV", dD = -1d) double initialMinV,
       @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
-      @Param(value = "sigmaMut", dD = 0.35d) double sigmaMut) {
-    return g -> new Representation<>(
-        new FixedLengthListFactory<>(g.size(), new UniformDoubleFactory(initialMinV, initialMaxV)),
+      @Param(value = "sigmaMut", dD = 0.35d) double sigmaMut
+  ) {
+    return (p, im) -> new Representation<>(
+        new FixedLengthListFactory<>(
+            im.apply(p.example()).size(),
+            new UniformDoubleFactory(initialMinV, initialMaxV)
+        ),
         new GaussianMutation(sigmaMut),
-        Crossover.from(new SegmentGeometricCrossover().andThen(new GaussianMutation(sigmaMut))));
+        Crossover.from(new SegmentGeometricCrossover().andThen(new GaussianMutation(sigmaMut)))
+    );
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<IntString, Representation<IntString>> intString(
-      @Param(value = "pMutRate", dD = 1d) double pMutRate) {
-    return g -> new Representation<>(
-        new UniformIntStringFactory(g.lowerBound(), g.upperBound(), g.size()),
-        new IntStringFlipMutation(pMutRate / (double) g.size()),
-        Crossover.from(new IntStringUniformCrossover()
-            .andThen(new IntStringFlipMutation(pMutRate / (double) g.size()))));
+  public static <S> ExampleBasedRepresentationBuilder<IntString, S> intString(
+      @Param(value = "pMutRate", dD = 1d) double pMutRate
+  ) {
+    return (p, im) -> {
+      IntString g = im.apply(p.example());
+      return new Representation<>(
+          new UniformIntStringFactory(
+              g.lowerBound(),
+              g.upperBound(),
+              g.size()
+          ),
+          new IntStringFlipMutation(pMutRate / (double) g.size()),
+          Crossover.from(new IntStringUniformCrossover()
+              .andThen(new IntStringFlipMutation(pMutRate / (double) g.size())))
+      );
+    };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<List<Tree<Element>>, Representation<List<Tree<Element>>>> multiSRTree(
+  public static <S> ExampleBasedRepresentationBuilder<List<Tree<Element>>, S> multiSRTree(
       @Param(
-              value = "constants",
-              dDs = {0.1, 1, 10})
-          List<Double> constants,
+          value = "constants",
+          dDs = {0.1, 1, 10})
+      List<Double> constants,
       @Param(
-              value = "operators",
-              dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
-          List<Element.Operator> operators,
+          value = "operators",
+          dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
+      List<Element.Operator> operators,
       @Param(value = "minTreeH", dI = 4) int minTreeH,
-      @Param(value = "maxTreeH", dI = 10) int maxTreeH) {
-    return g -> {
+      @Param(value = "maxTreeH", dI = 10) int maxTreeH
+  ) {
+    return (p, im) -> {
+      List<Tree<Element>> g = im.apply(p.example());
       List<Element.Variable> variables = g.stream()
           .map(t -> t.visitDepth().stream()
               .filter(e -> e instanceof Element.Variable)
@@ -113,7 +143,8 @@ public class Representations {
       IndependentFactory<Element> nonTerminalFactory = IndependentFactory.picker(operators);
       IndependentFactory<List<Tree<Element>>> treeListFactory = new FixedLengthListFactory<>(
           g.size(),
-          new TreeIndependentFactory<>(minTreeH, maxTreeH, x -> 2, nonTerminalFactory, terminalFactory, 0.5));
+          new TreeIndependentFactory<>(minTreeH, maxTreeH, x -> 2, nonTerminalFactory, terminalFactory, 0.5)
+      );
       // single tree factory
       TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(x -> 2, nonTerminalFactory, terminalFactory);
       // subtree between same position trees
@@ -137,25 +168,29 @@ public class Representations {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G1, G2> Function<Pair<G1, G2>, Representation<Pair<G1, G2>>> pair(
-      @Param("first") Function<G1, Representation<G1>> r1, @Param("second") Function<G2, Representation<G2>> r2) {
-    return p -> Representation.pair(r1.apply(p.first()), r2.apply(p.second()));
+  public static <G1, G2, S, P extends Problem<S>> RepresentationBuilder<Pair<G1, G2>, S, P> pair(
+      @Param("first") RepresentationBuilder<G1, S, P> r1, @Param("second") RepresentationBuilder<G2, S, P> r2) {
+    return (p, im) -> {
+      return Representation.pair(r1.apply(p, s -> im.apply(s).first()), r2.apply(p, s -> im.apply(s).second()));
+    };
   }
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<Tree<Element>, Representation<Tree<Element>>> srTree(
+  public static <S> ExampleBasedRepresentationBuilder<Tree<Element>, S> srTree(
       @Param(
-              value = "constants",
-              dDs = {0.1, 1, 10})
-          List<Double> constants,
+          value = "constants",
+          dDs = {0.1, 1, 10})
+      List<Double> constants,
       @Param(
-              value = "operators",
-              dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
-          List<Element.Operator> operators,
+          value = "operators",
+          dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"})
+      List<Element.Operator> operators,
       @Param(value = "minTreeH", dI = 4) int minTreeH,
-      @Param(value = "maxTreeH", dI = 10) int maxTreeH) {
-    return g -> {
+      @Param(value = "maxTreeH", dI = 10) int maxTreeH
+  ) {
+    return (p,im) -> {
+      Tree<Element> g = im.apply(p.example());
       List<Element.Variable> variables = g.visitDepth().stream()
           .filter(e -> e instanceof Element.Variable)
           .map(e -> ((Element.Variable) e).name())
@@ -172,7 +207,8 @@ public class Representations {
       return new Representation<>(
           new RampedHalfAndHalf<>(minTreeH, maxTreeH, x -> 2, nonTerminalFactory, terminalFactory),
           new SubtreeMutation<>(maxTreeH, treeBuilder),
-          new SubtreeCrossover<>(maxTreeH));
+          new SubtreeCrossover<>(maxTreeH)
+      );
     };
   }
 }
