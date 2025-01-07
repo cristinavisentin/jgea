@@ -191,10 +191,12 @@ public class MapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
         .flatMap(Collection::stream)
         .toList();
 
+    Archive<MEIndividual<G, S, Q>> newArchive = new Archive<>(state.archive().binUpperBounds());
+
     return state.updatedWithIteration(
         populationSize,
         populationSize,
-        new Archive<>(state.archive()).updated(newAndOldPopulation, MEIndividual::bins, partialComparator(state.problem()))
+        newArchive.updated(newAndOldPopulation, MEIndividual::bins, partialComparator(state.problem()))
     );
   }
 }
