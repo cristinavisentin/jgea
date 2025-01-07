@@ -34,7 +34,6 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
   protected final int offspringSize;
   protected final boolean overlapping;
   protected final int maxUniquenessAttempts;
-  protected final BinaryOperator<Q> fitnessReducer;
 
   public StandardBiEvolver(Function<? super G, ? extends S> solutionMapper,
                            Factory<? extends G> genotypeFactory,
@@ -48,7 +47,7 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
                            boolean overlapping,
                            int maxUniquenessAttempts,
                            BinaryOperator<Q> fitnessReducer) {
-    super(solutionMapper, genotypeFactory, stopCondition, false);
+    super(solutionMapper, genotypeFactory, stopCondition, false, fitnessReducer);
     this.operators = operators;
     this.parentSelector = parentSelector;
     this.unsurvivalSelector = unsurvivalSelector;
@@ -56,7 +55,6 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
     this.offspringSize = offspringSize;
     this.overlapping = overlapping;
     this.maxUniquenessAttempts = maxUniquenessAttempts;
-    this.fitnessReducer = fitnessReducer;
   }
 
   protected Collection<ChildGenotype<G>> buildOffspringToMapGenotypes(POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> state, RandomGenerator random) {
@@ -101,8 +99,8 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
   public POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> init(
       QualityBasedBiProblem<S, O, Q> problem,
       RandomGenerator random,
-      ExecutorService executor) throws SolverException {
-
+      ExecutorService executor
+  ) throws SolverException {
     AtomicLong counter = new AtomicLong(0);
     List<? extends G> genotypes = genotypeFactory.build(populationSize, random);
     List<? extends G> firstHalfGenotypes;
@@ -165,14 +163,20 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
   }
 
   @Override
-  public POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> update(RandomGenerator random, ExecutorService executor, POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> state) throws SolverException {
+  public POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> update(
+      RandomGenerator random,
+      ExecutorService executor,
+      POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>> state
+  ) throws SolverException {
+
     List<ChildGenotype<G>> offspringChildGenotypes = buildOffspringToMapGenotypes(state, random).stream().toList();
     int nOfNewBirths = offspringChildGenotypes.size();
-    List<Individual<G, S, Q>> individuals = new ArrayList<>(offspringChildGenotypes.stream().map(g -> Individual.<G, S, Q>from(g, solutionMapper, s -> null, state.nOfIterations())).toList());
+    List<Individual<G, S, Q>> individuals = new ArrayList<>(offspringChildGenotypes.stream().map(
+        g -> Individual.<G, S, Q>from(g, solutionMapper, s -> null, state.nOfIterations())
+    ).toList());
     individuals.addAll(state.pocPopulation().all().stream().toList());
 
     Collections.shuffle(individuals, random);
-
     List<Individual<G, S, Q>> firstHalfIndividuals;
     int half = individuals.size() / 2;
     if (individuals.size() % 2 == 0) {
@@ -183,9 +187,7 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
     List<Individual<G, S, Q>> secondHalfIndividuals = individuals.subList(half, individuals.size());
 
     List<CompletableFuture<List<Individual<G, S, Q>>>> futures = new ArrayList<>();
-
     for (int i = 0; i < firstHalfIndividuals.size(); i++) {
-
       int index = i;
 
       CompletableFuture<List<Individual<G, S, Q>>> future = CompletableFuture.supplyAsync(() -> {
@@ -196,8 +198,12 @@ public class StandardBiEvolver<G, S, Q, O> extends AbstractBiEvolver<
         Q newFirstQuality = state.problem().firstQualityFunction().apply(outcome);
         Q newSecondQuality = state.problem().secondQualityFunction().apply(outcome);
 
-        firstIndividual = Objects.isNull(firstIndividual.quality()) ? firstIndividual.updateQuality(newFirstQuality, state.nOfIterations()) : firstIndividual.updateQuality(fitnessReducer.apply(firstIndividual.quality(), newFirstQuality), state.nOfIterations());
-        secondIndividual = Objects.isNull(secondIndividual.quality()) ? secondIndividual.updateQuality(newSecondQuality, state.nOfIterations()) : secondIndividual.updateQuality(fitnessReducer.apply(secondIndividual.quality(), newSecondQuality), state.nOfIterations());
+        firstIndividual = Objects.isNull(firstIndividual.quality())
+            ? firstIndividual.updateQuality(newFirstQuality, state.nOfIterations())
+            : firstIndividual.updateQuality(fitnessReducer.apply(firstIndividual.quality(), newFirstQuality), state.nOfIterations());
+        secondIndividual = Objects.isNull(secondIndividual.quality())
+            ? secondIndividual.updateQuality(newSecondQuality, state.nOfIterations())
+            : secondIndividual.updateQuality(fitnessReducer.apply(secondIndividual.quality(), newSecondQuality), state.nOfIterations());
 
         // If populationSize is odd, the last element of firstHalfGenotypes is the same as the first element of secondHalfGenotypes
         if (individuals.size() % 2 != 0 && index != 0) {
