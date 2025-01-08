@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 
 public interface MEPopulationState<G, S, Q, P extends QualityBasedProblem<S, Q>>
     extends POCPopulationState<MEIndividual<G, S, Q>, G, S, Q, P> {
+
   Archive<MEIndividual<G, S, Q>> archive();
 
   List<MapElites.Descriptor<G, S, Q>> descriptors();

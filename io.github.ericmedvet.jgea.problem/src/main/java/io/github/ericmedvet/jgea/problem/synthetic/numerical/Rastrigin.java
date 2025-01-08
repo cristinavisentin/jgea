@@ -30,5 +30,4 @@ public class Rastrigin extends AbstractNumericalProblem {
                 .mapToDouble(v -> v * v - 10 * Math.cos(2 * Math.PI * v))
                 .sum());
   }
-
 }

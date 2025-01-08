@@ -92,14 +92,7 @@ public interface Individual<G, S, Q> extends Serializable {
 
   default Individual<G, S, Q> updateQuality(Q quality, long qualityMappingIteration) {
     return of(
-            id(),
-            genotype(),
-            solution(),
-            quality,
-            genotypeBirthIteration(),
-            qualityMappingIteration,
-            parentIds()
-    );
+        id(), genotype(), solution(), quality, genotypeBirthIteration(), qualityMappingIteration, parentIds());
   }
 
   default <P extends QualityBasedProblem<S, Q>> Individual<G, S, Q> updatedWithQuality(State<P, S> state) {

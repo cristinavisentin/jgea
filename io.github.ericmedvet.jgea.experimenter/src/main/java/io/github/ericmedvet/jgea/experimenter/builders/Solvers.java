@@ -36,6 +36,7 @@ import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.*;
 import io.github.ericmedvet.jgea.core.solver.bi.StandardBiEvolver;
+import io.github.ericmedvet.jgea.core.solver.bi.mapelites.MapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.CellularAutomataBasedSolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.SubstrateFiller;
 import io.github.ericmedvet.jgea.core.solver.es.CMAEvolutionaryStrategy;
@@ -209,12 +210,10 @@ public class Solvers {
     };
   }
 
-
-
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> Function<S, StandardBiEvolver<G, S, Q, O>> gaBi(
-      @Param(value = "name", dS = "gaBi") String name,
+  public static <G, S, Q, O> Function<S, StandardBiEvolver<G, S, Q, O>> biGa(
+      @Param(value = "name", dS = "biGa") String name,
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
@@ -223,7 +222,7 @@ public class Solvers {
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
-      @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer){
+      @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
       return new StandardBiEvolver<>(
@@ -241,7 +240,30 @@ public class Solvers {
     };
   }
 
-
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> Function<S, MapElitesBiEvolver<G, S, Q, O>> biMapElites(
+      @Param(value = "name", dS = "biMe") String name,
+      @Param("representation") Function<G, Representation<G>> representation,
+      @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
+      @Param(value = "nPop", dI = 100) int nPop,
+      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
+      @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
+      @Param("emptyArchive") boolean emptyArchive) {
+    return exampleS -> {
+      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      return new MapElitesBiEvolver<>(
+          mapper.mapperFor(exampleS),
+          r.factory(),
+          StopConditions.nOfFitnessEvaluations(nEval),
+          r.mutations().getFirst(),
+          nPop,
+          descriptors,
+          fitnessReducer,
+          emptyArchive);
+    };
+  }
 
   @SuppressWarnings("unused")
   @Cacheable
