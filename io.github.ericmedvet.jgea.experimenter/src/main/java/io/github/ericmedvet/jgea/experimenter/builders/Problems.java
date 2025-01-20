@@ -116,6 +116,7 @@ public class Problems {
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <B, Q extends Comparable<Q>>
   SimulationBasedTotalOrderProblem<
       NumericalDynamicalSystem<?>,
@@ -148,6 +149,8 @@ public class Problems {
         type);
   }
 
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <S, SS, B extends Simulation.Outcome<SS>, Q extends Comparable<Q>> QualityBasedBiProblem<S, B, Q> biSimTo(
       @Param(value = "name", iS = "{simulation.name}") String name,
       @Param("simulation") HomogeneousBiSimulation<S, SS, B> biSimulation,
@@ -159,7 +162,7 @@ public class Problems {
     if (type == OptimizationType.MAXIMIZE) {
       qComparator = qComparator.reversed();
     }
-    if (biSimulation instanceof HomogeneousBiSimulationWithExample<S,SS,B> hbswe) {
+    if (biSimulation instanceof HomogeneousBiSimulationWithExample<S, SS, B> hbswe) {
       record HardQBBWEProblem<S, B, Q>(
           BiFunction<S, S, B> outcomeFunction,
           Function<B, Q> firstQualityFunction,
