@@ -381,6 +381,7 @@ public class TTPNMain {
                 runner.run(goodNetwork, e.input()).outputs()
             )
         );
+    System.out.println(runner.run(goodNetwork, List.of(3, 4)));
   }
 
 }
