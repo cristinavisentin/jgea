@@ -38,9 +38,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrumentedOutcome> {
+  private final Configuration configuration;
+
+  public TTPNOutcomeVideoBuilder(Configuration configuration) {
+    this.configuration = configuration;
+  }
+
   public record Configuration(
       double frameRate,
       Color textInfoColor,
+      Color tokenContentColor,
       double tokenWireSizeRate,
       double tokenSpacingRate,
       TTPNDrawer.Configuration drawerConfiguration
@@ -48,16 +55,33 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
     public static final Configuration DEFAULT = new Configuration(
         2d,
         Color.BLUE,
+        Color.WHITE,
         2d,
         1.1d,
         TTPNDrawer.Configuration.DEFAULT
     );
   }
 
-  private final Configuration configuration;
+  private static double length(List<Point2D> points) {
+    double l = 0;
+    for (int i = 1; i < points.size(); i++) {
+      l = l + Math.sqrt(
+          Math.pow(points.get(i).getX() - points.get(i - 1).getX(), 2d) + Math.pow(
+              points.get(i)
+                  .getY() - points.get(i - 1).getY(),
+              2d
+          )
+      );
+    }
+    return l;
+  }
 
-  public TTPNOutcomeVideoBuilder(Configuration configuration) {
-    this.configuration = configuration;
+  private static Point2D onSegment(Point2D p1, Point2D p2, double l) {
+    double a = Math.atan2(p2.getY() - p1.getY(), p2.getX() - p1.getX());
+    return new Point2D.Double(
+        p1.getX() + l * Math.cos(a),
+        p1.getY() + l * Math.sin(a)
+    );
   }
 
   @Override
@@ -105,6 +129,17 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
     );
   }
 
+  @Override
+  public VideoInfo videoInfo(Runner.TTPNInstrumentedOutcome outcome) {
+    TTPNDrawer drawer = new TTPNDrawer(configuration.drawerConfiguration);
+    ImageBuilder.ImageInfo imageInfo = drawer.imageInfo(outcome.network());
+    return new VideoInfo(
+        imageInfo.w(),
+        imageInfo.h(),
+        VideoUtils.EncoderFacility.DEFAULT
+    );
+  }
+
   private BufferedImage buildImage(
       BufferedImage networkImage,
       Map<Wire, List<Point2D>> wirePaths,
@@ -140,65 +175,45 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
   }
 
   private void drawTokens(Graphics2D g, List<Point2D> wirePoints, Type type, List<Object> tokens) {
+    if (tokens.isEmpty()) {
+      return;
+    }
     double l = length(wirePoints);
     double tR = configuration.tokenWireSizeRate * configuration.drawerConfiguration.wireW();
-    double tS = tR * configuration.tokenSpacingRate;
-    if (tR * tokens.size() + tS * (tokens.size() - 1) > l) {
-      tS = l / (tokens.size()) + 1;
+    double tS = 2d * tR * configuration.tokenSpacingRate;
+    double d0 = tS - tR;
+    if (d0 + tS * (tokens.size() - 1) + tR > l) {
+      tS = (l - d0 * wirePoints.size()) / (tokens.size() + 1);
     }
     @SuppressWarnings("SuspiciousMethodCalls") Color typeColor = configuration.drawerConfiguration.baseTypeColors()
         .getOrDefault(type, configuration.drawerConfiguration.otherTypeColor());
+    int sC = wirePoints.size() - 1;
+    double sL = length(List.of(wirePoints.get(sC), wirePoints.get(sC - 1)));
+    double d = d0;
+    Shape clip = g.getClip();
     for (int i = 0; i < tokens.size(); i++) {
-      double x = wirePoints.getLast().getX() - tR - tS * i;
-      double y = wirePoints.getLast().getY();
-      Point2D p = nPoint(wirePoints, i, tR * (1d - configuration.tokenSpacingRate), tS);
+      if (d > sL) {
+        d = d0;
+        sC = sC - 1;
+        sL = length(List.of(wirePoints.get(sC), wirePoints.get(sC - 1)));
+      }
+      Point2D p = onSegment(wirePoints.get(sC), wirePoints.get(sC - 1), d);
+      d = d + tS;
       Ellipse2D circle = new Ellipse2D.Double(p.getX() - tR, p.getY() - tR, 2d * tR, 2d * tR);
       g.setColor(typeColor);
       g.fill(circle);
       g.setColor(configuration.drawerConfiguration.borderColor());
       g.draw(circle);
-    }
-  }
-
-  private static double length(List<Point2D> points) {
-    double l = 0;
-    for (int i = 1; i < points.size(); i++) {
-      l = l + Math.sqrt(
-          Math.pow(points.get(i).getX() - points.get(i - 1).getX(), 2d) - Math.pow(
-              points.get(i)
-                  .getY() - points.get(i - 1).getY(),
-              2d
-          )
+      g.setClip(circle);
+      String str = tokens.get(i).toString();
+      Rectangle2D strR = ImageUtils.bounds(str, g.getFont(), g);
+      g.setColor(configuration.tokenContentColor);
+      g.drawString(
+          str,
+          (float) p.getX() - (float) strR.getWidth() / 2f,
+          (float) p.getY() + (float) strR.getHeight() / 2f
       );
+      g.setClip(clip);
     }
-    return l;
-  }
-
-  private static Point2D nPoint(List<Point2D> points, int n, double d0, double d) {
-    for (int i = points.size() - 1; i > 0; i = i - 1) {
-      double l = length(List.of(points.get(i), points.get(i - 1)));
-      if (d0 + d * n < l) {
-        // point on this segment
-        return new Point2D.Double(
-            // TODO change
-            points.get(i).getX() - d0 - d * n,
-            points.get(i).getY()
-        );
-      }
-      n = n - (int) Math.floor((l - d0) / d);
-    }
-    return points.getFirst(); // TODO should not happen
-  }
-
-
-  @Override
-  public VideoInfo videoInfo(Runner.TTPNInstrumentedOutcome outcome) {
-    TTPNDrawer drawer = new TTPNDrawer(configuration.drawerConfiguration);
-    ImageBuilder.ImageInfo imageInfo = drawer.imageInfo(outcome.network());
-    return new VideoInfo(
-        imageInfo.w(),
-        imageInfo.h(),
-        VideoUtils.EncoderFacility.DEFAULT
-    );
   }
 }

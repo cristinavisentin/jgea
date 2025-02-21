@@ -59,9 +59,9 @@ public class TTPNDrawer implements Drawer<Network> {
         Color.BLACK,
         Map.ofEntries(
             Map.entry(Base.INT, Color.BLUE),
-            Map.entry(Base.REAL, Color.CYAN),
+            Map.entry(Base.REAL, Color.CYAN.darker().darker()),
             Map.entry(Base.BOOLEAN, Color.RED),
-            Map.entry(Base.STRING, Color.GREEN)
+            Map.entry(Base.STRING, Color.GREEN.darker().darker())
         ),
         Color.DARK_GRAY,
         100,
@@ -110,6 +110,26 @@ public class TTPNDrawer implements Drawer<Network> {
   }
 
   private record Point(int x, int y) {}
+
+  private static boolean areXAligned(Point2D p1, Point2D p2, Point2D p3) {
+    if (p1.getX() == p2.getX() && p2.getX() == p3.getX()) {
+      if (p1.getY() <= p2.getY() && p2.getY() <= p3.getY()) {
+        return true;
+      }
+      return p1.getY() >= p2.getY() && p2.getY() >= p3.getY();
+    }
+    return false;
+  }
+
+  private static boolean areYAligned(Point2D p1, Point2D p2, Point2D p3) {
+    if (p1.getY() == p2.getY() && p2.getY() == p3.getY()) {
+      if (p1.getX() <= p2.getX() && p2.getX() <= p3.getX()) {
+        return true;
+      }
+      return p1.getX() >= p2.getX() && p2.getX() >= p3.getX();
+    }
+    return false;
+  }
 
   private static Map<Integer, Point> computeGatePoints(Network network) {
     Map<Integer, Point> map = new TreeMap<>();
@@ -180,6 +200,13 @@ public class TTPNDrawer implements Drawer<Network> {
     return -1;
   }
 
+  private static Path2D toPath(List<Point2D> points) {
+    Path2D path = new Path2D.Double();
+    path.moveTo(points.getFirst().getX(), points.getFirst().getY());
+    IntStream.range(1, points.size()).forEach(i -> path.lineTo(points.get(i).getX(), points.get(i).getY()));
+    return path;
+  }
+
   protected List<Point2D> computeWirePoints(Metrics m, Wire w, Network network) {
     Point srcPoint = m.gatePoints.get(w.src().gateIndex());
     Point dstPoint = m.gatePoints.get(w.dst().gateIndex());
@@ -221,14 +248,19 @@ public class TTPNDrawer implements Drawer<Network> {
       points.add(new Point2D.Double(wp3x, dstY));
     }
     points.add(new Point2D.Double(dstX, dstY));
-    return points;
-  }
-
-  private static Path2D toPath(List<Point2D> points) {
-    Path2D path = new Path2D.Double();
-    path.moveTo(points.getFirst().getX(), points.getFirst().getY());
-    IntStream.range(1, points.size()).forEach(i -> path.lineTo(points.get(i).getX(), points.get(i).getY()));
-    return path;
+    // simplify
+    List<Point2D> simpliefiedPoints = new ArrayList<>();
+    points.forEach(p -> {
+      if (simpliefiedPoints.size() >= 2) {
+        Point2D last = simpliefiedPoints.getLast();
+        Point2D secondLast = simpliefiedPoints.get(simpliefiedPoints.size() - 2);
+        if (areXAligned(secondLast, last, p) || areYAligned(secondLast, last, p)) {
+          simpliefiedPoints.removeLast();
+        }
+      }
+      simpliefiedPoints.add(p);
+    });
+    return simpliefiedPoints;
   }
 
   @Override
