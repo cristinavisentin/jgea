@@ -28,6 +28,7 @@ import io.github.ericmedvet.jgea.core.representation.programsynthesis.RunProfile
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.Type;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public interface ProgramSynthesisProblem extends SimpleEBMOProblem<Program, List
   enum Metric implements BiFunction<List<Outcome>, Distance<List<Object>>, Double> {
     SMOOTH_FAIL_RATE(
         (outcomes, d) -> (double) outcomes.stream()
-            .filter(outcome -> d.apply(outcome.actual, outcome.executionOutcome.outputs()) < SMOOTH_DISTANCE_THRESHOLD)
+            .filter(outcome -> d.apply(outcome.actual, outcome.executionOutcome.outputs()) > SMOOTH_DISTANCE_THRESHOLD)
             .count() / (double) outcomes.size()
     ), FAIL_RATE(
         (outcomes, d) -> (double) outcomes.stream()
