@@ -54,6 +54,11 @@ public class Problems {
     return Math.max(v1, Math.max(v2, v3));
   }
 
+  @Typed("[R]")
+  public static List<Double> vScProduct(@Typed("[R]") List<Double> vs, @Typed("R") Double r) {
+    return vs.stream().map(v -> v * r).toList();
+  }
+
   @Typed("[<S,I>]")
   public static List<List<Object>> sLengther(@Typed("[S]") List<String> strings) {
     return strings.stream().map(s -> List.<Object>of(s, s.length())).toList();

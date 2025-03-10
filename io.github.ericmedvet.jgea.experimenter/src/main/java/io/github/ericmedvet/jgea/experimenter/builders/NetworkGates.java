@@ -265,4 +265,10 @@ public class NetworkGates {
   public static Gate unpairer() {
     return Gates.unpairer();
   }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static Gate sPSequencer() {
+    return Gates.sPSequencer();
+  }
 }
