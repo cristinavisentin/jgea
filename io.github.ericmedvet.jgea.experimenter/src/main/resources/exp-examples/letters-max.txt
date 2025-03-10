@@ -1,9 +1,9 @@
-$nEvals = [20000]
+$nEvals = [5000]
 
 ea.experiment(
   runs = (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
     (problem = [
-      ea.p.s.lettersMax(l = 32; letters = [b]);
+      % ea.p.s.lettersMax(l = 32; letters = [b]);
       ea.p.s.lettersMax(l = 64; letters = [b;c])
     ]) *
     (solver = (nEval = $nEvals) * [
@@ -22,6 +22,8 @@ ea.experiment(
     ea.l.console(
       functions = [
         ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+        f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = b; of = ea.f.quality())); format = "%5.3f");
+        f.max(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = c; of = ea.f.quality())); format = "%5.3f");
         f.mapValue(key = b; of = ea.f.quality(of = ea.f.best()); format = "%5.3f");
         f.mapValue(key = c; of = ea.f.quality(of = ea.f.best()); format = "%5.3f")
       ];
