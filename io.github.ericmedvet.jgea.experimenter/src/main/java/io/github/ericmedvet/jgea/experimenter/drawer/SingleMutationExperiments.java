@@ -333,17 +333,18 @@ public class SingleMutationExperiments {
             Gates.iSPSum(),
             Gate.output(Base.INT),
             Gates.noop(),
-            Gates.noop(),
+            Gates.iSPSum(),
             Gates.noop()
         ),
         Set.of(
             Wire.of(0, 0, 4, 0),
             Wire.of(4, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
             Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 2, 0),
             Wire.of(2, 0, 6, 0),
-            Wire.of(6, 0, 3, 0),
-            Wire.of(2, 0, 2, 1)
+            Wire.of(2, 0, 5, 1),
+            Wire.of(5, 0, 2, 1),
+            Wire.of(6, 0, 3, 0)
         )
     );
 
@@ -513,6 +514,34 @@ public class SingleMutationExperiments {
     );
 
 
+    Network iBiMaxbiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.noop(),
+            Gates.iBefore(),
+            Gates.noop(),
+            Gates.select(),
+            Gates.repeater(),
+            Gates.noop(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(0, 0, 4, 0),
+            Wire.of(4, 0, 5, 1),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(1, 0, 5, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 5, 2),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 7, 0),
+            Wire.of(7, 0, 8, 0)
+        )
+    );
+
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -544,8 +573,8 @@ public class SingleMutationExperiments {
         "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = iArraySumgoodNetwork;
-    ProgramSynthesisProblem psb = iArraySumpsb;
+    Network goodNetwork = sLengthergoodNetwork;
+    ProgramSynthesisProblem psb = sLengtherpsb;
 
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);

@@ -377,6 +377,32 @@ public class BiggerNetworks {
         )
     );
 
+
+    Network vProductgoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.queuer(),
+            Gates.rSMult(),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 6, 1),
+            Wire.of(6, 0, 7, 0)
+
+
+        )
+    );
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -403,7 +429,7 @@ public class BiggerNetworks {
     );
 
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate; fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
     ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
@@ -414,8 +440,8 @@ public class BiggerNetworks {
         "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = iArraySumbiggerNetwork;
-    ProgramSynthesisProblem psb = iArraySumpsb;
+    Network goodNetwork = triLongestStringbiggerNetwork;
+    ProgramSynthesisProblem psb = triLongestStringpsb;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);

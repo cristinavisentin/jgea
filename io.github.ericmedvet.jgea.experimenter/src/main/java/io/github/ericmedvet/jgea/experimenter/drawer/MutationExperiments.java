@@ -296,53 +296,54 @@ public class MutationExperiments {
             Gates.iSPSum(),
             Gate.output(Base.INT),
             Gates.noop(),
-            Gates.noop(),
+            Gates.iSPSum(),
             Gates.noop()
         ),
         Set.of(
             Wire.of(0, 0, 4, 0),
             Wire.of(4, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
             Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 2, 0),
             Wire.of(2, 0, 6, 0),
-            Wire.of(6, 0, 3, 0),
-            Wire.of(2, 0, 2, 1)
+            Wire.of(2, 0, 5, 1),
+            Wire.of(5, 0, 2, 1),
+            Wire.of(6, 0, 3, 0)
         )
     );
 
-    //    Network vScProductbiggerNetwork = new Network(
-    //            List.of(
-    //                    Gate.input(Composed.sequence(Base.REAL)),
-    //                    Gate.input(Base.REAL),
-    //                    Gates.length(),
-    //                    Gates.repeater(),
-    //                    Gates.queuer(),
-    //                    Gates.noop(),
-    //                    Gates.repeater(),
-    //                    Gates.splitter(),
-    //                    Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
-    //                    Gates.sPSequencer(),
-    //                    Gates.noop(),
-    //                    Gate.output(Composed.sequence(Base.REAL))
-    //            ),
-    //            Set.of(
-    //                    Wire.of(1, 0, 6, 0),
-    //                    Wire.of(0, 0, 2, 0),
-    //                    Wire.of(0, 0, 3, 0),
-    //                    Wire.of(2,0,3,1),
-    //                    Wire.of(3,0,7,0),
-    //                    Wire.of(2,0,4,0),
-    //                    Wire.of(2,0,4,1),
-    //                    Wire.of(4, 0, 5, 0),
-    //                    Wire.of(5,0,6,1),
-    //                    Wire.of(6, 0, 8, 0),
-    //                    Wire.of(7, 0, 8, 1),
-    //                    Wire.of(8, 0, 9, 0),
-    //                    Wire.of(9, 0, 9, 1),
-    //                    Wire.of(9, 0, 10, 0),
-    //                    Wire.of(10,0,11,0)
-    //            )
-    //    );
+    Network vScProductbiggerNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Base.REAL),
+            Gates.length(),
+            Gates.repeater(),
+            Gates.queuer(),
+            Gates.noop(),
+            Gates.repeater(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.sPSequencer(),
+            Gates.noop(),
+            Gate.output(Composed.sequence(Base.REAL))
+        ),
+        Set.of(
+            Wire.of(1, 0, 6, 0),
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 3, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 7, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(2, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 8, 0),
+            Wire.of(7, 0, 8, 1),
+            Wire.of(8, 0, 9, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(9, 0, 10, 0),
+            Wire.of(10, 0, 11, 0)
+        )
+    );
 
     Network sLengtherbiggerNetwork = new Network(
         List.of(
@@ -564,38 +565,6 @@ public class MutationExperiments {
         )
     );
 
-    Network vScProductbiggerNetwork = new Network(
-        List.of(
-            Gate.input(Composed.sequence(Base.REAL)),
-            Gate.input(Base.REAL),
-            Gates.length(),
-            Gates.repeater(),
-            Gates.splitter(),
-            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
-            Gates.sPSequencer(),
-            Gate.output(Composed.sequence(Base.REAL)),
-            Gates.noop(),
-            Gates.noop(),
-            Gates.noop(),
-            Gates.noop()
-        ),
-        Set.of(
-            Wire.of(1, 0, 3, 0),
-            Wire.of(0, 0, 8, 0),
-            Wire.of(8, 0, 2, 0),
-            Wire.of(0, 0, 4, 0),
-            Wire.of(2, 0, 3, 1),
-            Wire.of(3, 0, 11, 0),
-            Wire.of(11, 0, 5, 0),
-            Wire.of(4, 0, 9, 0),
-            Wire.of(9, 0, 5, 1),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 10, 0),
-            Wire.of(10, 0, 7, 0)
-        )
-    );
-
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -622,7 +591,7 @@ public class MutationExperiments {
         "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
@@ -684,7 +653,7 @@ public class MutationExperiments {
     );
 
     List<Network> networks = List.of(
-        rIntSumbiggerNetwork
+        rIntSumgoodNetwork
     );
 
 
@@ -700,13 +669,15 @@ public class MutationExperiments {
       );
 
 
-      for (Mutation<Network> mutation : List.of(grMutation, giMutation, wsMutation)) {
+      for (Mutation<Network> mutation : List.of(wsMutation)) {
         double totalFailRate = 0;
         double totalAvgRawDissimilarity = 0;
         double totalProfileAvgSteps = 0;
 
         Set<Network> mutatedNetworks = new HashSet<>();
         int neutralCount = 0;
+
+        //Network originalNetwork = goodNetwork.clone();
 
         for (int i = 0; i < 10; i++) {
           Network mutated = mutation.mutate(goodNetwork, rnd);
