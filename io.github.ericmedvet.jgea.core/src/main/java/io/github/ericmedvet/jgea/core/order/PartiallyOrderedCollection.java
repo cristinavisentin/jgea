@@ -22,17 +22,14 @@ package io.github.ericmedvet.jgea.core.order;
 
 import io.github.ericmedvet.jgea.core.util.Sized;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public interface PartiallyOrderedCollection<T> extends Sized {
   void add(T t);
 
-  Collection<T> all();
-
   PartialComparator<? super T> comparator();
 
-  Collection<T> firsts();
-
-  Collection<T> lasts();
+  List<Collection<T>> fronts();
 
   boolean remove(T t);
 
@@ -45,32 +42,10 @@ public interface PartiallyOrderedCollection<T> extends Sized {
 
   static <T> PartiallyOrderedCollection<T> from(Collection<T> ts, PartialComparator<? super T> comparator) {
     PartiallyOrderedCollection<T> poc = new DAGPartiallyOrderedCollection<>(ts, comparator);
-    Collection<T> firsts = poc.firsts();
-    Collection<T> lasts = poc.lasts();
-    Collection<T> all = poc.all();
+    List<Collection<T>> fronts = poc.fronts();
     return new PartiallyOrderedCollection<>() {
       @Override
       public void add(T t) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public Collection<T> all() {
-        return all;
-      }
-
-      @Override
-      public Collection<T> firsts() {
-        return firsts;
-      }
-
-      @Override
-      public Collection<T> lasts() {
-        return lasts;
-      }
-
-      @Override
-      public boolean remove(T t) {
         throw new UnsupportedOperationException();
       }
 
@@ -78,103 +53,67 @@ public interface PartiallyOrderedCollection<T> extends Sized {
       public PartialComparator<? super T> comparator() {
         return comparator;
       }
-    };
-  }
-
-  static <T> PartiallyOrderedCollection<T> from(T t) {
-    Collection<T> collection = List.of(t);
-    return new PartiallyOrderedCollection<>() {
-      @Override
-      public void add(T t) {
-        throw new UnsupportedOperationException();
-      }
 
       @Override
-      public Collection<T> all() {
-        return collection;
-      }
-
-      @Override
-      public Collection<T> firsts() {
-        return collection;
-      }
-
-      @Override
-      public Collection<T> lasts() {
-        return collection;
+      public List<Collection<T>> fronts() {
+        return fronts;
       }
 
       @Override
       public boolean remove(T t) {
         throw new UnsupportedOperationException();
       }
+    };
+  }
+
+  static <T> PartiallyOrderedCollection<T> from(T t) {
+    List<Collection<T>> fronts = List.of(List.of(t));
+    return new PartiallyOrderedCollection<>() {
+      @Override
+      public void add(T t) {
+        throw new UnsupportedOperationException();
+      }
+
 
       @Override
       public PartialComparator<? super T> comparator() {
         return (k1, k2) -> PartialComparator.PartialComparatorOutcome.SAME;
       }
-    };
-  }
-
-  static <T> PartiallyOrderedCollection<T> from(Collection<T> ts, Comparator<? super T> comparator) {
-    List<T> all = ts.stream().sorted(comparator).toList();
-    List<T> firsts = all.stream()
-        .filter(t -> comparator.compare(t, all.getFirst()) == 0)
-        .toList();
-    List<T> lasts = all.stream()
-        .filter(t -> comparator.compare(t, all.getLast()) == 0)
-        .toList();
-    return new PartiallyOrderedCollection<>() {
-      @Override
-      public void add(T t) {
-        throw new UnsupportedOperationException();
-      }
 
       @Override
-      public Collection<T> all() {
-        return all;
-      }
-
-      @Override
-      public Collection<T> firsts() {
-        return firsts;
-      }
-
-      @Override
-      public Collection<T> lasts() {
-        return lasts;
+      public List<Collection<T>> fronts() {
+        return fronts;
       }
 
       @Override
       public boolean remove(T t) {
         throw new UnsupportedOperationException();
       }
-
-      @Override
-      public PartialComparator<? super T> comparator() {
-        return PartialComparator.from(comparator);
-      }
     };
   }
 
-  default List<Collection<T>> fronts() {
-    DAGPartiallyOrderedCollection<T> poc = new DAGPartiallyOrderedCollection<>(all(), comparator());
-    Collection<T> firsts = poc.firsts();
-    List<Collection<T>> fronts = new ArrayList<>();
-    while (!firsts.isEmpty()) {
-      fronts.add(Collections.unmodifiableCollection(firsts));
-      firsts.forEach(poc::remove);
-      firsts = poc.firsts();
-    }
-    return Collections.unmodifiableList(fronts);
+  static <T> PartiallyOrderedCollection<T> from(Collection<T> ts, Comparator<? super T> comparator) {
+    return from(ts, PartialComparator.from(comparator));
+  }
+
+  default Collection<T> all() {
+    return fronts().stream().flatMap(Collection::stream).toList();
+  }
+
+  default Collection<T> firsts() {
+    return fronts().getFirst();
+  }
+
+  default Collection<T> lasts() {
+    return fronts().getLast();
   }
 
   default Collection<T> mids() {
-    Collection<T> firsts = firsts();
-    Collection<T> lasts = lasts();
-    return all().stream()
-        .filter(t -> !firsts.contains(t) && !lasts.contains(t))
-        .toList();
+    List<Collection<T>> fronts = fronts();
+    if (fronts.size() > 2) {
+      return IntStream.range(1, fronts.size() - 1).mapToObj(fronts::get).flatMap(Collection::stream).toList();
+    }
+    return List.of();
   }
 
   @Override
