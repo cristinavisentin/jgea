@@ -41,7 +41,7 @@ public interface ProgramSynthesisProblem extends SimpleEBMOProblem<Program, List
   enum Metric implements BiFunction<List<Outcome>, Distance<List<Object>>, Double> {
     SMOOTH_FAIL_RATE(
         (outcomes, d) -> (double) outcomes.stream()
-            .filter(outcome -> d.apply(outcome.actual, outcome.executionOutcome.outputs()) < SMOOTH_DISTANCE_THRESHOLD)
+            .filter(outcome -> d.apply(outcome.actual, outcome.executionOutcome.outputs()) > SMOOTH_DISTANCE_THRESHOLD)
             .count() / (double) outcomes.size()
     ), FAIL_RATE(
         (outcomes, d) -> (double) outcomes.stream()
