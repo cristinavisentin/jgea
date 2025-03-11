@@ -565,6 +565,69 @@ public class MutationExperiments {
         )
     );
 
+    Network remaindergoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
+    Network remainderbiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT),
+            Gates.rSPMult(),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop()
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 11, 0),
+            Wire.of(11, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 10, 0),
+            Wire.of(10, 0, 6, 1),
+            Wire.of(2, 0, 9, 0),
+            Wire.of(9, 0, 4, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 12, 0),
+            Wire.of(12, 0, 8, 0)
+
+        )
+    );
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -592,6 +655,10 @@ public class MutationExperiments {
     );
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    );
+
+    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
@@ -645,7 +712,7 @@ public class MutationExperiments {
     //    );
 
     List<ProgramSynthesisProblem> psbs = List.of(
-        rIntSumpsb
+        remainderpsb
     );
 
     List<String> problemNames = List.of(
@@ -653,8 +720,10 @@ public class MutationExperiments {
     );
 
     List<Network> networks = List.of(
-        rIntSumgoodNetwork
+        remainderbiggerNetwork
     );
+
+    int times = 10;
 
 
     for (int j = 0; j < networks.size(); j++) {
@@ -679,7 +748,7 @@ public class MutationExperiments {
 
         //Network originalNetwork = goodNetwork.clone();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < times; i++) {
           Network mutated = mutation.mutate(goodNetwork, rnd);
           mutatedNetworks.add(mutated);
           neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
@@ -700,12 +769,12 @@ public class MutationExperiments {
         double uniqueness = mutatedNetworks.size();
         double neutrality = neutralCount;
 
-        System.out.printf("%.1f\t\t\t", uniqueness / 10);
-        System.out.printf("%.1f\t\t\t", neutrality / 10);
+        System.out.printf("%.1f\t\t\t", uniqueness / times);
+        System.out.printf("%.1f\t\t\t", neutrality / times);
 
-        System.out.printf("%.1f\t\t\t", totalFailRate / 10);
-        System.out.printf("%.1f\t\t\t", totalAvgRawDissimilarity / 10);
-        System.out.printf("%.1f\t\t\t\t\t", totalProfileAvgSteps / 10);
+        System.out.printf("%.1f\t\t\t", totalFailRate / times);
+        System.out.printf("%.1f\t\t\t", totalAvgRawDissimilarity / times);
+        System.out.printf("%.1f\t\t\t\t\t", totalProfileAvgSteps / times);
 
       }
       System.out.println();

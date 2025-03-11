@@ -541,6 +541,63 @@ public class SingleMutationExperiments {
         )
     );
 
+    Network remaindergoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
+    Network remainderbiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT),
+            Gates.rSPMult()
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 9, 0),
+            Wire.of(9, 0, 4, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
 
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
@@ -573,8 +630,12 @@ public class SingleMutationExperiments {
         "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = sLengthergoodNetwork;
-    ProgramSynthesisProblem psb = sLengtherpsb;
+    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    );
+
+    Network goodNetwork = remaindergoodNetwork;
+    ProgramSynthesisProblem psb = remainderpsb;
 
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);

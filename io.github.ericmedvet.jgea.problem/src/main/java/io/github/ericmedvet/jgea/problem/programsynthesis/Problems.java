@@ -77,4 +77,9 @@ public class Problems {
     return IntStream.range(0, v1.size()).mapToDouble(i -> v1.get(i) * v2.get(i)).sum();
   }
 
+  @Typed("I")
+  public static Integer remainder(@Typed("I") Integer v1, @Typed("I") Integer v2) {
+    return (v1 % v2);
+  }
+
 }
