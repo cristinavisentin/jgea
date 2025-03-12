@@ -37,7 +37,7 @@ public class MutationExperiments {
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
 
-    Network rIntSumgoodNetwork = new Network(
+    Network rIntSumGoodNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -54,7 +54,7 @@ public class MutationExperiments {
         )
     );
 
-    Network biLongestStringgoodNetwork = new Network(
+    Network biLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -80,7 +80,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iArraySumgoodNetwork = new Network(
+    Network iArraySumGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
@@ -95,7 +95,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iBiMaxgoodNetwork = new Network(
+    Network iBiMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -113,7 +113,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iTriMaxgoodNetwork = new Network(
+    Network iTriMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -140,7 +140,7 @@ public class MutationExperiments {
         )
     );
 
-    Network vScProductgoodNetwork = new Network(
+    Network vScProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -164,7 +164,7 @@ public class MutationExperiments {
         )
     );
 
-    Network sLengthergoodNetwork = new Network(
+    Network sLengtherGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.splitter(),
@@ -187,7 +187,7 @@ public class MutationExperiments {
         )
     );
 
-    Network triLongestStringgoodNetwork = new Network(
+    Network triLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -229,7 +229,7 @@ public class MutationExperiments {
         )
     );
 
-    Network vProductgoodNetwork = new Network(
+    Network vProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Composed.sequence(Base.REAL)),
@@ -255,7 +255,7 @@ public class MutationExperiments {
     );
 
 
-    Network rIntSumbiggerNetwork = new Network(
+    Network rIntSumBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -289,7 +289,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iArraySumbiggerNetwork = new Network(
+    Network iArraySumBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
@@ -311,7 +311,7 @@ public class MutationExperiments {
         )
     );
 
-    Network vScProductbiggerNetwork = new Network(
+    Network vScProductBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -345,7 +345,7 @@ public class MutationExperiments {
         )
     );
 
-    Network sLengtherbiggerNetwork = new Network(
+    Network sLengtherBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.noop(),
@@ -374,7 +374,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iBiMaxbiggerNetwork = new Network(
+    Network iBiMaxBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -401,7 +401,7 @@ public class MutationExperiments {
         )
     );
 
-    Network biLongestStringbiggerNetwork = new Network(
+    Network biLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -438,7 +438,7 @@ public class MutationExperiments {
         )
     );
 
-    Network vProductbiggerNetwork = new Network(
+    Network vProductBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Composed.sequence(Base.REAL)),
@@ -469,7 +469,7 @@ public class MutationExperiments {
         )
     );
 
-    Network iTriMaxbiggerNetwork = new Network(
+    Network iTriMaxBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -508,7 +508,7 @@ public class MutationExperiments {
         )
     );
 
-    Network triLongestStringbiggerNetwork = new Network(
+    Network triLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -565,7 +565,7 @@ public class MutationExperiments {
         )
     );
 
-    Network remaindergoodNetwork = new Network(
+    Network remainderGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -592,7 +592,7 @@ public class MutationExperiments {
         )
     );
 
-    Network remainderbiggerNetwork = new Network(
+    Network remainderBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -656,7 +656,6 @@ public class MutationExperiments {
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
-
     ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
@@ -694,9 +693,9 @@ public class MutationExperiments {
     //
     //
     //    List<Network> networks = List.of(
-    //            rIntSumgoodNetwork, iArraySumgoodNetwork,
-    //            iBiMaxgoodNetwork, iTriMaxgoodNetwork, vScProductgoodNetwork,
-    //            sLengthergoodNetwork, vProductgoodNetwork, biLongestStringgoodNetwork, triLongestStringgoodNetwork
+    //            rIntSumGoodNetwork, iArraySumGoodNetwork,
+    //            iBiMaxGoodNetwork, iTriMaxGoodNetwork, vScProductGoodNetwork,
+    //            sLengtherGoodNetwork, vProductGoodNetwork, biLongestStringGoodNetwork, triLongestStringGoodNetwork
     //    );
 
     //    List<ProgramSynthesisProblem> psbs = List.of(
@@ -708,11 +707,11 @@ public class MutationExperiments {
     //    );
     //
     //    List<Network> networks = List.of(
-    //            rIntSumbiggerNetwork, iArraySumbiggerNetwork, vScProductbiggerNetwork, sLengtherbiggerNetwork, iBiMaxbiggerNetwork, biLongestStringbiggerNetwork, vProductbiggerNetwork, iTriMaxbiggerNetwork, triLongestStringbiggerNetwork
+    //            rIntSumBiggerNetwork, iArraySumBiggerNetwork, vScProductBiggerNetwork, sLengtherBiggerNetwork, iBiMaxBiggerNetwork, biLongestStringBiggerNetwork, vProductBiggerNetwork, iTriMaxBiggerNetwork, triLongestStringBiggerNetwork
     //    );
 
     List<ProgramSynthesisProblem> psbs = List.of(
-        remainderpsb
+        rIntSumpsb
     );
 
     List<String> problemNames = List.of(
@@ -720,7 +719,7 @@ public class MutationExperiments {
     );
 
     List<Network> networks = List.of(
-        remainderbiggerNetwork
+        rIntSumGoodNetwork
     );
 
     int times = 10;
@@ -733,12 +732,12 @@ public class MutationExperiments {
 
       System.out.print(problemName + "\t\t\t");
 
-      System.out.print(
-          psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
-      );
+//      System.out.print(
+//          psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
+//      );
 
 
-      for (Mutation<Network> mutation : List.of(wsMutation)) {
+      for (Mutation<Network> mutation : List.of(giMutation)) {
         double totalFailRate = 0;
         double totalAvgRawDissimilarity = 0;
         double totalProfileAvgSteps = 0;

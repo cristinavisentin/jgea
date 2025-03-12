@@ -27,9 +27,8 @@ import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.TypeE
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element;
 import io.github.ericmedvet.jgea.problem.programsynthesis.ProgramSynthesisProblem;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+
+import java.util.*;
 import java.util.random.RandomGenerator;
 
 public class XOExperiments {
@@ -38,7 +37,7 @@ public class XOExperiments {
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
 
-    Network rIntSumgoodNetwork = new Network(
+    Network rIntSumGoodNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -55,7 +54,7 @@ public class XOExperiments {
         )
     );
 
-    Network rIntSumbiggerNetwork = new Network(
+    Network rIntSumBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -93,43 +92,99 @@ public class XOExperiments {
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
+//    ProgramSynthesisProblem biLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"biLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem iArraySumpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"iArraySum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem iBiMaxpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"iBiMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"iTriMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
+//    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+//        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+//    );
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);
 
-    System.out.println(
-        rIntSumpsb.qualityFunction().apply(runner.asInstrumentedProgram((rIntSumgoodNetwork))).get("fail_rate")
-    );
-    System.out.println(
-        rIntSumpsb.qualityFunction().apply(runner.asInstrumentedProgram((rIntSumbiggerNetwork))).get("fail_rate")
-    );
-
-
     //drawer.show(rIntSumgoodNetwork);
     //drawer.show(rIntSumbiggerNetwork);
 
+    Set<Network> xodNetworks = new HashSet<>();
+    xodNetworks.add(rIntSumGoodNetwork);
+    xodNetworks.add(rIntSumBiggerNetwork);
+
+    int times = 2;
+
     Crossover<Network> xo = new NetworkCrossover(30, 0.5, 20, true);
     RandomGenerator rnd = new Random(3);
-    Network xod = xo.recombine(rIntSumgoodNetwork, rIntSumbiggerNetwork, rnd);
-    drawer.show(xod);
 
-    System.out.println(rIntSumpsb.qualityFunction().apply(runner.asInstrumentedProgram((xod))).get("fail_rate"));
+    Network parent1 = rIntSumGoodNetwork;
+    Network parent2 = rIntSumBiggerNetwork;
 
-    //    rIntSumpsb.caseProvider()
-    //        .stream()
-    //        .forEach(
-    //            e -> {
-    //              InstrumentedProgram.InstrumentedOutcome outcome = runner.run(xod, e.input());
-    //              System.out.printf(
-    //                  "in=%s\tactualOut=%s\tpredOut=%s exc=%s%n",
-    //                  e.input(),
-    //                  e.output().outputs(),
-    //                  outcome.outputs(),
-    //                  outcome.exception()
-    //              );
-    //            }
-    //        );
+    double totalFailRate = 0;
+    double totalAvgRawDissimilarity = 0;
+    double totalProfileAvgSteps = 0;
+
+    int neutralCount = 0;
 
 
+    for (int i=0; i<times; i++) {
+      Network xod = xo.recombine(parent1, parent2, rnd);
+      xodNetworks.add(xod);
+
+      neutralCount += (xod.equals(rIntSumGoodNetwork) || xod.equals(rIntSumBiggerNetwork)) ? 1 : 0;
+
+      //drawer.show(xod);
+
+      List<Network> networkList = new ArrayList<>(xodNetworks);
+
+      parent1 = networkList.get(rnd.nextInt(networkList.size()));
+      parent2 = networkList.get(rnd.nextInt(networkList.size()));
+
+      while (parent1.equals(parent2)) {
+        parent2 = networkList.get(rnd.nextInt(networkList.size()));
+      }
+
+      rIntSumpsb.caseProvider().all().forEach(c -> System.out.println(c.input()) );
+      Map<String, Double> qualityMetrics = rIntSumpsb.qualityFunction().apply(runner.asInstrumentedProgram(xod));
+
+      double failRate = qualityMetrics.get("fail_rate");
+      double avgRawDissimilarity = qualityMetrics.get("avg_raw_dissimilarity");
+      double profileAvgSteps = qualityMetrics.get("profile_avg_steps");
+
+      totalFailRate += failRate;
+      totalAvgRawDissimilarity += avgRawDissimilarity;
+      totalProfileAvgSteps += profileAvgSteps;
+
+    }
+    double uniqueness = xodNetworks.size();
+    double neutrality = neutralCount;
+
+    System.out.printf(
+        "Uniqueness: %.4f | Neutrality: %.4f | Fail Rate: %.4f | Avg Raw Dissimilarity: %.4f | Steps: %.4f%n",
+        (uniqueness - 2) / times,
+        neutrality / times,
+        totalFailRate / times,
+        totalAvgRawDissimilarity / times,
+        totalProfileAvgSteps / times
+    );
   }
 }
+

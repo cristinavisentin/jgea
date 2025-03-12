@@ -37,7 +37,7 @@ public class StepwiseMutations {
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
 
-    Network rIntSumgoodNetwork = new Network(
+    Network rIntSumGoodNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -54,7 +54,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network biLongestStringgoodNetwork = new Network(
+    Network biLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -80,7 +80,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iArraySumgoodNetwork = new Network(
+    Network iArraySumGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
@@ -95,7 +95,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iBiMaxgoodNetwork = new Network(
+    Network iBiMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -113,7 +113,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iTriMaxgoodNetwork = new Network(
+    Network iTriMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -140,7 +140,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network vScProductgoodNetwork = new Network(
+    Network vScProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -164,7 +164,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network sLengthergoodNetwork = new Network(
+    Network sLengtherGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.splitter(),
@@ -187,7 +187,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network triLongestStringgoodNetwork = new Network(
+    Network triLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -229,7 +229,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network vProductgoodNetwork = new Network(
+    Network vProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Composed.sequence(Base.REAL)),
@@ -254,7 +254,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network rIntSumbiggerNetwork = new Network(
+    Network rIntSumBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -288,7 +288,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iArraySumbiggerNetwork = new Network(
+    Network iArraySumBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
@@ -309,7 +309,7 @@ public class StepwiseMutations {
         )
     );
 
-    //    Network vScProductbiggerNetwork = new Network(
+    //    Network vScProductBiggerNetwork = new Network(
     //            List.of(
     //                    Gate.input(Composed.sequence(Base.REAL)),
     //                    Gate.input(Base.REAL),
@@ -343,7 +343,7 @@ public class StepwiseMutations {
     //            )
     //    );
 
-    Network sLengtherbiggerNetwork = new Network(
+    Network sLengtherBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.noop(),
@@ -372,7 +372,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iBiMaxbiggerNetwork = new Network(
+    Network iBiMaxBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -399,7 +399,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network biLongestStringbiggerNetwork = new Network(
+    Network biLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -436,7 +436,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network vProductbiggerNetwork = new Network(
+    Network vProductBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Composed.sequence(Base.REAL)),
@@ -467,7 +467,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network iTriMaxbiggerNetwork = new Network(
+    Network iTriMaxBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -506,7 +506,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network triLongestStringbiggerNetwork = new Network(
+    Network triLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -563,7 +563,7 @@ public class StepwiseMutations {
         )
     );
 
-    Network vScProductbiggerNetwork = new Network(
+    Network vScProductBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -636,8 +636,8 @@ public class StepwiseMutations {
     );
 
     List<Network> networks = List.of(
-        rIntSumgoodNetwork,
-        rIntSumbiggerNetwork
+        rIntSumGoodNetwork,
+        rIntSumBiggerNetwork
     );
 
 
