@@ -11,28 +11,19 @@ ea.experiment(
       ea.p.ps.synthetic(name = "sLengther"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "biLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "triLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps])
-    ]) * [ea.p.smoToSubsettedSmo(objectives = [avg_raw_dissimilarity])]) *
+    ]) * [ea.p.smoToSubsettedSmo(objectives = [fail_rate])]) *
     (solver = (nEval = $nEvals) * [
       ea.s.ga(
-        representation = ea.r.ttpn(maxNOfGates = 10);
+        name = "ga";
+        representation = ea.r.ttpn(maxNOfGates = 32);
         mapper = ea.m.ttpnToProgram();
-        crossoverP = 0.5;
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
+        crossoverP = 0.8
       );
-      ea.s.mapElites(
-        representation = ea.r.ttpn(maxNOfGates = 10);
+      ea.s.ga(
+        name = "ga-no-xover";
+        representation = ea.r.ttpn(maxNOfGates = 32);
         mapper = ea.m.ttpnToProgram();
-        descriptors = [
-          ea.s.me.d.descriptor(f = ea.f.size(of = ea.f.genotype()); min = 0; max = 20; nOfBins = 10);
-          ea.s.me.d.descriptor(f = ea.f.ttpnNOfTypes(of = ea.f.genotype()); min = 1; max = 10; nOfBins = 10)
-        ];
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
-      );
-      ea.s.nsga2(
-        representation = ea.r.ttpn(maxNOfGates = 10);
-        mapper = ea.m.ttpnToProgram();
-        crossoverP = 0.5;
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
+        crossoverP = 0.0
       )
     ]) * [
     ea.run()
@@ -59,24 +50,6 @@ ea.experiment(
     ea.l.savePlotForExp(
       path = "../../Documenti/experiments/{name}/{startTime}/best-avg_raw_dissimilarity";
       plot = ea.plot.multi.quality(q = f.mapValue(key = avg_raw_dissimilarity))
-    );
-    ea.l.savePlotForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/objectives-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
-      plot = ea.plot.single.biObjectivePopulation(
-        x = f.mapValue(key = avg_raw_dissimilarity; of = ea.f.quality());
-        y = ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
-      );
-      processor = ea.f.imagePlotter(secondary = true)
-    );
-    ea.l.savePlotForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
-      plot = ea.plot.single.me(
-        values = [
-          f.mapValue(key = fail_rate; of = ea.f.quality());
-          ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
-        ]
-      );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "me.*")
     );
     ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/profile-vs-dead-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
