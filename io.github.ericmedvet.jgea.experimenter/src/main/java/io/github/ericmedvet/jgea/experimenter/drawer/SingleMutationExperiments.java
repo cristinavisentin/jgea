@@ -669,7 +669,7 @@ public class SingleMutationExperiments {
     Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
 
 
-    for (Mutation<Network> mutation : List.of(giMutation)) {
+    for (Mutation<Network> mutation : List.of(wsMutation)) {
       double totalFailRate = 0;
       double totalAvgRawDissimilarity = 0;
       double totalProfileAvgSteps = 0;

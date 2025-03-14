@@ -43,11 +43,14 @@ public class WireSwapperMutation implements Mutation<Network> {
       typedWires.computeIfAbsent(type, t -> new ArrayList<>()).add(w);
     });
     int nOfAttempts = 0;
-    List<List<Wire>> lists = typedWires.values().stream().filter(ws -> ws.size() > 1).toList();
+    List<List<Wire>> lists = new ArrayList<>(typedWires.values().stream().filter(ws -> ws.size() > 1).toList());
+    Collections.shuffle(lists, random);
     for (List<Wire> wires : lists) {
+      wires = new ArrayList<>(wires);
+      Collections.shuffle(wires, random);
       for (Wire w1 : wires) {
         for (Wire w2 : wires) {
-          if (!w1.dst().equals(w2.dst())) {
+          if (!w1.dst().equals(w2.dst()) && !w1.src().equals(w2.src())) {
             Wire newW1 = new Wire(w1.src(), w2.dst());
             Wire newW2 = new Wire(w2.src(), w1.dst());
             Set<Wire> newWires = new HashSet<>(network.wires());
@@ -61,7 +64,7 @@ public class WireSwapperMutation implements Mutation<Network> {
                 return newNetwork;
               }
             } catch (NetworkStructureException | TypeException e) {
-              throw new RuntimeException(e);
+              //try again
             }
             nOfAttempts = nOfAttempts + 1;
             if (nOfAttempts > maxNOfAttempts) {
