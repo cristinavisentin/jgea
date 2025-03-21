@@ -1,5 +1,5 @@
 $SIMULATION = ds.bat.fromEnvironment(
-  tRange = misc.range(min = 0; max = 30);
+  tRange = misc.range(min = 0; max = 45);
   dT = 0.05;
   environment = ds.e.pong(racketsInitialYRange = m.range(min=25.0;max=25.0));
   stopCondition = predicate.not(condition = predicate.always())
@@ -18,8 +18,8 @@ $VS_SELF = ds.f.selfBiSimulator(
 
 ea.experiment(
   runs =
-    (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) *
-    (solver = (nEval = [30000]) * [
+    (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
+    (solver = (nEval = [50000]) * [
       ea.s.ga(
         name = "self-ga-tree";
         representation = ea.r.srTree();
