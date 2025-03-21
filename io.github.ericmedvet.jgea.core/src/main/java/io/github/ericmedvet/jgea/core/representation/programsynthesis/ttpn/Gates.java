@@ -202,7 +202,7 @@ public class Gates {
                     .reduce((n1, n2) -> n1 * n2)
                     .orElseThrow()
             ),
-            "s*"
+            "iSMultiply"
         )
     );
   }
@@ -360,7 +360,8 @@ public class Gates {
                         .toArray()
                 )
             ),
-            "%s".formatted(operator.toString())
+            //"%s".formatted(operator.toString())
+            "rPMultiply"
         )
     );
   }
@@ -376,7 +377,7 @@ public class Gates {
                     .reduce((n1, n2) -> n1 * n2)
                     .orElseThrow()
             ),
-            "s*"
+            "rSMultiply"
         )
     );
   }
@@ -414,7 +415,7 @@ public class Gates {
                         .reduce(Double::sum)
                         .orElse(0d)
             ),
-            "sp+"
+            "rSPSum"
         )
     );
   }
@@ -576,7 +577,7 @@ public class Gates {
     return Gate.of(
         List.of(Gate.Port.single(Composed.sequence(Generic.of("t")))),
         List.of(Generic.of("t")),
-        NamedFunction.from(in -> Gate.Data.single(in.one(0, List.class)), "splitter")
+        NamedFunction.from(in -> Gate.Data.single(in.one(0, List.class)), "aSplitter")
     );
   }
 

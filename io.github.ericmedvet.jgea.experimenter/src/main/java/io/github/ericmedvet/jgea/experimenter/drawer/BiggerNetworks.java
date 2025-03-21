@@ -384,8 +384,7 @@ public class BiggerNetworks {
             Gate.input(Composed.sequence(Base.REAL)),
             Gates.splitter(),
             Gates.splitter(),
-            Gates.queuer(),
-            Gates.rSMult(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
             Gates.rSPSum(),
             Gate.output(Base.REAL)
         ),
@@ -395,9 +394,8 @@ public class BiggerNetworks {
             Wire.of(2, 0, 4, 0),
             Wire.of(3, 0, 4, 1),
             Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 7, 0)
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
 
 
         )
@@ -480,8 +478,8 @@ public class BiggerNetworks {
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = remainderbiggerNetwork;
-    ProgramSynthesisProblem psb = remainderpsb;
+    Network goodNetwork = vProductgoodNetwork;
+    ProgramSynthesisProblem psb = vProductpsb;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);

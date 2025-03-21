@@ -27,7 +27,6 @@ import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.TypeE
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element;
 import io.github.ericmedvet.jgea.problem.programsynthesis.ProgramSynthesisProblem;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
-
 import java.util.*;
 import java.util.random.RandomGenerator;
 
@@ -92,33 +91,33 @@ public class XOExperiments {
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
-//    ProgramSynthesisProblem biLongestStringpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"biLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem iArraySumpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"iArraySum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem iBiMaxpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"iBiMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"iTriMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
-//    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
-//        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-//    );
+    //    ProgramSynthesisProblem biLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"biLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iArraySumpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iArraySum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iBiMaxpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iBiMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iTriMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);
@@ -145,7 +144,7 @@ public class XOExperiments {
     int neutralCount = 0;
 
 
-    for (int i=0; i<times; i++) {
+    for (int i = 0; i < times; i++) {
       Network xod = xo.recombine(parent1, parent2, rnd);
       xodNetworks.add(xod);
 
@@ -162,7 +161,7 @@ public class XOExperiments {
         parent2 = networkList.get(rnd.nextInt(networkList.size()));
       }
 
-      rIntSumpsb.caseProvider().all().forEach(c -> System.out.println(c.input()) );
+      rIntSumpsb.caseProvider().all().forEach(c -> System.out.println(c.input()));
       Map<String, Double> qualityMetrics = rIntSumpsb.qualityFunction().apply(runner.asInstrumentedProgram(xod));
 
       double failRate = qualityMetrics.get("fail_rate");
@@ -187,4 +186,3 @@ public class XOExperiments {
     );
   }
 }
-

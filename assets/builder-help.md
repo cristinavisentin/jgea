@@ -2688,7 +2688,7 @@ Aliases: `ea.p.programSynthesis`, `ea.p.ps`, `ea.problem.programSynthesis`, `ea.
 | `metrics` | e[] | `[fail_rate]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.problem.programsynthesis.ProgramSynthesisProblem$Metric">ProgramSynthesisProblem$Metric</abbr>&gt;</code> |
 | `maxDissimilarity` | d | `1000.0` | <code>double</code> |
 | `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
-| `nOfCases` | i | `20` | <code>int</code> |
+| `nOfCases` | i | `50` | <code>int</code> |
 | `nOfValidationCases` | i | `100` | <code>int</code> |
 | `maxExceptionRate` | d | `0.1` | <code>double</code> |
 | `ints` | i[] | `[1, 2, 3, 5, 10]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Integer">Integer</abbr>&gt;</code> |

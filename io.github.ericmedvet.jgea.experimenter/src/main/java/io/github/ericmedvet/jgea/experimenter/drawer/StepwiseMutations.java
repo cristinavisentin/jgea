@@ -235,8 +235,7 @@ public class StepwiseMutations {
             Gate.input(Composed.sequence(Base.REAL)),
             Gates.splitter(),
             Gates.splitter(),
-            Gates.queuer(),
-            Gates.rSMult(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
             Gates.rSPSum(),
             Gate.output(Base.REAL)
         ),
@@ -246,9 +245,8 @@ public class StepwiseMutations {
             Wire.of(2, 0, 4, 0),
             Wire.of(3, 0, 4, 1),
             Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 7, 0)
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
 
 
         )
@@ -595,6 +593,63 @@ public class StepwiseMutations {
         )
     );
 
+    Network remainderGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
+    Network remainderBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT),
+            Gates.rSPMult()
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 9, 0),
+            Wire.of(9, 0, 4, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -623,21 +678,8 @@ public class StepwiseMutations {
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
-
-
-    List<ProgramSynthesisProblem> psbs = List.of(
-        rIntSumpsb,
-        rIntSumpsb
-    );
-
-    List<String> problemNames = List.of(
-        "rIntSum",
-        "rIntSum_Bigger"
-    );
-
-    List<Network> networks = List.of(
-        rIntSumGoodNetwork,
-        rIntSumBiggerNetwork
+    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
 
@@ -652,28 +694,39 @@ public class StepwiseMutations {
     List<Mutation<Network>> mutations = List.of(giMutation, grMutation, wsMutation);
 
 
-    for (int j = 0; j < networks.size(); j++) {
-      Network network = networks.get(j);
-      ProgramSynthesisProblem psb = psbs.get(j);
-      String problemName = problemNames.get(j);
+    Network network = vProductGoodNetwork;
+    ProgramSynthesisProblem psb = vProductpsb;
+    int times = 100;
 
-      System.out.println(problemName + "\t\t\t");
+    Random rnd_mutation = new Random();
+    Network mutated = network;
 
-      drawer.show(network);
-      System.out.print(psb.qualityFunction().apply(runner.asInstrumentedProgram(network)).get("fail_rate"));
+    double totalFailRate = 0;
+    Set<Network> mutatedNetworks = new HashSet<>();
+    int neutralCount = 0;
 
+    for (int i = 0; i < times; i++) {
 
-      Random rnd_mutation = new Random();
-      Network mutated = network;
-
-      for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
         Mutation<Network> mutation = mutations.get(rnd.nextInt(mutations.size()));
-        System.out.print("  --" + mutation.getClass().getSimpleName() + "-->  ");
+        //System.out.print(mutation.getClass().getSimpleName());
         mutated = mutation.mutate(mutated, rnd);
-        drawer.show(mutated);
-        System.out.print(psb.qualityFunction().apply(runner.asInstrumentedProgram(mutated)).get("fail_rate"));
+        //drawer.show(mutated);
       }
-      System.out.println();
+
+      mutatedNetworks.add(mutated);
+      neutralCount += mutated.equals(network) ? 1 : 0;
+
+      Map<String, Double> qualityMetrics = psb.qualityFunction()
+          .apply(runner.asInstrumentedProgram(mutated));
+      double failRate = qualityMetrics.get("fail_rate");
+      totalFailRate += failRate;
     }
+    double uniqueness = mutatedNetworks.size();
+    double neutrality = neutralCount;
+
+    System.out.printf("uniq %.1f\t\t\t", uniqueness / times);
+    System.out.printf("neut %.1f\t\t\t", neutrality / times);
+    System.out.printf("FR %.1f\t\t\t", totalFailRate / times);
   }
 }

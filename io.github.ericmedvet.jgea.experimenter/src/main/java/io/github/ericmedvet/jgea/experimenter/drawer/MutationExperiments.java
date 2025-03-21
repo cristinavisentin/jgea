@@ -235,8 +235,7 @@ public class MutationExperiments {
             Gate.input(Composed.sequence(Base.REAL)),
             Gates.splitter(),
             Gates.splitter(),
-            Gates.queuer(),
-            Gates.rSMult(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
             Gates.rSPSum(),
             Gate.output(Base.REAL)
         ),
@@ -246,9 +245,8 @@ public class MutationExperiments {
             Wire.of(2, 0, 4, 0),
             Wire.of(3, 0, 4, 1),
             Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 7, 0)
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
 
 
         )
@@ -632,33 +630,33 @@ public class MutationExperiments {
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
-    ProgramSynthesisProblem biLongestStringpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"biLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem iArraySumpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"iArraySum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem iBiMaxpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"iBiMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"iTriMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
-    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
+    //    ProgramSynthesisProblem biLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"biLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iArraySumpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iArraySum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iBiMaxpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iBiMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"iTriMax\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate ; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
+    //    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+    //        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    //    );
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
 
@@ -732,12 +730,12 @@ public class MutationExperiments {
 
       System.out.print(problemName + "\t\t\t");
 
-//      System.out.print(
-//          psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
-//      );
+      //      System.out.print(
+      //          psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
+      //      );
 
 
-      for (Mutation<Network> mutation : List.of(giMutation)) {
+      for (Mutation<Network> mutation : List.of(wsMutation, giMutation, grMutation)) {
         double totalFailRate = 0;
         double totalAvgRawDissimilarity = 0;
         double totalProfileAvgSteps = 0;

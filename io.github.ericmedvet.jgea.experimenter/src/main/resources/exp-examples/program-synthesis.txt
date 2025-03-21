@@ -1,7 +1,7 @@
 $nEvals = [20000]
 
 ea.experiment(
-  runs = (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
+  runs = (randomGenerator = (seed = [1:1:30]) * [m.defaultRG()]) *
     (problem = (smoProblem = [
       ea.p.ps.synthetic(name = "rIntSum"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "biLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
@@ -15,12 +15,12 @@ ea.experiment(
       ea.p.ps.synthetic(name = "remainder"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps])
     ]) * [ea.p.smoToSubsettedSmo(objectives = [avg_raw_dissimilarity])]) *
     (solver = (nEval = $nEvals) * [
-      ea.s.ga(
-        name = "ga";
-        representation = ea.r.ttpn(maxNOfGates = 40);
-        mapper = ea.m.ttpnToProgram();
-        crossoverP = 0.8
-      );
+      % ea.s.ga(
+      %   name = "ga";
+      %   representation = ea.r.ttpn(maxNOfGates = 40);
+      %   mapper = ea.m.ttpnToProgram();
+      %   crossoverP = 0.8
+      % );
       ea.s.ga(
         name = "ga-no-xover";
         representation = ea.r.ttpn(maxNOfGates = 40);
@@ -45,14 +45,6 @@ ea.experiment(
       ];
       onlyLast = false
     );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-fail_rate";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = fail_rate))
-    );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-avg_raw_dissimilarity";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = avg_raw_dissimilarity))
-    );
     ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/profile-vs-dead-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
       plot = ea.plot.single.biObjectivePopulation(
@@ -60,6 +52,24 @@ ea.experiment(
         y = ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
       );
       processor = ea.f.imagePlotter(secondary = true)
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.qualityBoxplot(
+        q = f.mapValue(key = fail_rate)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/fail_rate-bp"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.qualityBoxplot(
+        q = f.mapValue(key = avg_raw_dissimilarity)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/avg_raw_dissimilarity-bp"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
     );
     ea.l.onExpDone(
       of = ea.plot.multi.quality(

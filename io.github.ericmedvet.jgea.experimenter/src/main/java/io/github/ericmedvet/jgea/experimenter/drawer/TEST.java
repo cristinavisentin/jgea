@@ -31,8 +31,7 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
-public class SingleMutationExperiments {
-
+public class TEST {
   public static void main(
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
@@ -595,6 +594,45 @@ public class SingleMutationExperiments {
         )
     );
 
+    Network vProductBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.queuer(),
+            Gates.rSMult(),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop()
+        ),
+        Set.of(
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 6, 1),
+            Wire.of(0, 0, 8, 0),
+            Wire.of(8, 0, 2, 0),
+            Wire.of(1, 0, 9, 0),
+            Wire.of(9, 0, 3, 0),
+            Wire.of(6, 0, 10, 0),
+            Wire.of(10, 0, 7, 0)
+
+
+        )
+    );
+
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    Runner runner = new Runner(100, 1000, 1000, 100, false);
+
+    RandomGenerator rnd = new Random(3);
+    Mutation<Network> giMutation = new GateInserterMutation(new LinkedHashSet<>(StatsMain.ALL_GATES), 30, 20, true);
+    Mutation<Network> grMutation = new GateRemoverMutation(10, true);
+    Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
+
 
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
@@ -620,7 +658,7 @@ public class SingleMutationExperiments {
         "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
     ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
@@ -630,55 +668,48 @@ public class SingleMutationExperiments {
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
+
     Network goodNetwork = vProductGoodNetwork;
     ProgramSynthesisProblem psb = vProductpsb;
-    int times = 10;
+    int times = 100;
 
-    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
-    Runner runner = new Runner(100, 1000, 1000, 100, false);
+    System.out.print(
+        psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
+    );
 
-    drawer.show(goodNetwork);
 
-    RandomGenerator rnd = new Random(3);
-    Mutation<Network> giMutation = new GateInserterMutation(new LinkedHashSet<>(StatsMain.ALL_GATES), 30, 20, true);
-    Mutation<Network> grMutation = new GateRemoverMutation(10, true);
-    Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
+    double totalFailRate = 0;
+    double totalAvgRawDissimilarity = 0;
+    double totalProfileAvgSteps = 0;
 
-    for (Mutation<Network> mutation : List.of(giMutation)) {
-      double totalFailRate = 0;
-      double totalAvgRawDissimilarity = 0;
-      double totalProfileAvgSteps = 0;
+    Set<Network> mutatedNetworks = new HashSet<>();
+    int neutralCount = 0;
 
-      Set<Network> mutatedNetworks = new HashSet<>();
-      int neutralCount = 0;
+    for (int i = 0; i < times; i++) {
+      Network mutated = grMutation.mutate(goodNetwork, rnd);
+      mutatedNetworks.add(mutated);
+      neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
 
-      for (int i = 0; i < times; i++) {
-        Network mutated = mutation.mutate(goodNetwork, rnd);
-        mutatedNetworks.add(mutated);
-        neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
+      Map<String, Double> qualityMetrics = psb.qualityFunction()
+          .apply(runner.asInstrumentedProgram(mutated));
 
-        Map<String, Double> qualityMetrics = psb.qualityFunction()
-            .apply(runner.asInstrumentedProgram(mutated));
+      double failRate = qualityMetrics.get("smooth_fail_rate");
+      double avgRawDissimilarity = qualityMetrics.get("avg_raw_dissimilarity");
+      double profileAvgSteps = qualityMetrics.get("profile_avg_steps");
 
-        double failRate = qualityMetrics.get("fail_rate");
-        double avgRawDissimilarity = qualityMetrics.get("avg_raw_dissimilarity");
-        double profileAvgSteps = qualityMetrics.get("profile_avg_steps");
-
-        totalFailRate += failRate;
-        totalAvgRawDissimilarity += avgRawDissimilarity;
-        totalProfileAvgSteps += profileAvgSteps;
-      }
-
-      double uniqueness = mutatedNetworks.size();
-      double neutrality = neutralCount;
-
-      System.out.printf("uniq %.1f\t\t\t", uniqueness / times);
-      System.out.printf("neut %.1f\t\t\t", neutrality / times);
-
-      System.out.printf("FR %.1f\t\t\t", totalFailRate / times);
-      System.out.printf("ARD %.1f\t\t\t", totalAvgRawDissimilarity / times);
-      System.out.printf("steps %.1f\t\t\t\t\t", totalProfileAvgSteps / times);
+      totalFailRate += failRate;
+      totalAvgRawDissimilarity += avgRawDissimilarity;
+      totalProfileAvgSteps += profileAvgSteps;
     }
-    System.out.println();
+
+    double uniqueness = mutatedNetworks.size();
+    double neutrality = neutralCount;
+
+    System.out.printf("uniq %.2f\t\t\t", uniqueness / times);
+    System.out.printf("neut %.2f\t\t\t", neutrality / times);
+    System.out.printf("FR %.2f\t\t\t", totalFailRate / times);
+    //System.out.printf("ARD %.2f\t\t\t", totalAvgRawDissimilarity / times);
+    //System.out.printf("steps %.2f\t\t\t\t\t", totalProfileAvgSteps / times);
+
   }
 }
