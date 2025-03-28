@@ -31,7 +31,7 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
-public class TEST {
+public class ExperimentsNoLoop {
   public static void main(
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
@@ -677,6 +677,8 @@ public class TEST {
         psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
     );
 
+    drawer.show(goodNetwork);
+    //drawer.show(new ImageBuilder.ImageInfo(2000,1000), goodNetwork);
 
     double totalFailRate = 0;
     double totalAvgRawDissimilarity = 0;
@@ -686,14 +688,14 @@ public class TEST {
     int neutralCount = 0;
 
     for (int i = 0; i < times; i++) {
-      Network mutated = grMutation.mutate(goodNetwork, rnd);
+      Network mutated = giMutation.mutate(goodNetwork, rnd);
       mutatedNetworks.add(mutated);
       neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
 
       Map<String, Double> qualityMetrics = psb.qualityFunction()
           .apply(runner.asInstrumentedProgram(mutated));
 
-      double failRate = qualityMetrics.get("smooth_fail_rate");
+      double failRate = qualityMetrics.get("fail_rate");
       double avgRawDissimilarity = qualityMetrics.get("avg_raw_dissimilarity");
       double profileAvgSteps = qualityMetrics.get("profile_avg_steps");
 

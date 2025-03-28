@@ -51,7 +51,7 @@ public class Gates {
 
   public static Gate bConst(boolean value) {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T"))),
         List.of(Base.BOOLEAN),
         NamedFunction.from(
             in -> Gate.Data.singleOne(value),
@@ -100,10 +100,10 @@ public class Gates {
   public static Gate concat() {
     return Gate.of(
         List.of(
-            Gate.Port.single(Composed.sequence(Generic.of("t"))),
-            Gate.Port.single(Composed.sequence(Generic.of("t")))
+            Gate.Port.single(Composed.sequence(Generic.of("T"))),
+            Gate.Port.single(Composed.sequence(Generic.of("T")))
         ),
-        List.of(Composed.sequence(Generic.of("t"))),
+        List.of(Composed.sequence(Generic.of("T"))),
         NamedFunction.from(
             in -> Gate.Data.singleOne(
                 Stream.concat(in.one(0, List.class).stream(), in.one(1, List.class).stream()).toList()
@@ -115,7 +115,7 @@ public class Gates {
 
   public static Gate equal() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t")), Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T")), Gate.Port.single(Generic.of("T"))),
         List.of(Base.BOOLEAN),
         NamedFunction.from(
             in -> Gate.Data.singleOne(in.one(0).equals(in.one(1))),
@@ -137,7 +137,7 @@ public class Gates {
 
   public static Gate iConst(int value) {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T"))),
         List.of(Base.INT),
         NamedFunction.from(
             in -> Gate.Data.singleOne(value),
@@ -264,10 +264,10 @@ public class Gates {
   public static Gate iTh() {
     return Gate.of(
         List.of(
-            Gate.Port.single(Composed.sequence(Generic.of("t"))),
+            Gate.Port.single(Composed.sequence(Generic.of("T"))),
             Gate.Port.single(Base.INT)
         ),
-        List.of(Generic.of("t")),
+        List.of(Generic.of("T")),
         NamedFunction.from(in -> Gate.Data.singleOne(in.one(0, List.class).get(in.one(1, Integer.class))), "iTh")
     );
   }
@@ -287,7 +287,7 @@ public class Gates {
 
   public static Gate length() {
     return Gate.of(
-        List.of(Gate.Port.single(Composed.sequence(Generic.of("t")))),
+        List.of(Gate.Port.single(Composed.sequence(Generic.of("T")))),
         List.of(Base.INT),
         NamedFunction.from(in -> Gate.Data.singleOne(in.one(0, List.class).size()), "length")
     );
@@ -295,8 +295,8 @@ public class Gates {
 
   public static Gate noop() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
-        List.of(Generic.of("t")),
+        List.of(Gate.Port.single(Generic.of("T"))),
+        List.of(Generic.of("T")),
         NamedFunction.from(in -> Gate.Data.singleOne(in.one(0)), "noop")
     );
   }
@@ -311,8 +311,8 @@ public class Gates {
 
   public static Gate queuer() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t")), Gate.Port.single(Generic.of("t"))),
-        List.of(Generic.of("t")),
+        List.of(Gate.Port.single(Generic.of("T")), Gate.Port.single(Generic.of("T"))),
+        List.of(Generic.of("T")),
         NamedFunction.from(
             in -> Gate.Data.single(
                 List.of(
@@ -338,7 +338,7 @@ public class Gates {
 
   public static Gate rConst(double value) {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T"))),
         List.of(Base.REAL),
         NamedFunction.from(
             in -> Gate.Data.singleOne(value),
@@ -451,8 +451,8 @@ public class Gates {
 
   public static Gate repeater() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t")), Gate.Port.single(Base.INT)),
-        List.of(Generic.of("t")),
+        List.of(Gate.Port.single(Generic.of("T")), Gate.Port.single(Base.INT)),
+        List.of(Generic.of("T")),
         NamedFunction.from(
             in -> {
               int n = in.one(1, Integer.class);
@@ -495,7 +495,7 @@ public class Gates {
 
   public static Gate sConst(String value) {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T"))),
         List.of(Base.STRING),
         NamedFunction.from(
             in -> Gate.Data.singleOne(value),
@@ -521,8 +521,8 @@ public class Gates {
 
   public static Gate select() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t")), Gate.Port.single(Generic.of("t")), Gate.Port.single(Base.BOOLEAN)),
-        List.of(Generic.of("t")),
+        List.of(Gate.Port.single(Generic.of("T")), Gate.Port.single(Generic.of("T")), Gate.Port.single(Base.BOOLEAN)),
+        List.of(Generic.of("T")),
         NamedFunction.from(
             in -> Gate.Data.singleOne(in.one(2, Boolean.class) ? in.one(0) : in.one(1)),
             "select"
@@ -533,7 +533,7 @@ public class Gates {
   public static Gate sequencer() {
     return Gate.of(
         List.of(Gate.Port.atLeast(Generic.of("t"), 1)),
-        List.of(Composed.sequence(Generic.of("t"))),
+        List.of(Composed.sequence(Generic.of("T"))),
         NamedFunction.from(in -> Gate.Data.singleOne(in.all(0)), "sequencer")
     );
   }
@@ -542,9 +542,9 @@ public class Gates {
     return Gate.of(
         List.of(
             Gate.Port.atLeast(Generic.of("t"), 1),
-            Gate.Port.atLeast(Composed.sequence(Generic.of("t")), 0)
+            Gate.Port.atLeast(Composed.sequence(Generic.of("T")), 0)
         ),
-        List.of(Composed.sequence(Generic.of("t"))),
+        List.of(Composed.sequence(Generic.of("T"))),
         NamedFunction.from(
             in -> {
               List<Object> tokens = in.all(0);
@@ -563,7 +563,7 @@ public class Gates {
 
   public static Gate sink() {
     return Gate.of(
-        List.of(Gate.Port.single(Generic.of("t"))),
+        List.of(Gate.Port.single(Generic.of("T"))),
         List.of(),
         NamedFunction.from(
             in -> Gate.Data.empty(),
@@ -575,9 +575,9 @@ public class Gates {
   public static Gate splitter() {
     //noinspection unchecked
     return Gate.of(
-        List.of(Gate.Port.single(Composed.sequence(Generic.of("t")))),
-        List.of(Generic.of("t")),
-        NamedFunction.from(in -> Gate.Data.single(in.one(0, List.class)), "aSplitter")
+        List.of(Gate.Port.single(Composed.sequence(Generic.of("T")))),
+        List.of(Generic.of("T")),
+        NamedFunction.from(in -> Gate.Data.single(in.one(0, List.class)), "splitter")
     );
   }
 

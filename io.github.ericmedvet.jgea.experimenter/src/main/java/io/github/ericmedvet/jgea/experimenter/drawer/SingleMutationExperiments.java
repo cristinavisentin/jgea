@@ -630,8 +630,8 @@ public class SingleMutationExperiments {
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = vProductGoodNetwork;
-    ProgramSynthesisProblem psb = vProductpsb;
+    Network goodNetwork = iArraySumGoodNetwork;
+    ProgramSynthesisProblem psb = iArraySumpsb;
     int times = 10;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
