@@ -19,6 +19,10 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
+import io.github.ericmedvet.jgea.core.problem.QualityBasedBiProblem;
+import io.github.ericmedvet.jgea.core.solver.AbstractPopulationBasedIterativeSolver;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MEPopulationState;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.experimenter.drawer.DoubleGridDrawer;
 import io.github.ericmedvet.jgea.problem.ca.MultivariateRealGridCellularAutomaton;
@@ -29,25 +33,28 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
+import io.github.ericmedvet.jnb.datastructure.TriFunction;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "ea.misc")
 public class Miscs {
-
+  
   private Miscs() {
   }
-
+  
   @SuppressWarnings("unused")
   public static VideoBuilder<MultivariateRealGridCellularAutomaton> caVideo(
       @Param(value = "gray", dB = true) boolean gray,
@@ -73,7 +80,7 @@ public class Miscs {
         Drawer.stringWriter(Color.PINK, (float) fontSize, Function.identity())
             .draw(g, "k=%3d".formatted(p.first()));
       }
-
+      
       @Override
       public ImageInfo imageInfo(Pair<Integer, Grid<double[]>> p) {
         return gDrawer.imageInfo(p.second());
@@ -86,12 +93,12 @@ public class Miscs {
           .toList();
     });
   }
-
+  
   @SuppressWarnings("unused")
   public static Character ch(@Param("s") String s) {
     return s.charAt(0);
   }
-
+  
   @SuppressWarnings("unused")
   public static Color colorByName(@Param("name") String name) {
     try {
@@ -100,32 +107,18 @@ public class Miscs {
       throw new RuntimeException(e);
     }
   }
-
+  
   @SuppressWarnings("unused")
   public static Color colorByRgb(@Param("r") int r, @Param("g") int g, @Param("b") int b) {
     return new Color(r, g, b);
   }
-
+  
   @SuppressWarnings("unused")
   @Cacheable
   public static <K, V> Map.Entry<K, V> entry(@Param("key") K key, @Param("value") V value) {
     return Map.entry(key, value);
   }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static BinaryOperator<Double> lossyAverage(
-      @Param(value = "memoryFactor", dD = 0.5) double memoryFactor
-  ) {
-    return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static BinaryOperator<Double> minValue() {
-    return Math::min;
-  }
-
+  
   @SuppressWarnings("unused")
   @Cacheable
   public static BufferedImage imgByName(
@@ -138,7 +131,7 @@ public class Miscs {
     return ImageUtils.imageDrawer(bgColor, marginRate)
         .build(new ImageBuilder.ImageInfo(w, h), ImageUtils.loadFromResource(name));
   }
-
+  
   @SuppressWarnings("unused")
   @Cacheable
   public static BufferedImage imgFromString(
@@ -151,14 +144,22 @@ public class Miscs {
   ) {
     return ImageUtils.stringDrawer(fgColor, bgColor, marginRate).build(new ImageBuilder.ImageInfo(w, h), s);
   }
-
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static BinaryOperator<Double> lossyAverage(
+      @Param(value = "memoryFactor", dD = 0.5) double memoryFactor
+  ) {
+    return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
+  }
+  
   @SuppressWarnings("unused")
   public static <K, V> Map<K, V> map(@Param("entries") List<Map.Entry<K, V>> entries) {
     Map<K, V> map = new LinkedHashMap<>();
     entries.forEach(e -> map.put(e.getKey(), e.getValue()));
     return Collections.unmodifiableMap(map);
   }
-
+  
   @SuppressWarnings("unused")
   public static <K, V> Map<K, V> mapFromLists(
       @Param("keys") List<K> keys,
@@ -183,13 +184,28 @@ public class Miscs {
             )
     );
   }
-
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static BinaryOperator<Double> minValue() {
+    return Math::min;
+  }
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> TriFunction<MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> randomMESelector(
+      @Param(value = "nOfSolutions", dI = 1) int nOfSolutions
+  ) {
+    return (MEPopulationState, MEIndividual, random) ->
+        IntStream.range(0, nOfSolutions).mapToObj(j -> Misc.pickRandomly(MEPopulationState.archive().asMap().values().stream().toList(), random)).toList();
+  }
+  
   @SuppressWarnings("unused")
   @Cacheable
   public static <V> Map.Entry<String, V> sEntry(@Param("key") String key, @Param("value") V value) {
     return Map.entry(key, value);
   }
-
+  
   @SuppressWarnings("unused")
   public static <V> Map<String, V> sMapFromLists(
       @Param("keys") List<String> keys,
@@ -214,7 +230,7 @@ public class Miscs {
             )
     );
   }
-
+  
   @SuppressWarnings("unused")
   public static <S> VideoBuilder<Simulation.Outcome<S>> toVideo(@Param("drawer") SimulationOutcomeDrawer<S> drawer) {
     return drawer.videoBuilder();

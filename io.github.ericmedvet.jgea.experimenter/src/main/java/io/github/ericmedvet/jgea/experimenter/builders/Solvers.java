@@ -25,6 +25,7 @@ import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
+import io.github.ericmedvet.jgea.core.problem.QualityBasedBiProblem;
 import io.github.ericmedvet.jgea.core.representation.graph.*;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Constant;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Input;
@@ -37,6 +38,7 @@ import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.*;
 import io.github.ericmedvet.jgea.core.solver.bi.StandardBiEvolver;
+import io.github.ericmedvet.jgea.core.solver.bi.mapelites.GeneralizedMapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.bi.mapelites.MapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.CellularAutomataBasedSolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.SubstrateFiller;
@@ -55,11 +57,14 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
+import io.github.ericmedvet.jnb.datastructure.TriFunction;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import java.util.stream.DoubleStream;
 
 @Discoverable(prefixTemplate = "ea.solver|s")
@@ -295,6 +300,39 @@ public class Solvers {
           fitnessReducer,
           emptyArchive,
           additionalIndividualComparators
+      );
+    };
+  }
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> Function<S, GeneralizedMapElitesBiEvolver<G, S, Q, O>> generalizedBiMapElites(
+      @Param(value = "name", dS = "biMe") String name,
+      @Param("representation") Function<G, Representation<G>> representation,
+      @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
+      @Param(value = "nPop", dI = 100) int nPop,
+      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
+      @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
+      @Param("emptyArchive") boolean emptyArchive,
+      @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
+      @Param("opponentsSelector") TriFunction<MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector,
+      @Param("fitnessAggregator") Function<List<Q>, Q> fitnessAggregator
+  ) {
+    return exampleS -> {
+      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      return new GeneralizedMapElitesBiEvolver<>(
+          mapper.mapperFor(exampleS),
+          r.factory(),
+          StopConditions.nOfFitnessEvaluations(nEval),
+          r.mutations().getFirst(),
+          nPop,
+          descriptors,
+          fitnessReducer,
+          emptyArchive,
+          additionalIndividualComparators,
+          opponentsSelector,
+          fitnessAggregator
       );
     };
   }

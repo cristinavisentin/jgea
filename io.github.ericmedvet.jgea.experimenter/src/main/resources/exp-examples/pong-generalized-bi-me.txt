@@ -1,5 +1,5 @@
 $SIMULATION = ds.bat.fromEnvironment(
-  tRange = misc.range(min = 0; max = 40);
+  tRange = misc.range(min = 0; max = 45);
   dT = 0.05;
   environment = ds.e.pong(racketsInitialYRange = m.range(min=25.0;max=25.0));
   stopCondition = predicate.not(condition = predicate.always())
@@ -18,49 +18,20 @@ $VS_SELF = ds.f.selfBiSimulator(
 
 ea.experiment(
   runs =
-    (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
-    (solver = (nEval = [10000; 20000; 30000; 40000; 50000]) * [
-      ea.s.biGa(
-        name = "bi-ga-ann-minValue";
-        fitnessReducer = ea.misc.minValue();
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.00";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.10";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0.10);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.20";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0.20);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.30";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0.30);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.40";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0.40);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
-      );
-      ea.s.biGa(
-        name = "bi-ga-ann-mf0.50";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor=0.50);
-        representation = ea.r.doubleString();
-        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
+    (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
+    (solver = (nEval = [10000]) * [
+      ea.s.generalizedBiMapElites(
+        name = "bi-me-tree";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        emptyArchive = false;
+        descriptors = [
+          ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
+          ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
+        ];
+        opponentsSelector = ea.misc.randomMESelector(nOfSolutions = 3);
+        fitnessAggregator = f.min()
       )
     ]) *
     (problem = [ea.p.biSimToBqb(
@@ -81,7 +52,7 @@ ea.experiment(
       onlyLast = false
     );
     ea.l.saveLastPopulationForRun(
-      path = "../results/{name}/{startTime}/last-pop-{run.solver.name}-{run.solver.nEval}-{run.randomGenerator.seed:%04d}"
+      path = "../results/{name}/{startTime}/last-pop-{run.solver.name}-{run.randomGenerator.seed:%04d}"
     );
     ea.l.savePlotForExp(
       path = "../results/{name}/{startTime}/best-q";
@@ -108,16 +79,31 @@ ea.experiment(
       plot = ea.plot.multi.xyExp(x = ea.f.nOfEvals(); y = f.avg(of = f.each(mapF = ds.e.pong.scoreDiff1(of = f.composition(then = $VS_OPPONENT)); of = ea.f.all())))
     );
     ea.l.savePlotForRun(
-      path = "../results/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.solver.nEval}-{run.randomGenerator.seed:%03d}";
+      path = "../results/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
       plot = ea.plot.single.me();
       condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "biMe")
+    );
+    ea.l.saveForRun(
+      of = ea.acc.lastBest();
+      processor = ea.f.toVideo(
+        video = ea.misc.toVideo(drawer = ds.d.pong());
+        of = $VS_SELF
+      );
+      path = "../results/{name}/{startTime}/best-vs-self-{run.solver.name}-{run.randomGenerator.seed:%04d}"
+    );
+    ea.l.saveForRun(
+      of = ea.acc.lastBest();
+      processor = ea.f.toVideo(
+        video = ea.misc.toVideo(drawer = ds.d.pong());
+        of = $VS_OPPONENT
+      );
+      path = "../results/{name}/{startTime}/best-vs-simple-{run.solver.name}-{run.randomGenerator.seed:%04d}"
     );
     ea.l.bestCsv(
         path = "../results/{name}/{startTime}/allBest.csv";
         runFunctions = [
           ea.f.runKey(key = "run.problem.simulation.environment");
-          ea.f.runKey(key = "run.solver.mapper");
-          ea.f.runKey(key = "run.solver.nEval")
+          ea.f.runKey(key = "run.solver.mapper")
         ];
         functions = [
           f.toBase64(of = ea.f.genotype(of = ea.f.best()))
