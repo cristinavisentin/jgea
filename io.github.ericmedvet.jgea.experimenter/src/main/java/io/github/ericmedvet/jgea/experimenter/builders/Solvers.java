@@ -25,7 +25,6 @@ import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
-import io.github.ericmedvet.jgea.core.problem.QualityBasedBiProblem;
 import io.github.ericmedvet.jgea.core.representation.graph.*;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Constant;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Input;
@@ -59,6 +58,7 @@ import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -316,7 +316,7 @@ public class Solvers {
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("emptyArchive") boolean emptyArchive,
       @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
-      @Param("opponentsSelector") TriFunction<List<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector,
+      @Param("opponentsSelector") TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector,
       @Param("fitnessAggregator") Function<List<Q>, Q> fitnessAggregator
   ) {
     return exampleS -> {

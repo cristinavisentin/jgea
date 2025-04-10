@@ -19,9 +19,9 @@ $VS_SELF = ds.f.selfBiSimulator(
 ea.experiment(
   runs =
     (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
-    (solver = (nEval = [10000]) * [
+    (solver = (nEval = [100000]) * [
       ea.s.generalizedBiMapElites(
-        name = "bi-me-tree";
+        name = "bi-me-tree-furthest";
         fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
@@ -30,8 +30,21 @@ ea.experiment(
           ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
           ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
         ];
-        opponentsSelector = ea.misc.randomMESelector(nOfSolutions = 3);
-        fitnessAggregator = f.min()
+        opponentsSelector = ea.misc.furthestMESelector(nOfOpponents = 3);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.generalizedBiMapElites(
+        name = "bi-me-tree-nearest";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        emptyArchive = false;
+        descriptors = [
+          ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
+          ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
+        ];
+        opponentsSelector = ea.misc.nearestMESelector(nOfOpponents = 3);
+        fitnessAggregator = f.avg()
       )
     ]) *
     (problem = [ea.p.biSimToBqb(

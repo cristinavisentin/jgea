@@ -41,4 +41,5 @@ module io.github.ericmedvet.jgea.experimenter {
   requires com.googlecode.lanterna;
   requires jcommander;
   requires org.apache.commons.csv;
+  requires commons.math3;
 }

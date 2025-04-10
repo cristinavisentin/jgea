@@ -19,10 +19,8 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.problem.QualityBasedBiProblem;
-import io.github.ericmedvet.jgea.core.solver.AbstractPopulationBasedIterativeSolver;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MEPopulationState;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.experimenter.drawer.DoubleGridDrawer;
 import io.github.ericmedvet.jgea.problem.ca.MultivariateRealGridCellularAutomaton;
@@ -44,9 +42,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "ea.misc")
@@ -190,15 +190,64 @@ public class Miscs {
   public static BinaryOperator<Double> minValue() {
     return Math::min;
   }
-
-  //TODO fix (change "MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>>" in "List<MEIndividual<G, S, Q>>")
+  
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> TriFunction<MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> randomMESelector(
+  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> randomMESelector(
       @Param(value = "nOfSolutions", dI = 1) int nOfSolutions
   ) {
-    return (MEPopulationState, MEIndividual, random) ->
-        IntStream.range(0, nOfSolutions).mapToObj(j -> Misc.pickRandomly(MEPopulationState.archive().asMap().values().stream().toList(), random)).toList();
+    return (population, individual, random) ->
+        IntStream.range(0, nOfSolutions).mapToObj(j -> Misc.pickRandomly(population, random)).toList();
+  }
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> nearestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, random) -> {
+      double[] individualCoordinates = individual.coordinates().stream()
+          .mapToDouble(MapElites.Descriptor.Coordinate::value)
+          .toArray();
+      BiFunction<double[], double[], Double> computeEuclideanDistance = (v1, v2) -> {
+        if (v1.length != v2.length){
+          throw new IllegalArgumentException("Mismatch in array size");
+        }
+        return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
+      };
+      return population.stream()
+          .filter(candidate -> !candidate.equals(individual))
+          .sorted(Comparator.comparingDouble(
+              candidate -> computeEuclideanDistance.apply(individualCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
+          ))
+          .limit(nOfOpponents)
+          .collect(Collectors.toList());
+    };
+  }
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> furthestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, random) -> {
+      double[] targetCoordinates = individual.coordinates()
+          .stream()
+          .mapToDouble(MapElites.Descriptor.Coordinate::value)
+          .toArray();
+      BiFunction<double[], double[], Double> computeEuclideanDistance = (v1, v2) -> {
+        if (v1.length != v2.length){
+          throw new IllegalArgumentException("Mismatch in array size");
+        }
+        return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
+      };
+      return population.stream()
+          .filter(candidate -> !candidate.equals(individual))
+          .sorted(Comparator.comparingDouble(candidate -> -computeEuclideanDistance.apply(targetCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
+          ))
+          .limit(nOfOpponents)
+          .collect(Collectors.toList());
+    };
   }
   
   @SuppressWarnings("unused")
