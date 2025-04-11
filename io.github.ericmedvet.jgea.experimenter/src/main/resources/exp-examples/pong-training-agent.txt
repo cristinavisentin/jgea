@@ -18,8 +18,8 @@ $VS_OPPONENT = ds.f.opponentBiSimulator(
 
 ea.experiment(
   runs =
-    (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
-    (solver = (nEval = [50000]) * [
+    (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) *
+    (solver = (nEval = [100000]) * [
       ea.s.ga(
         name = "trainer-ga-tree";
         representation = ea.r.srTree();

@@ -239,7 +239,7 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
     archive = archive.updated(updatedIndividuals, MEIndividual::bins, partialComparator(state.problem()));
     return state.updatedWithIteration(populationSize, futures.size(), archive);
   }
-  
+
   public record FightOutcome<Q>(long id1, long id2, Q f1, Q f2){
   }
 }

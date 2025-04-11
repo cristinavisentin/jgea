@@ -194,10 +194,10 @@ public class Miscs {
   @SuppressWarnings("unused")
   @Cacheable
   public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> randomMESelector(
-      @Param(value = "nOfSolutions", dI = 1) int nOfSolutions
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, random) ->
-        IntStream.range(0, nOfSolutions).mapToObj(j -> Misc.pickRandomly(population, random)).toList();
+        IntStream.range(0, nOfOpponents).mapToObj(j -> Misc.pickRandomly(population, random)).toList();
   }
   
   @SuppressWarnings("unused")
@@ -209,7 +209,7 @@ public class Miscs {
       double[] individualCoordinates = individual.coordinates().stream()
           .mapToDouble(MapElites.Descriptor.Coordinate::value)
           .toArray();
-      BiFunction<double[], double[], Double> computeEuclideanDistance = (v1, v2) -> {
+      BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
         if (v1.length != v2.length){
           throw new IllegalArgumentException("Mismatch in array size");
         }
@@ -218,7 +218,7 @@ public class Miscs {
       return population.stream()
           .filter(candidate -> !candidate.equals(individual))
           .sorted(Comparator.comparingDouble(
-              candidate -> computeEuclideanDistance.apply(individualCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
+              candidate -> euclideanDistance.apply(individualCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
           ))
           .limit(nOfOpponents)
           .collect(Collectors.toList());
@@ -227,7 +227,7 @@ public class Miscs {
   
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> furthestMESelector(
+  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> farthestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, random) -> {
@@ -235,7 +235,7 @@ public class Miscs {
           .stream()
           .mapToDouble(MapElites.Descriptor.Coordinate::value)
           .toArray();
-      BiFunction<double[], double[], Double> computeEuclideanDistance = (v1, v2) -> {
+      BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
         if (v1.length != v2.length){
           throw new IllegalArgumentException("Mismatch in array size");
         }
@@ -243,7 +243,7 @@ public class Miscs {
       };
       return population.stream()
           .filter(candidate -> !candidate.equals(individual))
-          .sorted(Comparator.comparingDouble(candidate -> -computeEuclideanDistance.apply(targetCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
+          .sorted(Comparator.comparingDouble(candidate -> -euclideanDistance.apply(targetCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
           ))
           .limit(nOfOpponents)
           .collect(Collectors.toList());
