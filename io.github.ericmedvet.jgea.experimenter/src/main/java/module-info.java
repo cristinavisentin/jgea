@@ -36,10 +36,10 @@ module io.github.ericmedvet.jgea.experimenter {
   requires io.github.ericmedvet.jviz.core;
   requires java.desktop;
   requires telegram.bot.api;
-  requires java.logging;
   requires jdk.management;
   requires com.googlecode.lanterna;
   requires jcommander;
   requires org.apache.commons.csv;
   requires commons.math3;
+  requires java.sql;
 }

@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
+import io.github.ericmedvet.jgea.core.solver.bi.mapelites.GeneralizedMapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
 import io.github.ericmedvet.jgea.core.util.Misc;
@@ -31,13 +32,11 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.jnb.datastructure.TriFunction;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -45,16 +44,23 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "ea.misc")
 public class Miscs {
-  
+
   private Miscs() {
   }
-  
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> bestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    throw new RuntimeException("Not implemented"); //TODO check with Eric how to do this
+  }
+
   @SuppressWarnings("unused")
   public static VideoBuilder<MultivariateRealGridCellularAutomaton> caVideo(
       @Param(value = "gray", dB = true) boolean gray,
@@ -80,7 +86,7 @@ public class Miscs {
         Drawer.stringWriter(Color.PINK, (float) fontSize, Function.identity())
             .draw(g, "k=%3d".formatted(p.first()));
       }
-      
+
       @Override
       public ImageInfo imageInfo(Pair<Integer, Grid<double[]>> p) {
         return gDrawer.imageInfo(p.second());
@@ -93,12 +99,12 @@ public class Miscs {
           .toList();
     });
   }
-  
+
   @SuppressWarnings("unused")
   public static Character ch(@Param("s") String s) {
     return s.charAt(0);
   }
-  
+
   @SuppressWarnings("unused")
   public static Color colorByName(@Param("name") String name) {
     try {
@@ -107,18 +113,18 @@ public class Miscs {
       throw new RuntimeException(e);
     }
   }
-  
+
   @SuppressWarnings("unused")
   public static Color colorByRgb(@Param("r") int r, @Param("g") int g, @Param("b") int b) {
     return new Color(r, g, b);
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static <K, V> Map.Entry<K, V> entry(@Param("key") K key, @Param("value") V value) {
     return Map.entry(key, value);
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static BufferedImage imgByName(
@@ -131,7 +137,7 @@ public class Miscs {
     return ImageUtils.imageDrawer(bgColor, marginRate)
         .build(new ImageBuilder.ImageInfo(w, h), ImageUtils.loadFromResource(name));
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static BufferedImage imgFromString(
@@ -144,7 +150,7 @@ public class Miscs {
   ) {
     return ImageUtils.stringDrawer(fgColor, bgColor, marginRate).build(new ImageBuilder.ImageInfo(w, h), s);
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static BinaryOperator<Double> lossyAverage(
@@ -152,14 +158,14 @@ public class Miscs {
   ) {
     return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
   }
-  
+
   @SuppressWarnings("unused")
   public static <K, V> Map<K, V> map(@Param("entries") List<Map.Entry<K, V>> entries) {
     Map<K, V> map = new LinkedHashMap<>();
     entries.forEach(e -> map.put(e.getKey(), e.getValue()));
     return Collections.unmodifiableMap(map);
   }
-  
+
   @SuppressWarnings("unused")
   public static <K, V> Map<K, V> mapFromLists(
       @Param("keys") List<K> keys,
@@ -184,78 +190,101 @@ public class Miscs {
             )
     );
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static BinaryOperator<Double> minValue() {
     return Math::min;
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> randomMESelector(
+  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> randomMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
-    return (population, individual, random) ->
-        IntStream.range(0, nOfOpponents).mapToObj(j -> Misc.pickRandomly(population, random)).toList();
+    return (population, individual, problem, random) -> IntStream.range(0, nOfOpponents)
+        .mapToObj(j -> Misc.pickRandomly(population, random))
+        .toList();
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> nearestMESelector(
+  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> nearestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
-    return (population, individual, random) -> {
-      double[] individualCoordinates = individual.coordinates().stream()
+    return (population, individual, problem, random) -> {
+      double[] individualCoordinates = individual.coordinates()
+          .stream()
           .mapToDouble(MapElites.Descriptor.Coordinate::value)
           .toArray();
       BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
-        if (v1.length != v2.length){
+        if (v1.length != v2.length) {
           throw new IllegalArgumentException("Mismatch in array size");
         }
         return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
       };
       return population.stream()
           .filter(candidate -> !candidate.equals(individual))
-          .sorted(Comparator.comparingDouble(
-              candidate -> euclideanDistance.apply(individualCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
-          ))
+          .sorted(
+              Comparator.comparingDouble(
+                  candidate -> euclideanDistance.apply(
+                      individualCoordinates,
+                      candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray()
+                  )
+              )
+          )
           .limit(nOfOpponents)
           .collect(Collectors.toList());
     };
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> farthestMESelector(
+  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> farthestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
-    return (population, individual, random) -> {
+    return (population, individual, problem, random) -> {
       double[] targetCoordinates = individual.coordinates()
           .stream()
           .mapToDouble(MapElites.Descriptor.Coordinate::value)
           .toArray();
       BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
-        if (v1.length != v2.length){
+        if (v1.length != v2.length) {
           throw new IllegalArgumentException("Mismatch in array size");
         }
         return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
       };
       return population.stream()
-          .filter(candidate -> !candidate.equals(individual))
-          .sorted(Comparator.comparingDouble(candidate -> -euclideanDistance.apply(targetCoordinates, candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray())
-          ))
+          .sorted(
+              Comparator.comparingDouble(
+                  candidate -> -euclideanDistance.apply(
+                      targetCoordinates,
+                      candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray()
+                  )
+              )
+          )
           .limit(nOfOpponents)
           .collect(Collectors.toList());
     };
   }
-  
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> oldestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> population.stream()
+        .sorted(Comparator.comparingLong(MEIndividual::genotypeBirthIteration))
+        .limit(nOfOpponents)
+        .collect(Collectors.toList());
+  }
+
   @SuppressWarnings("unused")
   @Cacheable
   public static <V> Map.Entry<String, V> sEntry(@Param("key") String key, @Param("value") V value) {
     return Map.entry(key, value);
   }
-  
+
   @SuppressWarnings("unused")
   public static <V> Map<String, V> sMapFromLists(
       @Param("keys") List<String> keys,
@@ -280,7 +309,7 @@ public class Miscs {
             )
     );
   }
-  
+
   @SuppressWarnings("unused")
   public static <S> VideoBuilder<Simulation.Outcome<S>> toVideo(@Param("drawer") SimulationOutcomeDrawer<S> drawer) {
     return drawer.videoBuilder();

@@ -56,15 +56,11 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.jnb.datastructure.TriFunction;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.random.RandomGenerator;
 import java.util.stream.DoubleStream;
 
 @Discoverable(prefixTemplate = "ea.solver|s")
@@ -303,7 +299,7 @@ public class Solvers {
       );
     };
   }
-  
+
   @SuppressWarnings("unused")
   @Cacheable
   public static <G, S, Q, O> Function<S, GeneralizedMapElitesBiEvolver<G, S, Q, O>> generalizedBiMapElites(
@@ -316,7 +312,7 @@ public class Solvers {
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("emptyArchive") boolean emptyArchive,
       @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
-      @Param("opponentsSelector") TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector,
+      @Param("opponentsSelector") GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector,
       @Param("fitnessAggregator") Function<List<Q>, Q> fitnessAggregator
   ) {
     return exampleS -> {

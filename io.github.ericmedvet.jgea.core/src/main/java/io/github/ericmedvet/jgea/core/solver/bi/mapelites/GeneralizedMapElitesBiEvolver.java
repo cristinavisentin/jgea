@@ -32,8 +32,6 @@ import io.github.ericmedvet.jgea.core.solver.mapelites.MEPopulationState;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.jnb.datastructure.TriFunction;
-
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +50,7 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
   private final Mutation<G> mutation;
   private final List<MapElites.Descriptor<G, S, Q>> descriptors;
   private final boolean emptyArchive;
-  private final TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector;
+  private final GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector;
   private final Function<List<Q>, Q> fitnessAggregator;
 
   public GeneralizedMapElitesBiEvolver(
@@ -65,7 +63,7 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
       BinaryOperator<Q> fitnessReducer,
       boolean emptyArchive,
       List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
-      TriFunction<Collection<MEIndividual<G, S, Q>>, MEIndividual<G, S, Q>, RandomGenerator, List<MEIndividual<G, S, Q>>> opponentsSelector,
+      GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector,
       Function<List<Q>, Q> fitnessAggregator
   ) {
     super(solutionMapper, genotypeFactory, stopCondition, false, fitnessReducer, additionalIndividualComparators);
@@ -76,7 +74,17 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
     this.opponentsSelector = opponentsSelector;
     this.fitnessAggregator = fitnessAggregator;
   }
-  
+
+  @FunctionalInterface
+  public interface OpponentSelector<G, S, Q, O> {
+    List<MEIndividual<G, S, Q>> select(
+        Collection<MEIndividual<G, S, Q>> population,
+        MEIndividual<G, S, Q> individual,
+        QualityBasedBiProblem<S, O, Q> problem,
+        RandomGenerator random
+    );
+  }
+
   @Override
   public MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>> init(
       QualityBasedBiProblem<S, O, Q> problem,
@@ -86,30 +94,36 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
     // create new genotypes and split in two list of opponents
     AtomicLong counter = new AtomicLong(0);
     Collection<? extends G> genotypes = genotypeFactory.build(populationSize, random);
-    Collection<MEIndividual<G, S, Q>> individuals = genotypes.stream().map(g -> MEIndividual.from(
-        Individual.of(
-            counter.getAndIncrement(),
-            g,
-            solutionMapper.apply(g),
-            null,
-            0,
-            0,
-            List.of()
-        ),
-        descriptors
-    )).toList();
+    Collection<MEIndividual<G, S, Q>> individuals = genotypes.stream()
+        .map(
+            g -> MEIndividual.from(
+                Individual.of(
+                    counter.getAndIncrement(),
+                    g,
+                    solutionMapper.apply(g),
+                    null,
+                    0,
+                    0,
+                    List.of()
+                ),
+                descriptors
+            )
+        )
+        .toList();
     Map<Pair<Long, Long>, Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>>> fights = new HashMap<>();
-    BiFunction<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>, Pair<Long, Long>> individualsToIdPair =
-        (i1, i2) -> new Pair<>(Math.min(i1.id(), i2.id()), Math.max(i1.id(), i2.id()));
-    for (MEIndividual<G, S, Q> individual: individuals){
-      List<MEIndividual<G, S, Q>> opponents = opponentsSelector.apply(individuals, individual, random);
-      for (MEIndividual<G, S, Q> opponent : opponents){
+    BiFunction<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>, Pair<Long, Long>> individualsToIdPair = (
+        i1,
+        i2
+    ) -> new Pair<>(Math.min(i1.id(), i2.id()), Math.max(i1.id(), i2.id()));
+    for (MEIndividual<G, S, Q> individual : individuals) {
+      List<MEIndividual<G, S, Q>> opponents = opponentsSelector.select(individuals, individual, problem, random);
+      for (MEIndividual<G, S, Q> opponent : opponents) {
         fights.putIfAbsent(individualsToIdPair.apply(individual, opponent), new Pair<>(individual, opponent));
       }
     }
     List<Future<FightOutcome<Q>>> futures = new ArrayList<>();
     List<Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>>> fightsOpponents = fights.values().stream().toList();
-    for (int i = 0; i < fights.size(); i++){
+    for (int i = 0; i < fights.size(); i++) {
       int index = i;
       Future<FightOutcome<Q>> future = executor.submit(() -> {
         Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>> fight = fightsOpponents.get(index);
@@ -136,8 +150,11 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
       idsFitnessMap.computeIfAbsent(fo.id1(), k -> new ArrayList<>()).add(fo.f1());
       idsFitnessMap.computeIfAbsent(fo.id2(), k -> new ArrayList<>()).add(fo.f2());
     });
-    Collection<MEIndividual<G, S, Q>> updatedIndividuals = individuals.stream().map(
-        i -> i.updateQuality(fitnessAggregator.apply(idsFitnessMap.get(i.id())), 0)).toList();
+    Collection<MEIndividual<G, S, Q>> updatedIndividuals = individuals.stream()
+        .map(
+            i -> i.updateQuality(fitnessAggregator.apply(idsFitnessMap.get(i.id())), 0)
+        )
+        .toList();
     MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>> newState = MEPopulationState.empty(
         problem,
         stopCondition(),
@@ -181,17 +198,26 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
     );
     Map<Pair<Long, Long>, Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>>> fights = new HashMap<>();
     BiFunction<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>, Pair<Long, Long>> individualsToIdPair = (
-        i1, i2) -> new Pair<>(Math.min(i1.id(), i2.id()), Math.max(i1.id(), i2.id())
+        i1,
+        i2
+    ) -> new Pair<>(
+        Math.min(i1.id(), i2.id()),
+        Math.max(i1.id(), i2.id())
     );
-    for (MEIndividual<G, S, Q> individual: individuals){
-      List<MEIndividual<G, S, Q>> opponents = opponentsSelector.apply(individuals, individual, random);
-      for (MEIndividual<G, S, Q> opponent : opponents){
+    for (MEIndividual<G, S, Q> individual : individuals) {
+      List<MEIndividual<G, S, Q>> opponents = opponentsSelector.select(
+          individuals,
+          individual,
+          state.problem(),
+          random
+      );
+      for (MEIndividual<G, S, Q> opponent : opponents) {
         fights.putIfAbsent(individualsToIdPair.apply(individual, opponent), new Pair<>(individual, opponent));
       }
     }
     List<Future<FightOutcome<Q>>> futures = new ArrayList<>();
     List<Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>>> fightsOpponents = fights.values().stream().toList();
-    for (int i = 0; i < fights.size(); i++){
+    for (int i = 0; i < fights.size(); i++) {
       int index = i;
       Future<FightOutcome<Q>> future = executor.submit(() -> {
         Pair<MEIndividual<G, S, Q>, MEIndividual<G, S, Q>> fight = fightsOpponents.get(index);
@@ -218,13 +244,16 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
       idsFitnessMap.computeIfAbsent(fo.id1(), k -> new ArrayList<>()).add(fo.f1());
       idsFitnessMap.computeIfAbsent(fo.id2(), k -> new ArrayList<>()).add(fo.f2());
     });
-    Collection<MEIndividual<G, S, Q>> updatedIndividuals = individuals.stream().map(
-        i -> {
-          Q newQuality = i.quality() != null
-              ? fitnessReducer.apply(i.quality(), fitnessAggregator.apply(idsFitnessMap.get(i.id())))
-              : fitnessAggregator.apply(idsFitnessMap.get(i.id()));
-          return i.updateQuality(newQuality, i.qualityMappingIteration());
-        })
+    Collection<MEIndividual<G, S, Q>> updatedIndividuals = individuals.stream()
+        .map(
+            i -> {
+              Q newQuality = i.quality() != null ? fitnessReducer.apply(
+                  i.quality(),
+                  fitnessAggregator.apply(idsFitnessMap.get(i.id()))
+              ) : fitnessAggregator.apply(idsFitnessMap.get(i.id()));
+              return i.updateQuality(newQuality, i.qualityMappingIteration());
+            }
+        )
         .toList();
     PartialComparator<? super Individual<?, ?, ?>> updaterComparator = (
         newI,
@@ -240,6 +269,6 @@ public class GeneralizedMapElitesBiEvolver<G, S, Q, O> extends AbstractBiEvolver
     return state.updatedWithIteration(populationSize, futures.size(), archive);
   }
 
-  public record FightOutcome<Q>(long id1, long id2, Q f1, Q f2){
+  public record FightOutcome<Q>(long id1, long id2, Q f1, Q f2) {
   }
 }
