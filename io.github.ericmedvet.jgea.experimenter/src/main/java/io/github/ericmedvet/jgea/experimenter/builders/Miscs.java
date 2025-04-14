@@ -19,6 +19,8 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
+import io.github.ericmedvet.jgea.core.order.PartialComparator;
+import io.github.ericmedvet.jgea.core.order.PartiallyOrderedCollection;
 import io.github.ericmedvet.jgea.core.solver.bi.mapelites.GeneralizedMapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
@@ -58,13 +60,16 @@ public class Miscs {
   public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> bestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
-    return (population, individual, problem, random) ->
-        population.stream()
-        .sorted(
-            Comparator.comparing(MEIndividual::quality, problem.qualityComparator().comparator())  //TODO this is not ok because it throw exception if NOT_COMPARABLE
-        )
-        .limit(nOfOpponents)
-        .collect(Collectors.toList());
+    return (population, individual, problem, random) -> {
+      PartialComparator<MEIndividual<G,S,Q>> partialComparator = (me1, me2) -> problem.qualityComparator().compare(me1.quality(), me2.quality());
+      PartiallyOrderedCollection.from(population, partialComparator).fronts(); //TODO integrate this code below
+      return population.stream()
+          .sorted(
+              Comparator.comparing(MEIndividual::quality, problem.qualityComparator().comparator())  //TODO this is not ok because it throw exception if NOT_COMPARABLE
+          )
+          .limit(nOfOpponents)
+          .collect(Collectors.toList());
+    };
   }
 
   @SuppressWarnings("unused")
