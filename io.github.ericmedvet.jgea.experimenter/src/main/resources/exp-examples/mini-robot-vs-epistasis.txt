@@ -1,12 +1,12 @@
 ea.experiment(
   runs = (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
-  (solver = (nEval = [1000]) *
+  (solver = (nEval = [500]) *
   [
     ea.s.ga(
       name = "ga-epistasis";
       mapper = ea.mapper.pair(
         first = ea.m.identity();
-        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 10; nOfInnerLayers = 4));
+        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 1; nOfInnerLayers = 2));
         of = ea.m.splitter(of = ea.m.isIndexedDs())
       );
       representation = ea.representation.pair(
@@ -18,7 +18,7 @@ ea.experiment(
       name = "ga-pair-ds";
       mapper = ea.mapper.pair(
         first = ea.m.identity();
-        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 10; nOfInnerLayers = 4))
+        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 1; nOfInnerLayers = 2))
       );
       representation = ea.representation.pair(
         first = ea.representation.doubleString();
@@ -29,7 +29,7 @@ ea.experiment(
       name = "ga-single-ds";
       mapper = ea.mapper.pair(
         first = ea.m.identity();
-        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 10; nOfInnerLayers = 4));
+        second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 1; nOfInnerLayers = 2));
         of = ea.m.splitter()
       );
       representation = ea.representation.doubleString()
@@ -45,7 +45,9 @@ ea.experiment(
     ea.l.console(
       functions = [
         f.mapValue(key = "avg.dist"; of = ea.f.behaviorQuality(of = ea.f.quality(of = ea.f.best())); format = "%6.4f");
-        ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d")
+        ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+        ea.f.size(of = f.pairFirst(of = ea.f.genotype(of = ea.f.best())); format = "%3d");
+        ea.f.size(of = f.pairSecond(of = ea.f.genotype(of = ea.f.best())); format = "%3d")
       ];
       onlyLast = false
     );

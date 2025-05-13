@@ -374,6 +374,7 @@ public class Mappers {
     return beforeM.andThen(
         InvertibleMapper.from(
             (eDs, p) -> {
+              int dsSize = (int) Math.round(eDs.size() * relativeLength);
               // check for consistency of example and pair
               if (p.second().size() != eDs.size()) {
                 throw new IllegalArgumentException(
@@ -383,12 +384,11 @@ public class Mappers {
                     )
                 );
               }
-              if (p.second().lowerBound() != 0 || p.second()
-                  .upperBound() != (int) Math.round(eDs.size() * relativeLength)) {
+              if (p.second().lowerBound() != 0 || p.second().upperBound() != dsSize - 1) {
                 throw new IllegalArgumentException(
                     "Indexes domain is wrong: [%d,%d] expected, [%d,%d] found".formatted(
                         0,
-                        (int) Math.round(eDs.size() * relativeLength),
+                        dsSize - 1,
                         p.second().lowerBound(),
                         p.second().upperBound()
                     )
@@ -397,9 +397,10 @@ public class Mappers {
               // check for self-consistency of pair
               if (p.second().upperBound() != p.first().size() - 1) {
                 throw new IllegalArgumentException(
-                    "Size of values does not match domain of indexes: %d vs. %d".formatted(
+                    "Size of values does not match domain of indexes: %d vs. [%d,%d]".formatted(
                         p.first().size(),
-                        p.second().upperBound() + 1
+                        0,
+                        p.second().upperBound()
                     )
                 );
               }
@@ -412,7 +413,11 @@ public class Mappers {
             },
             eDs -> new Pair<>(
                 Collections.nCopies((int) Math.round(eDs.size() * relativeLength), 0d),
-                new IntString(Collections.nCopies(eDs.size(), 0), 0, (int) Math.round(eDs.size() * relativeLength))
+                new IntString(
+                    Collections.nCopies(eDs.size(), 0),
+                    0,
+                    (int) Math.round(eDs.size() * relativeLength) - 1
+                )
             ),
             "isIndexedDs[rl=%f]".formatted(relativeLength)
         )
