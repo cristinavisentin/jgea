@@ -31,7 +31,6 @@ import io.github.ericmedvet.jsdynsym.control.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -53,12 +52,12 @@ public class Problems {
       @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,
       @Param(value = "type", dS = "minimize") OptimizationType type,
       @Param(value = "qFunction") Function<B, Q> qFunction,
-      @Param(value = "trainingOpponent") Supplier<S> trainingOpponent
+      @Param(value = "trainingOpponent") S trainingOpponent
   ) {
     return new TotalOrderQualityBasedProblem<>() {
       @Override
       public Function<S, Q> qualityFunction() {
-        return (s -> qFunction.apply(simulation.simulate(s, trainingOpponent.get())));
+        return (s -> qFunction.apply(simulation.simulate(s, trainingOpponent)));
       }
 
       @Override
