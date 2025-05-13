@@ -56,6 +56,7 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
 import io.github.ericmedvet.jsdynsym.core.composed.Stepped;
 import io.github.ericmedvet.jsdynsym.core.numerical.*;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -328,10 +329,10 @@ public class Mappers {
     return beforeM.andThen(
         InvertibleMapper.from(
             (nmrf, g) -> NamedMultivariateRealFunction.from(
-                new FunctionGraph(g, nmrf.xVarNames(), nmrf.yVarNames()),
-                nmrf.xVarNames(),
-                nmrf.yVarNames()
-            )
+                    new FunctionGraph(g, nmrf.xVarNames(), nmrf.yVarNames()),
+                    nmrf.xVarNames(),
+                    nmrf.yVarNames()
+                )
                 .andThen(toOperator(postOperator)),
             nmrf -> FunctionGraph.sampleFor(nmrf.xVarNames(), nmrf.yVarNames()),
             "fGraphToNmrf[po=%s]".formatted(postOperator)
@@ -363,6 +364,50 @@ public class Mappers {
   @Cacheable
   public static <X> InvertibleMapper<X, X> identity() {
     return InvertibleMapper.identity();
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> InvertibleMapper<X, List<Double>> isIndexedDs(
+      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Pair<List<Double>, IntString>> beforeM,
+      @Param(value = "relativeLength", dD = 1) double relativeLength
+  ) {
+    return beforeM.andThen(
+        InvertibleMapper.from(
+            (eDs, p) -> {
+              // check for consistency of example and pair
+              if (p.second().size() != eDs.size()) {
+                throw new IllegalArgumentException("Sizes of indexes and example do not match: %d vs. %d".formatted(
+                    p.second().size(),
+                    eDs.size()
+                ));
+              }
+              if (p.second().lowerBound() != 0 || p.second()
+                  .upperBound() != (int) Math.round(eDs.size() * relativeLength)) {
+                throw new IllegalArgumentException("Indexes domain is wrong: [%d,%d] expected, [%d,%d] found".formatted(
+                    0, (int) Math.round(eDs.size() * relativeLength),
+                    p.second().lowerBound(), p.second().upperBound()
+                ));
+              }
+              // check for self-consistency of pair
+              if (p.second().upperBound() != p.first().size() - 1) {
+                throw new IllegalArgumentException("Size of values does not match domain of indexes: %d vs. %d".formatted(
+                    p.first().size(),
+                    p.second().upperBound() + 1
+                ));
+              }
+              // do the mapping
+              return p.second().genes().stream()
+                  .map(i -> p.first().get(i))
+                  .toList();
+            },
+            eDs -> new Pair<>(
+                Collections.nCopies((int) Math.round(eDs.size() * relativeLength), 0d),
+                new IntString(Collections.nCopies(eDs.size(), 0), 0, (int) Math.round(eDs.size() * relativeLength))
+            ),
+            "isIndexedDs[rl=%f]".formatted(relativeLength)
+        )
+    );
   }
 
   @SuppressWarnings("unused")
@@ -591,27 +636,6 @@ public class Mappers {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> InvertibleMapper<X, NumericalDynamicalSystem<?>> nurfToNds(
-      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, NamedUnivariateRealFunction> beforeM
-  ) {
-    return beforeM.andThen(
-        InvertibleMapper.from(
-            (nds, nurf) -> nurf,
-            nds -> NamedUnivariateRealFunction.from(
-                UnivariateRealFunction.from(
-                    in -> 0d,
-                    nds.nOfInputs()
-                ),
-                MultivariateRealFunction.varNames("i", nds.nOfInputs()),
-                "output"
-            ),
-            "nurfToNds"
-        )
-    );
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X> InvertibleMapper<X, NamedUnivariateRealFunction> nmrfToNurf(
       @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, NamedMultivariateRealFunction> beforeM
   ) {
@@ -686,6 +710,27 @@ public class Mappers {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X> InvertibleMapper<X, NumericalDynamicalSystem<?>> nurfToNds(
+      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, NamedUnivariateRealFunction> beforeM
+  ) {
+    return beforeM.andThen(
+        InvertibleMapper.from(
+            (nds, nurf) -> nurf,
+            nds -> NamedUnivariateRealFunction.from(
+                UnivariateRealFunction.from(
+                    in -> 0d,
+                    nds.nOfInputs()
+                ),
+                MultivariateRealFunction.varNames("i", nds.nOfInputs()),
+                "output"
+            ),
+            "nurfToNds"
+        )
+    );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X> InvertibleMapper<X, NamedMultivariateRealFunction> oGraphToNmrf(
       @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Graph<Node, OperatorGraph.NonValuedArc>> beforeM,
       @Param(value = "postOperator", dNPM = "ds.f.doubleOp(activationF=identity)") Function<Double, Double> postOperator
@@ -714,6 +759,37 @@ public class Mappers {
             ),
             p2 -> new Pair<>(firstM.exampleFor(p2.first()), secondM.exampleFor(p2.second())),
             "pair[first=%s;second=%s]".formatted(firstM, secondM)
+        )
+    );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X, T> InvertibleMapper<X, Pair<List<T>, List<T>>> splitter(
+      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, List<T>> beforeM
+  ) {
+    return beforeM.andThen(
+        InvertibleMapper.from(
+            (ePair, ts) -> {
+              // check for length consistency
+              if (ePair.first().size() + ePair.second().size() != ts.size()) {
+                throw new IllegalArgumentException("Wrong input size: %d+%d=%d expected, %d found".formatted(
+                    ePair.first().size(), ePair.second().size(),
+                    ePair.first().size() + ePair.second().size(),
+                    ts.size()
+                ));
+              }
+              // do the mapping
+              return new Pair<>(
+                  ts.subList(0, ePair.first().size()),
+                  ts.subList(ePair.first().size(), ts.size())
+              );
+            },
+            ePair -> Stream.concat(
+                ePair.first().stream(),
+                ePair.second().stream()
+            ).toList(),
+            "splitter"
         )
     );
   }
@@ -798,4 +874,5 @@ public class Mappers {
         )
     );
   }
+
 }
