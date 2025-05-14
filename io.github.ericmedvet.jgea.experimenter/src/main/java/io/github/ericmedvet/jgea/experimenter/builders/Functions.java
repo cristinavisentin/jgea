@@ -19,7 +19,10 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.problem.*;
+import io.github.ericmedvet.jgea.core.problem.BehaviorBasedProblem;
+import io.github.ericmedvet.jgea.core.problem.MultiTargetProblem;
+import io.github.ericmedvet.jgea.core.problem.Problem;
+import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.Network;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
@@ -50,11 +53,9 @@ import io.github.ericmedvet.jviz.core.plot.image.*;
 import io.github.ericmedvet.jviz.core.plot.image.Configuration;
 import io.github.ericmedvet.jviz.core.plot.video.*;
 import io.github.ericmedvet.jviz.core.util.VideoUtils;
+
 import java.awt.image.BufferedImage;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -131,7 +132,8 @@ public class Functions {
   public static <X, G, S, Q> NamedFunction<X, Archive<? extends MEIndividual<G, S, Q>>> coMeArchive1(
       @Param(value = "of", dNPM = "f.identity()") Function<X, CoMEPopulationState<G, ?, S, ?, ?, Q, ?>> beforeF
   ) {
-    Function<CoMEPopulationState<G, ?, S, ?, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = CoMEPopulationState::archive1;
+    Function<CoMEPopulationState<G, ?, S, ?, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f =
+        CoMEPopulationState::archive1;
     return NamedFunction.from(f, "coMe.archive1").compose(beforeF);
   }
 
@@ -140,7 +142,8 @@ public class Functions {
   public static <X, G, S, Q> NamedFunction<X, Archive<? extends MEIndividual<G, S, Q>>> coMeArchive2(
       @Param(value = "of", dNPM = "f.identity()") Function<X, CoMEPopulationState<?, G, ?, S, ?, Q, ?>> beforeF
   ) {
-    Function<CoMEPopulationState<?, G, ?, S, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = CoMEPopulationState::archive2;
+    Function<CoMEPopulationState<?, G, ?, S, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f =
+        CoMEPopulationState::archive2;
     return NamedFunction.from(f, "coMe.archive2").compose(beforeF);
   }
 
@@ -180,6 +183,32 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> crossEpistasis(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
+      @Param(value = "startOffset", dI = 0) int startOffset,
+      @Param(value = "endOffset", dI = 0) int endOffset,
+      @Param(value = "splitOffset", dI = 0) int splitOffset,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<IntString, Double> f = is -> {
+      List<Integer> indexes = is.genes().subList(startOffset, is.genes().size() - endOffset);
+      List<Integer> leftIndexes = indexes.subList(0, splitOffset);
+      List<Integer> rightIndexes = indexes.subList(splitOffset, indexes.size());
+      Set<Integer> commonIndexes = new HashSet<>(leftIndexes);
+      commonIndexes.retainAll(rightIndexes);
+      double leftRate = (double) commonIndexes.size() / (double) leftIndexes.size();
+      double rightRate = (double) commonIndexes.size() / (double) rightIndexes.size();
+      return (leftRate + rightRate) / 2d;
+    };
+    return FormattedNamedFunction.from(
+        f,
+        format,
+        "cross.epistasis[%d;%d;%d]".formatted(startOffset, endOffset, splitOffset)
+    ).compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X, P extends XYPlot<D>, D> NamedFunction<X, String> csvPlotter(
       @Param(value = "of", dNPM = "f.identity()") Function<X, P> beforeF,
       @Param(value = "columnNameJoiner", dS = ".") String columnNameJoiner,
@@ -188,13 +217,14 @@ public class Functions {
       @Param(value = "missingDataString", dS = "nan") String missingDataString,
       @Param(value = "mode", dS = "paper_friendly") io.github.ericmedvet.jviz.core.plot.csv.Configuration.Mode mode
   ) {
-    io.github.ericmedvet.jviz.core.plot.csv.Configuration configuration = new io.github.ericmedvet.jviz.core.plot.csv.Configuration(
-        columnNameJoiner,
-        doubleFormat,
-        delimiter,
-        List.of(new io.github.ericmedvet.jviz.core.plot.csv.Configuration.Replacement("\\W+", ".")),
-        missingDataString
-    );
+    io.github.ericmedvet.jviz.core.plot.csv.Configuration configuration =
+        new io.github.ericmedvet.jviz.core.plot.csv.Configuration(
+            columnNameJoiner,
+            doubleFormat,
+            delimiter,
+            List.of(new io.github.ericmedvet.jviz.core.plot.csv.Configuration.Replacement("\\W+", ".")),
+            missingDataString
+        );
     Function<P, String> f = p -> {
       if (p instanceof DistributionPlot dp) {
         return new DistributionPlotCsvBuilder(configuration, mode).apply(dp);
@@ -366,6 +396,23 @@ public class Functions {
       );
     };
     return NamedFunction.from(f, "image.plotter").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> intraEpistasis(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
+      @Param(value = "startOffset", dI = 0) int startOffset,
+      @Param(value = "endOffset", dI = 0) int endOffset,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<IntString, Double> f = is -> 1d - (double) is.genes()
+        .subList(startOffset, is.genes().size() - endOffset)
+        .stream()
+        .distinct()
+        .count() / (double) (is.size() - startOffset - endOffset);
+    return FormattedNamedFunction.from(f, format, "intra.epistasis[%d;%d]".formatted(startOffset, endOffset)).compose(
+        beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -797,6 +844,16 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> ttpnDeadOrIUnwiredOutputGatesRate(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<Network, Double> f = n -> (double) n.deadOrIUnwiredOutputGates().size() / (double) n.gates().size();
+    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Integer> ttpnNOfTypes(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
       @Param(value = "format", dS = "%5.3f") String format
@@ -811,29 +868,20 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, Double> ttpnDeadOrIUnwiredOutputGatesRate(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
-      @Param(value = "format", dS = "%5.3f") String format
-  ) {
-    Function<Network, Double> f = n -> (double) n.deadOrIUnwiredOutputGates().size() / (double) n.gates().size();
-    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X, I extends Individual<?, S, Q>, S, Q, P extends QualityBasedProblem<S, Q>> FormattedNamedFunction<X, Q> validationQuality(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<?, ?, S, Q, P>> beforeF,
-      @Param(value = "individual", dNPM = "ea.f.best()") Function<POCPopulationState<?, ?, S, Q, P>, Individual<?, S, Q>> individualF,
+      @Param(value = "individual", dNPM = "ea.f.best()") Function<POCPopulationState<?, ?, S, Q, P>, Individual<?, S,
+          Q>> individualF,
       @Param(value = "format", dS = "%s") String format
   ) {
     Function<POCPopulationState<?, ?, S, Q, P>, Q> f = state -> state.problem()
         .validationQualityFunction()
         .apply(individualF.apply(state).solution());
     return FormattedNamedFunction.from(
-        f,
-        format,
-        "validation.quality[%s]".formatted(NamedFunction.name(individualF))
-    )
+            f,
+            format,
+            "validation.quality[%s]".formatted(NamedFunction.name(individualF))
+        )
         .compose(beforeF);
   }
 
@@ -854,7 +902,8 @@ public class Functions {
         encoder
     );
     Configuration iConfiguration = freeScales ? Configuration.FREE_SCALES : Configuration.DEFAULT;
-    io.github.ericmedvet.jviz.core.plot.video.Configuration vConfiguration = io.github.ericmedvet.jviz.core.plot.video.Configuration.DEFAULT;
+    io.github.ericmedvet.jviz.core.plot.video.Configuration vConfiguration =
+        io.github.ericmedvet.jviz.core.plot.video.Configuration.DEFAULT;
     Function<P, Video> f = p -> {
       if (p instanceof DistributionPlot dp) {
         BoxPlotVideoBuilder vb = new BoxPlotVideoBuilder(vConfiguration, iConfiguration, Configuration.BoxPlot.DEFAULT);
@@ -898,5 +947,4 @@ public class Functions {
     };
     return NamedFunction.from(f, "video.plotter").compose(beforeF);
   }
-
 }
