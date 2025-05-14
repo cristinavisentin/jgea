@@ -27,10 +27,13 @@ import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Pair;
-import io.github.ericmedvet.jsdynsym.control.*;
+import io.github.ericmedvet.jsdynsym.control.BiSimulation;
+import io.github.ericmedvet.jsdynsym.control.HomogeneousBiSimulation;
+import io.github.ericmedvet.jsdynsym.control.Simulation;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -46,40 +49,6 @@ public class Problems {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <S, B extends BiSimulation.Outcome<BS>, BS, Q, C extends Comparable<C>> TotalOrderQualityBasedProblem<S, Q> biSimToQb(
-      @Param(value = "name", iS = "{simulation.name}") String name,
-      @Param("simulation") HomogeneousBiSimulation<S, BS, B> simulation,
-      @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,
-      @Param(value = "type", dS = "minimize") OptimizationType type,
-      @Param(value = "qFunction") Function<B, Q> qFunction,
-      @Param(value = "trainingOpponent") S trainingOpponent
-  ) {
-    return new TotalOrderQualityBasedProblem<>() {
-      @Override
-      public Function<S, Q> qualityFunction() {
-        return (s -> qFunction.apply(simulation.simulate(s, trainingOpponent)));
-      }
-
-      @Override
-      public Comparator<Q> totalOrderComparator() {
-        return type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
-            .reversed() : Comparator.comparing(comparableFunction);
-      }
-
-      @Override
-      public Optional<S> example() {
-        return simulation.homogeneousExample();
-      }
-
-      @Override
-      public String toString() {
-        return "%s[%s]".formatted(name, String.join(";", NamedFunction.name(qFunction)));
-      }
-    };
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   //bi simulation to homogeneous bi quality based problem
   public static <S, B extends BiSimulation.Outcome<BS>, BS, Q, C extends Comparable<C>> TotalOrderQualityBasedBiProblem<S, B, Q> biSimToBqb(
       @Param(value = "name", iS = "{simulation.name}") String name,
@@ -91,9 +60,8 @@ public class Problems {
   ) {
     return new TotalOrderQualityBasedBiProblem<>() {
       @Override
-      public Comparator<Q> totalOrderComparator() {
-        return type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
-            .reversed() : Comparator.comparing(comparableFunction);
+      public Optional<S> example() {
+        return simulation.homogeneousExample();
       }
 
       @Override
@@ -112,16 +80,51 @@ public class Problems {
       }
 
       @Override
-      public Optional<S> example() {
-        return simulation.homogeneousExample();
-      }
-
-      @Override
       public String toString() {
         return "%s[%s]".formatted(
             name,
             String.join(";", NamedFunction.name(qFunction1), NamedFunction.name(qFunction2))
         );
+      }
+
+      @Override
+      public Comparator<Q> totalOrderComparator() {
+        return type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
+            .reversed() : Comparator.comparing(comparableFunction);
+      }
+    };
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <S, B extends BiSimulation.Outcome<BS>, BS, Q, C extends Comparable<C>> TotalOrderQualityBasedProblem<S, Q> biSimToQb(
+      @Param(value = "name", iS = "{simulation.name}") String name,
+      @Param("simulation") HomogeneousBiSimulation<S, BS, B> simulation,
+      @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,
+      @Param(value = "type", dS = "minimize") OptimizationType type,
+      @Param(value = "qFunction") Function<B, Q> qFunction,
+      @Param(value = "trainingOpponent") Supplier<S> trainingOpponent
+  ) {
+    return new TotalOrderQualityBasedProblem<>() {
+      @Override
+      public Optional<S> example() {
+        return simulation.homogeneousExample();
+      }
+
+      @Override
+      public Function<S, Q> qualityFunction() {
+        return (s -> qFunction.apply(simulation.simulate(s, trainingOpponent.get())));
+      }
+
+      @Override
+      public String toString() {
+        return "%s[%s]".formatted(name, String.join(";", NamedFunction.name(qFunction)));
+      }
+
+      @Override
+      public Comparator<Q> totalOrderComparator() {
+        return type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
+            .reversed() : Comparator.comparing(comparableFunction);
       }
     };
   }
