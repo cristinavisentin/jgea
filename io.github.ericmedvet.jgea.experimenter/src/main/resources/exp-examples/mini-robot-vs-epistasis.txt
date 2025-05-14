@@ -7,7 +7,7 @@ ea.experiment(
       mapper = ea.mapper.pair(
         first = ea.m.identity();
         second = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 1; nOfInnerLayers = 2));
-        of = ea.m.splitter(of = ea.m.isIndexedDs())
+        of = ea.m.splitter(of = ea.m.isIndexed())
       );
       representation = ea.representation.pair(
         first = ea.representation.doubleString();

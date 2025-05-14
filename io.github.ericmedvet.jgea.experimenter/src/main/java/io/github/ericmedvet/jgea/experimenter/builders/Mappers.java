@@ -338,28 +338,28 @@ public class Mappers {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> InvertibleMapper<X, List<Double>> isIndexedDs(
-      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Pair<List<Double>, IntString>> beforeM,
+  public static <X, T> InvertibleMapper<X, List<T>> isIndexed(
+      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Pair<List<T>, IntString>> beforeM,
       @Param(value = "relativeLength", dD = 1) double relativeLength
   ) {
     return beforeM.andThen(
         InvertibleMapper.from(
-            (eDs, p) -> {
-              int dsSize = (int) Math.round(eDs.size() * relativeLength);
+            (eTs, p) -> {
+              int tsSize = (int) Math.round(eTs.size() * relativeLength);
               // check for consistency of example and pair
-              if (p.second().size() != eDs.size()) {
+              if (p.second().size() != eTs.size()) {
                 throw new IllegalArgumentException(
                     "Sizes of indexes and example do not match: %d vs. %d".formatted(
                         p.second().size(),
-                        eDs.size()
+                        eTs.size()
                     )
                 );
               }
-              if (p.second().lowerBound() != 0 || p.second().upperBound() != dsSize - 1) {
+              if (p.second().lowerBound() != 0 || p.second().upperBound() != tsSize - 1) {
                 throw new IllegalArgumentException(
                     "Indexes domain is wrong: [%d,%d] expected, [%d,%d] found".formatted(
                         0,
-                        dsSize - 1,
+                        tsSize - 1,
                         p.second().lowerBound(),
                         p.second().upperBound()
                     )
@@ -382,15 +382,15 @@ public class Mappers {
                   .map(i -> p.first().get(i))
                   .toList();
             },
-            eDs -> new Pair<>(
-                Collections.nCopies((int) Math.round(eDs.size() * relativeLength), 0d),
+            eTs -> new Pair<>(
+                Collections.nCopies((int) Math.round(eTs.size() * relativeLength), eTs.getFirst()),
                 new IntString(
-                    Collections.nCopies(eDs.size(), 0),
+                    Collections.nCopies(eTs.size(), 0),
                     0,
-                    (int) Math.round(eDs.size() * relativeLength) - 1
+                    (int) Math.round(eTs.size() * relativeLength) - 1
                 )
             ),
-            "isIndexedDs[rl=%f]".formatted(relativeLength)
+            "isIndexed[rl=%f]".formatted(relativeLength)
         )
     );
   }
