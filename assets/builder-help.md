@@ -481,7 +481,7 @@ Aliases: `ds.opponent.pong`, `dynSys.opponent.pong`, `dynamicalSystem.opponent.p
 | --- | --- | --- | --- |
 | `deltaPosition` | d | `1.0` | <code>double</code> |
 
-Produces <code><abbr title="java.util.function.Supplier">Supplier</abbr>&lt;<abbr title="io.github.ericmedvet.jsdynsym.control.pong.PongAgent">PongAgent</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.PongOpponents.simple()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jsdynsym.control.pong.PongAgent">PongAgent</abbr></code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.PongOpponents.simple()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ## Package `dynamicalSystem.simulation`
 
