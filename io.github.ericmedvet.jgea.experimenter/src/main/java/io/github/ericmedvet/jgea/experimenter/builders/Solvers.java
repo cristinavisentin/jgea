@@ -37,7 +37,6 @@ import io.github.ericmedvet.jgea.core.selector.Last;
 import io.github.ericmedvet.jgea.core.selector.Tournament;
 import io.github.ericmedvet.jgea.core.solver.*;
 import io.github.ericmedvet.jgea.core.solver.bi.StandardBiEvolver;
-import io.github.ericmedvet.jgea.core.solver.bi.mapelites.GeneralizedMapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.bi.mapelites.MapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.CellularAutomataBasedSolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.SubstrateFiller;
@@ -282,42 +281,13 @@ public class Solvers {
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("emptyArchive") boolean emptyArchive,
-      @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators
-  ) {
-    return exampleS -> {
-      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
-      return new MapElitesBiEvolver<>(
-          mapper.mapperFor(exampleS),
-          r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
-          r.mutations().getFirst(),
-          nPop,
-          descriptors,
-          fitnessReducer,
-          emptyArchive,
-          additionalIndividualComparators
-      );
-    };
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <G, S, Q, O> Function<S, GeneralizedMapElitesBiEvolver<G, S, Q, O>> generalizedBiMapElites(
-      @Param(value = "name", dS = "biMe") String name,
-      @Param("representation") Function<G, Representation<G>> representation,
-      @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
-      @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
-      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
-      @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
-      @Param("emptyArchive") boolean emptyArchive,
       @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
-      @Param("opponentsSelector") GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector,
+      @Param("opponentsSelector") MapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector,
       @Param("fitnessAggregator") Function<List<Q>, Q> fitnessAggregator
   ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
-      return new GeneralizedMapElitesBiEvolver<>(
+      return new MapElitesBiEvolver<>(
           mapper.mapperFor(exampleS),
           r.factory(),
           StopConditions.nOfFitnessEvaluations(nEval),

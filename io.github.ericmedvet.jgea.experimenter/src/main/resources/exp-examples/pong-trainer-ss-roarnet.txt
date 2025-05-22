@@ -15,72 +15,46 @@ $VS_OPPONENT = ds.f.opponentBiSimulator(
   opponent = ds.opponent.pong.simple();
   simulation = $SIMULATION
 )
+
 ea.experiment(
   runs =
-    (randomGenerator = (seed = [1:1:3]) * [m.defaultRG()]) *
-    (solver = (nEval = [30000]) * [
-      ea.s.biMapElites(
-        name = "bi-me-tree-farthest2";
-        fitnessReducer = ea.misc.lossyAverage();
+    (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
+    (solver = (nEval = [50000]) * [
+      ea.s.ga(
+        name = "trainer-ga-tree";
         representation = ea.r.srTree();
-        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
-        emptyArchive = false;
-        descriptors = [
-          ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
-          ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
-        ];
-        opponentsSelector = ea.misc.farthestMESelector(nOfOpponents = 2);
-        fitnessAggregator = f.avg()
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf())
       );
-      ea.s.biMapElites(
-        name = "bi-me-tree-best1";
-        fitnessReducer = ea.misc.lossyAverage();
-        representation = ea.r.srTree();
-        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
-        emptyArchive = false;
-        descriptors = [
-          ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
-          ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
-        ];
-        opponentsSelector = ea.misc.bestMESelector(nOfOpponents = 1);
-        fitnessAggregator = f.avg()
+      ea.s.ga(
+        name = "trainer-ga-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1))
       );
-      ea.s.biMapElites(
-        name = "bi-me-tree-best2";
-        fitnessReducer = ea.misc.lossyAverage();
-        representation = ea.r.srTree();
-        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
-        emptyArchive = false;
+      ea.s.mapElites(
+        name = "trainer-me-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1));
         descriptors = [
-          ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
-          ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
-        ];
-        opponentsSelector = ea.misc.bestMESelector(nOfOpponents = 2);
-        fitnessAggregator = f.avg()
+          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
+          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+        ]
       );
-      ea.s.biMapElites(
-        name = "bi-me-tree-best3";
-        fitnessReducer = ea.misc.lossyAverage();
+      ea.s.mapElites(
+        name = "trainer-me-tree";
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
-        emptyArchive = false;
         descriptors = [
           ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
           ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
-        ];
-        opponentsSelector = ea.misc.bestMESelector(nOfOpponents = 3);
-        fitnessAggregator = f.avg()
-      )
-]) *
-
-    (problem = [
-      ea.p.biSimToBqb(
-        simulation = $SIMULATION;
-        qFunction1 = ds.e.pong.shiftedScoreDiff1();
-        qFunction2 = ds.e.pong.shiftedScoreDiff2();
-        type = maximize
+        ]
       )
     ]) *
+    (problem = [ea.p.biSimToQb(
+      simulation = $SIMULATION;
+      qFunction = ds.e.pong.scoreDiff1();
+      trainingOpponent = m.supplier(of = ds.opponent.pong.simple());
+      type = maximize
+    )]) *
     [ea.run()];
   listeners = [
     ea.l.console(
@@ -128,16 +102,23 @@ ea.experiment(
       of = ea.acc.lastBest();
       processor = ea.f.toVideo(
         video = ea.misc.toVideo(drawer = ds.d.pong());
+        of = $VS_SELF
+      );
+      path = "../results/{name}/{startTime}/best-vs-self-{run.solver.name}-{run.randomGenerator.seed:%04d}"
+    );
+    ea.l.saveForRun(
+      of = ea.acc.lastBest();
+      processor = ea.f.toVideo(
+        video = ea.misc.toVideo(drawer = ds.d.pong());
         of = $VS_OPPONENT
       );
-      path = "../results/{name}/{startTime}/best-vs-simple-{run.solver.name}--{run.randomGenerator.seed:%04d}"
+      path = "../results/{name}/{startTime}/best-vs-simple-{run.solver.name}-{run.randomGenerator.seed:%04d}"
     );
     ea.l.bestCsv(
         path = "../results/{name}/{startTime}/allBest.csv";
         runFunctions = [
           ea.f.runKey(key = "run.problem.simulation.environment");
-          ea.f.runKey(key = "run.solver.mapper");
-          ea.f.runKey(key = "run.problem.qFunction1")
+          ea.f.runKey(key = "run.solver.mapper")
         ];
         functions = [
           f.toBase64(of = ea.f.genotype(of = ea.f.best()))

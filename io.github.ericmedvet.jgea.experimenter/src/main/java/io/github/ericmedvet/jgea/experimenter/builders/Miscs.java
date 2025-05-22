@@ -21,7 +21,7 @@ package io.github.ericmedvet.jgea.experimenter.builders;
 
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
 import io.github.ericmedvet.jgea.core.order.PartiallyOrderedCollection;
-import io.github.ericmedvet.jgea.core.solver.bi.mapelites.GeneralizedMapElitesBiEvolver;
+import io.github.ericmedvet.jgea.core.solver.bi.mapelites.MapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
 import io.github.ericmedvet.jgea.core.util.Misc;
@@ -57,17 +57,24 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> bestMESelector(
+  public static <G, S, Q, O> MapElitesBiEvolver.OpponentSelector<G, S, Q, O> bestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> {
-      Collection<MEIndividual<G, S, Q>> evaluatedPopulation = population.stream().filter(i -> i.quality() != null).toList();
-      Collection<MEIndividual<G, S, Q>> nullQualityPopulation = population.stream().filter(i -> i.quality() == null).toList();
-      PartialComparator<MEIndividual<G,S,Q>> partialComparator = (me1, me2) -> problem.qualityComparator().compare(me1.quality(), me2.quality());
-      List<Collection<MEIndividual<G, S, Q>>> fronts = new ArrayList<>(PartiallyOrderedCollection
-          .from(evaluatedPopulation, partialComparator)
-          .fronts());
-      
+      Collection<MEIndividual<G, S, Q>> evaluatedPopulation = population.stream()
+          .filter(i -> i.quality() != null)
+          .toList();
+      Collection<MEIndividual<G, S, Q>> nullQualityPopulation = population.stream()
+          .filter(i -> i.quality() == null)
+          .toList();
+      PartialComparator<MEIndividual<G, S, Q>> partialComparator = (me1, me2) -> problem.qualityComparator()
+          .compare(me1.quality(), me2.quality());
+      List<Collection<MEIndividual<G, S, Q>>> fronts = new ArrayList<>(
+          PartiallyOrderedCollection
+              .from(evaluatedPopulation, partialComparator)
+              .fronts()
+      );
+
       if (!nullQualityPopulation.isEmpty()) {
         fronts.add(nullQualityPopulation);
       }
@@ -180,7 +187,7 @@ public class Miscs {
   @SuppressWarnings("unused")
   @Cacheable
   public static BinaryOperator<Double> lossyAverage(
-      @Param(value = "memoryFactor", dD = 0.5) double memoryFactor
+      @Param(value = "memoryFactor", dD = 0.2) double memoryFactor
   ) {
     return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
   }
@@ -225,7 +232,7 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> randomMESelector(
+  public static <G, S, Q, O> MapElitesBiEvolver.OpponentSelector<G, S, Q, O> randomMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> IntStream.range(0, nOfOpponents)
@@ -235,7 +242,7 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> nearestMESelector(
+  public static <G, S, Q, O> MapElitesBiEvolver.OpponentSelector<G, S, Q, O> nearestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> {
@@ -266,7 +273,7 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> farthestMESelector(
+  public static <G, S, Q, O> MapElitesBiEvolver.OpponentSelector<G, S, Q, O> farthestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> {
@@ -296,7 +303,7 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> GeneralizedMapElitesBiEvolver.OpponentSelector<G, S, Q, O> oldestMESelector(
+  public static <G, S, Q, O> MapElitesBiEvolver.OpponentSelector<G, S, Q, O> oldestMESelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> population.stream()

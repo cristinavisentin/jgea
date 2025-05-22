@@ -41,6 +41,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
@@ -51,10 +52,7 @@ import io.github.ericmedvet.jviz.core.plot.image.Configuration;
 import io.github.ericmedvet.jviz.core.plot.video.*;
 import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import java.awt.image.BufferedImage;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -267,6 +265,25 @@ public class Functions {
   ) {
     Function<Individual<G, ?, ?>, G> f = Individual::genotype;
     return FormattedNamedFunction.from(f, format, "genotype").compose(beforeF);
+  }
+  
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, List<Double>> getLayerWeights(
+      @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<MultiLayerPerceptron, List<Double>> f = mlp -> {
+      int[] neurons = new int[mlp.nOfLayers()];
+      for (int i = 0; i<neurons.length; i++){
+        neurons[i] = mlp.sizeOfLayer(i);
+      }
+      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
+      double[][] requestedWeights = unflat[indexOfLayer];
+      return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
+    };
+    return FormattedNamedFunction.from(f, format, "getLayerWeights").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
