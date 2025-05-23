@@ -508,7 +508,7 @@ public class Gates {
         List.of(Gate.Port.single(Base.STRING)),
         List.of(Composed.sequence(Base.STRING)),
         NamedFunction.from(
-            in -> Gate.Data.single(
+            in -> Gate.Data.singleOne(
                 Arrays.stream(in.one(0, String.class).split(""))
                     .map(s -> (Object) s)
                     .toList()
@@ -534,6 +534,29 @@ public class Gates {
         List.of(Gate.Port.atLeast(Generic.of("t"), 1)),
         List.of(Composed.sequence(Generic.of("t"))),
         NamedFunction.from(in -> Gate.Data.singleOne(in.all(0)), "sequencer")
+    );
+  }
+
+  public static Gate sPSequencer() {
+    return Gate.of(
+        List.of(
+            Gate.Port.atLeast(Generic.of("t"), 1),
+            Gate.Port.atLeast(Composed.sequence(Generic.of("t")), 0)
+        ),
+        List.of(Composed.sequence(Generic.of("t"))),
+        NamedFunction.from(
+            in -> {
+              List<Object> tokens = in.all(0);
+              @SuppressWarnings({"unchecked", "rawtypes"}) List<List<Object>> sequences = (List) in.all(1, List.class);
+              return Gate.Data.singleOne(
+                  Stream.concat(
+                      sequences.stream().flatMap(List::stream),
+                      tokens.stream()
+                  ).toList()
+              );
+            },
+            "sPSequencer"
+        )
     );
   }
 

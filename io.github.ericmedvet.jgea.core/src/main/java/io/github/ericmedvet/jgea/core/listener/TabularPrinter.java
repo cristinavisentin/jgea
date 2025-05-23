@@ -28,6 +28,7 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,6 +51,7 @@ public class TabularPrinter<E, K> implements ListenerFactory<E, K> {
 
   private final List<Pair<? extends FormattedNamedFunction<? super E, ?>, Integer>> ePairs;
   private final List<Pair<? extends FormattedNamedFunction<? super K, ?>, Integer>> kPairs;
+  private final Predicate<? super E> ePredicate;
   private final PrintStream ps;
   private final int headerInterval;
   private final int legendInterval;
@@ -66,14 +68,16 @@ public class TabularPrinter<E, K> implements ListenerFactory<E, K> {
   public TabularPrinter(
       List<? extends Function<? super E, ?>> eFunctions,
       List<? extends Function<? super K, ?>> kFunctions,
+      Predicate<? super E> ePredicate,
       boolean logExceptions
   ) {
-    this(eFunctions, kFunctions, System.out, 25, 100, true, true, true, logExceptions);
+    this(eFunctions, kFunctions, ePredicate, System.out, 25, 100, true, true, true, logExceptions);
   }
 
   public TabularPrinter(
       List<? extends Function<? super E, ?>> eFunctions,
       List<? extends Function<? super K, ?>> kFunctions,
+      Predicate<? super E> ePredicate,
       PrintStream ps,
       int headerInterval,
       int legendInterval,
@@ -100,6 +104,7 @@ public class TabularPrinter<E, K> implements ListenerFactory<E, K> {
             )
         )
         .collect(Collectors.toList());
+    this.ePredicate = ePredicate;
     this.ps = ps;
     this.headerInterval = headerInterval;
     this.legendInterval = legendInterval;
@@ -153,6 +158,9 @@ public class TabularPrinter<E, K> implements ListenerFactory<E, K> {
 
       @Override
       public void listen(E e) {
+        if (!ePredicate.test(e)) {
+          return;
+        }
         List<?> values = ePairs.stream()
             .map(p -> {
               try {
@@ -201,7 +209,7 @@ public class TabularPrinter<E, K> implements ListenerFactory<E, K> {
 
       @Override
       public String toString() {
-        return "tabular(%s)"
+        return "tabular[%s]"
             .formatted(
                 Stream.concat(
                     ePairs.stream().map(p -> p.first().name()),

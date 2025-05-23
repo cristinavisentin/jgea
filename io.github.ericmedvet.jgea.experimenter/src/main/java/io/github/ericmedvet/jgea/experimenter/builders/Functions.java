@@ -19,7 +19,10 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.problem.*;
+import io.github.ericmedvet.jgea.core.problem.BehaviorBasedProblem;
+import io.github.ericmedvet.jgea.core.problem.MultiTargetProblem;
+import io.github.ericmedvet.jgea.core.problem.Problem;
+import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.Network;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
@@ -174,6 +177,32 @@ public class Functions {
             relative
         );
     return NamedFunction.from(f, "coMe.strategy2.field").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> crossEpistasis(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
+      @Param(value = "startOffset", dI = 0) int startOffset,
+      @Param(value = "endOffset", dI = 0) int endOffset,
+      @Param(value = "splitOffset", dI = 0) int splitOffset,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<IntString, Double> f = is -> {
+      List<Integer> indexes = is.genes().subList(startOffset, is.genes().size() - endOffset);
+      List<Integer> leftIndexes = indexes.subList(0, splitOffset);
+      List<Integer> rightIndexes = indexes.subList(splitOffset, indexes.size());
+      Set<Integer> commonIndexes = new HashSet<>(leftIndexes);
+      commonIndexes.retainAll(rightIndexes);
+      double leftRate = (double) commonIndexes.size() / (double) leftIndexes.size();
+      double rightRate = (double) commonIndexes.size() / (double) rightIndexes.size();
+      return (leftRate + rightRate) / 2d;
+    };
+    return FormattedNamedFunction.from(
+        f,
+        format,
+        "cross.epistasis[%d;%d;%d]".formatted(startOffset, endOffset, splitOffset)
+    ).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -383,6 +412,25 @@ public class Functions {
       );
     };
     return NamedFunction.from(f, "image.plotter").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> intraEpistasis(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
+      @Param(value = "startOffset", dI = 0) int startOffset,
+      @Param(value = "endOffset", dI = 0) int endOffset,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<IntString, Double> f = is -> 1d - (double) is.genes()
+        .subList(startOffset, is.genes().size() - endOffset)
+        .stream()
+        .distinct()
+        .count() / (double) (is.size() - startOffset - endOffset);
+    return FormattedNamedFunction.from(f, format, "intra.epistasis[%d;%d]".formatted(startOffset, endOffset))
+        .compose(
+            beforeF
+        );
   }
 
   @SuppressWarnings("unused")
@@ -814,6 +862,16 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> ttpnDeadOrIUnwiredOutputGatesRate(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<Network, Double> f = n -> (double) n.deadOrIUnwiredOutputGates().size() / (double) n.gates().size();
+    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X> FormattedNamedFunction<X, Integer> ttpnNOfTypes(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
       @Param(value = "format", dS = "%5.3f") String format
@@ -824,16 +882,6 @@ public class Functions {
         .distinct()
         .count();
     return FormattedNamedFunction.from(f, format, "ttpn.n.types").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X> FormattedNamedFunction<X, Double> ttpnDeadOrIUnwiredOutputGatesRate(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, Network> beforeF,
-      @Param(value = "format", dS = "%5.3f") String format
-  ) {
-    Function<Network, Double> f = n -> (double) n.deadOrIUnwiredOutputGates().size() / (double) n.gates().size();
-    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -915,5 +963,4 @@ public class Functions {
     };
     return NamedFunction.from(f, "video.plotter").compose(beforeF);
   }
-
 }

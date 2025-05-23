@@ -27,15 +27,19 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.BiSimulation;
 import io.github.ericmedvet.jsdynsym.control.HomogeneousBiAgentTask;
 import io.github.ericmedvet.jsdynsym.control.pong.PongAgent;
-import io.github.ericmedvet.jsdynsym.control.pong.PongDrawer;
 import io.github.ericmedvet.jsdynsym.control.pong.PongEnvironment;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
-import java.util.random.RandomGenerator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -46,14 +50,11 @@ public class PongFightsMatrix {
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
 
-    String folder = "/home/il_bello/IdeaProjects/results/pong-generalized-bi-me-selectors/2025-04-15--15-02-33/";
+    String folder = "/home/il_bello/IdeaProjects/results/pong-ablation-study/2025-04-07--14-56-10/";
     String CSVPath1 = folder + "allBest.csv";
+    boolean singleCSV = true;
     String CSVPath2 = folder + "";
     String delimiter = ";";
-    boolean singleCSV = true;
-
-    String videoFolder = folder + "videos/";
-    Files.createDirectories(Paths.get(videoFolder));
 
     String score1 = "ds.e.pong.score1()";
     String score2 = "ds.e.pong.score2()";
@@ -146,138 +147,17 @@ public class PongFightsMatrix {
         winsMap.put(name, 0);
       }
 
-      Map<String, Integer> winsAgainstSimple = new HashMap<>();
-      Map<String, Integer> matchesPlayed = new HashMap<>();
-      Map<String, Integer> matchesVsSimple = new HashMap<>();
-
-      for (String name : opponentNames) {
-        winsAgainstSimple.put(name, 0);
-        matchesPlayed.put(name, 0);
-        matchesVsSimple.put(name, 0);
-      }
-
-      HomogeneousBiAgentTask<NumericalDynamicalSystem<?>, double[], double[], PongEnvironment.State> task = HomogeneousBiAgentTask
-          .fromHomogenousBiEnvironment(
-              () -> environment,
-              s -> false,
-              new DoubleRange(0, 60),
-              0.05
-          );
-
-      for (Pair<String, NumericalDynamicalSystem<?>> opponent1 : opponents) {
-        for (Pair<String, NumericalDynamicalSystem<?>> opponent2 : opponents) {
-          int index1 = opponentIndices.get(opponent1.first());
-          int index2 = opponentIndices.get(opponent2.first());
-
-          BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>> matchOutcome = task
-              .simulate(new Pair<>(opponent1.second(), opponent2.second()));
-
-          double fitness1 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
-              .build(score1)).apply(matchOutcome);
-          double fitness2 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
-              .build(score2)).apply(matchOutcome);
-          double collisions1 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
-              .build(numberCollisionsWithBall1)).apply(matchOutcome);
-          double collisions2 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
-              .build(numberCollisionsWithBall2)).apply(matchOutcome);
-
-          totalScore1[index1][index2] += fitness1;
-          totalScore2[index1][index2] += fitness2;
-          totalCollisions1[index1][index2] += collisions1;
-          totalCollisions2[index1][index2] += collisions2;
-          matchCounts[index1][index2]++;
-
-          matchesPlayed.put(opponent1.first(), matchesPlayed.get(opponent1.first()) + 1);
-          matchesPlayed.put(opponent2.first(), matchesPlayed.get(opponent2.first()) + 1);
-
-          if (opponent1.first().equals("simple") && !opponent2.first().equals("simple")) {
-            matchesVsSimple.put(opponent2.first(), matchesVsSimple.get(opponent2.first()) + 1);
-            if (fitness1 < fitness2) {
-              String videoPath = videoFolder + opponent1.first() + index1 + "_VS_" + opponent2
-                  .first() + "__" + RandomGenerator.getDefault().nextInt() + ".mp4";
-              PongDrawer pongDrawer = new PongDrawer();
-              pongDrawer.videoBuilder().save(new File(videoPath), matchOutcome);
-            }
-          } else if (opponent2.first().equals("simple") && !opponent1.first().equals("simple")) {
-            matchesVsSimple.put(opponent1.first(), matchesVsSimple.get(opponent1.first()) + 1);
-            if (fitness1 > fitness2) {
-              String videoPath = videoFolder + opponent1.first() + index1 + "_VS_" + opponent2
-                  .first() + "__" + RandomGenerator.getDefault().nextInt() + ".mp4";
-              PongDrawer pongDrawer = new PongDrawer();
-              pongDrawer.videoBuilder().save(new File(videoPath), matchOutcome);
-            }
-          }
-
-          if (fitness1 > fitness2) {
-            winsMap.put(opponent1.first(), winsMap.get(opponent1.first()) + 1);
-            if (opponent2.first().equals("simple") && !opponent1.first().equals("simple")) {
-              winsAgainstSimple.put(opponent1.first(), winsAgainstSimple.get(opponent1.first()) + 1);
-            }
-          } else if (fitness2 > fitness1) {
-            winsMap.put(opponent2.first(), winsMap.get(opponent2.first()) + 1);
-            if (opponent1.first().equals("simple") && !opponent2.first().equals("simple")) {
-              winsAgainstSimple.put(opponent2.first(), winsAgainstSimple.get(opponent2.first()) + 1);
-            }
-          }
-        }
-      }
-
-      for (int i = 0; i < numOpponents; i++) {
-        for (int j = 0; j < numOpponents; j++) {
-          if (matchCounts[i][j] > 0) {
-            scoreMatrix[i][j] = " = " + (totalScore1[i][j] / matchCounts[i][j]) + " / " + (totalScore2[i][j] / matchCounts[i][j]);
-            collisionsMatrix[i][j] = " = " + (totalCollisions1[i][j] / matchCounts[i][j]) + " / " + (totalCollisions2[i][j] / matchCounts[i][j]);
-          }
-        }
-      }
-
-      List<Map.Entry<String, Integer>> ranking = new ArrayList<>(winsMap.entrySet());
-      ranking.sort((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
-
-      try (BufferedWriter rankingWriter = Files.newBufferedWriter(Paths.get(folder + "ranking.csv"))) {
-        rankingWriter.write("nome;win_total;win_vs_simple;fights_total;fights_vs_simple\n");
-        for (Map.Entry<String, Integer> entry : ranking) {
-          String agentName = entry.getKey();
-          String vsSimpleWins = agentName.equals("simple") ? "-" : String.valueOf(winsAgainstSimple.get(agentName));
-          String totalMatches = String.valueOf(matchesPlayed.get(agentName));
-          String matchesAgainstSimple = agentName.equals("simple") ? "-" : String.valueOf(
-              matchesVsSimple.get(agentName)
-          );
-          rankingWriter.write(
-              agentName + ";" + entry
-                  .getValue() + ";" + vsSimpleWins + ";" + totalMatches + ";" + matchesAgainstSimple + "\n"
-          );
-        }
-      }
-
-      try (BufferedWriter scoreWriter = Files.newBufferedWriter(
-          Paths.get(folder + "scores-formula.csv")
-      ); BufferedWriter collisionsWriter = Files.newBufferedWriter(Paths.get(folder + "collisions-formula.csv"))) {
-        scoreWriter.write(";" + String.join(";", opponentNames) + "\n");
-        collisionsWriter.write(";" + String.join(";", opponentNames) + "\n");
-        for (int i = 0; i < numOpponents; i++) {
-          scoreWriter.write(opponentNames.get(i) + ";" + String.join(";", scoreMatrix[i]) + "\n");
-          collisionsWriter.write(opponentNames.get(i) + ";" + String.join(";", collisionsMatrix[i]) + "\n");
-        }
-      }
-
-      /*
-      Map<String, Integer> winsMap = new HashMap<>();
-      for (String name : opponentNames) {
-        winsMap.put(name, 0);
-      }
-      
       HomogeneousBiAgentTask<NumericalDynamicalSystem<?>, double[], double[], PongEnvironment.State> task = HomogeneousBiAgentTask
           .fromHomogenousBiEnvironment(() -> environment, s -> false, new DoubleRange(0, 60), 0.05);
-      
+
       for (Pair<String, NumericalDynamicalSystem<?>> opponent1 : opponents) {
         for (Pair<String, NumericalDynamicalSystem<?>> opponent2 : opponents) {
           int index1 = opponentIndices.get(opponent1.first());
           int index2 = opponentIndices.get(opponent2.first());
-      
+
           BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>> matchOutcome = task
               .simulate(new Pair<>(opponent1.second(), opponent2.second()));
-      
+
           double fitness1 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
               .build(score1)).apply(matchOutcome);
           double fitness2 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
@@ -286,13 +166,13 @@ public class PongFightsMatrix {
               .build(numberCollisionsWithBall1)).apply(matchOutcome);
           double collisions2 = ((FormattedNamedFunction<BiSimulation.Outcome<HomogeneousBiAgentTask.Step<double[], double[], PongEnvironment.State>>, Double>) BUILDER
               .build(numberCollisionsWithBall2)).apply(matchOutcome);
-      
+
           totalScore1[index1][index2] += fitness1;
           totalScore2[index1][index2] += fitness2;
           totalCollisions1[index1][index2] += collisions1;
           totalCollisions2[index1][index2] += collisions2;
           matchCounts[index1][index2]++;
-      
+
           if (fitness1 > fitness2) {
             winsMap.put(opponent1.first(), winsMap.get(opponent1.first()) + 1);
           } else if (fitness2 > fitness1) {
@@ -300,26 +180,28 @@ public class PongFightsMatrix {
           }
         }
       }
-      
+
       for (int i = 0; i < numOpponents; i++) {
         for (int j = 0; j < numOpponents; j++) {
           if (matchCounts[i][j] > 0) {
-            scoreMatrix[i][j] = " = " + (totalScore1[i][j] / matchCounts[i][j]) + " / " + (totalScore2[i][j] / matchCounts[i][j]);
-            collisionsMatrix[i][j] = " = " + (totalCollisions1[i][j] / matchCounts[i][j]) + " / " + (totalCollisions2[i][j] / matchCounts[i][j]);
+            scoreMatrix[i][j] = (" = " + (totalScore1[i][j] / matchCounts[i][j]) + " - " + (totalScore2[i][j] / matchCounts[i][j]))
+                .replace(".", ",");
+            collisionsMatrix[i][j] = (" = " + (totalCollisions1[i][j] / matchCounts[i][j]) + " - " + (totalCollisions2[i][j] / matchCounts[i][j]))
+                .replace(".", ",");
           }
         }
       }
-      
+
       List<Map.Entry<String, Integer>> ranking = new ArrayList<>(winsMap.entrySet());
       ranking.sort((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
-      
+
       try (BufferedWriter rankingWriter = Files.newBufferedWriter(Paths.get(folder + "ranking.csv"))) {
         rankingWriter.write("nome;vittorie\n");
         for (Map.Entry<String, Integer> entry : ranking) {
           rankingWriter.write(entry.getKey() + ";" + entry.getValue() + "\n");
         }
       }
-      
+
       try (BufferedWriter scoreWriter = Files.newBufferedWriter(
           Paths.get(folder + "scores-formula.csv")
       ); BufferedWriter collisionsWriter = Files.newBufferedWriter(Paths.get(folder + "collisions-formula.csv"))) {
@@ -330,8 +212,6 @@ public class PongFightsMatrix {
           collisionsWriter.write(opponentNames.get(i) + ";" + String.join(";", collisionsMatrix[i]) + "\n");
         }
       }
-      
-       */
     }
   }
 }
