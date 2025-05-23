@@ -16,6 +16,9 @@ $VS_OPPONENT = ds.f.opponentBiSimulator(
   simulation = $SIMULATION
 )
 
+$THRESHOLD = 0.5
+$NEG_THRESHOLD = -0.5
+
 ea.experiment(
   runs =
     (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
@@ -35,8 +38,30 @@ ea.experiment(
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1));
         descriptors = [
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          );
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          )
         ]
       );
       ea.s.mapElites(
@@ -96,7 +121,7 @@ ea.experiment(
     ea.l.savePlotForRun(
       path = "../results/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
       plot = ea.plot.single.me();
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "biMe")
+      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*-me-.*")
     );
     ea.l.saveForRun(
       of = ea.acc.lastBest();

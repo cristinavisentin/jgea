@@ -18,7 +18,8 @@ $VS_OPPONENT = ds.f.opponentBiSimulator(
 
 $MLP = ds.num.mlp(innerLayerRatio = 4; nOfInnerLayers = 1)
 
-$THRESHOLD = 0.2
+$THRESHOLD = 0.5
+$NEG_THRESHOLD = -0.5
 
 ea.experiment(
   runs =
@@ -44,8 +45,30 @@ ea.experiment(
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
         descriptors = [
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          );
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          )
         ];
         opponentsSelector = ea.misc.randomMESelector(nOfOpponents = 2);
         fitnessAggregator = f.avg()
@@ -83,8 +106,30 @@ ea.experiment(
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
         descriptors = [
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          );
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          )
         ];
         opponentsSelector = ea.misc.farthestMESelector(nOfOpponents = 2);
         fitnessAggregator = f.avg()
@@ -96,8 +141,30 @@ ea.experiment(
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
         descriptors = [
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          );
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          )
         ];
         opponentsSelector = ea.misc.nearestMESelector(nOfOpponents = 2);
         fitnessAggregator = f.avg()
@@ -116,10 +183,31 @@ ea.experiment(
         name = "self-me-ann";
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = $MLP);
-        descriptors = [ % Prendere descrittori Lippolis "covering.txt"
-          % ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = $MLP), condition = predicate.lt(t = $THRESHOLD))));
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 0)); min = -1; max = 1);
-          ea.s.me.d.descriptor(f = f.avg(of = f.nkTh(of = ea.f.genotype(); n = 2; k = 1)); min = -1; max = 1)
+        descriptors = [
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          );
+          ea.s.me.d.descriptor(
+            %f = f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+            f = f.mathOp(
+              op = divide;
+              args = [
+                f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])));
+                f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
+              ]
+            );
+            min = 0.0;
+            max = 1.0
+          )
         ]
       );
       ea.s.mapElites(
@@ -191,7 +279,7 @@ ea.experiment(
     ea.l.savePlotForRun(
       path = "../results/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
       plot = ea.plot.single.me();
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "biMe")
+      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*-me-.*")
     );
     ea.l.saveForRun(
       of = ea.acc.lastBest();
