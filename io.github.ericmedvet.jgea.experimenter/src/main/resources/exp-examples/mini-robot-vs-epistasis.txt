@@ -95,7 +95,6 @@ ea.experiment(
   listeners = [
     ea.l.console(
       functions = [
-        ea.f.behaviorQuality(of = ea.f.quality(of = ea.f.best()); format = "%50s");
         f.mapValue(key = $objName; of = ea.f.behaviorQuality(of = ea.f.quality(of = ea.f.best())); format = "%6.4f");
         ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
         ea.f.size(of = f.pairFirst(of = ea.f.genotype(of = ea.f.best())); format = "%3d");
