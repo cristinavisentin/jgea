@@ -3,7 +3,7 @@ $objName = "arena.coverage[10x10]"
 
 ea.experiment(
   runs = (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
-  (solver = (nEval = [50000]) *
+  (solver = (nEval = [2000]) *
   [
     ea.s.ga(
       name = "ga-epistasis-0.2";
@@ -132,7 +132,7 @@ ea.experiment(
       ];
       onlyLast = false
     );
-    ea.l.savePlotForExp(
+    ea.l.savePlotForRun(
       plot = ea.plot.multi.quality(q = f.mapValue(key = $objName; of = ea.f.behaviorQuality()));
       path = "../results/{name}/{startTime}/best-fitness"
     );
