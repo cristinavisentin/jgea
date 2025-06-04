@@ -48,7 +48,7 @@ public class PongFightsMatrix {
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
     
-    String folder = "/home/il_bello/IdeaProjects/results/pong-ss-roarnet/2025-06-03--12-52-59/";
+    String folder = "/home/il_bello/IdeaProjects/results/to_delete/";
     String CSVPath1 = folder + "allBest.csv";
     String CSVPath2 = folder + ".csv";
     String delimiter = ";";

@@ -27,7 +27,7 @@ ea.experiment(
     (solver = (nEval = [200000]) * [
       ea.s.biMapElites(
         name = "bi-me-tree-random2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
         emptyArchive = false;
@@ -40,7 +40,7 @@ ea.experiment(
       );
       ea.s.biMapElites(
         name = "bi-me-ann-random2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
@@ -75,7 +75,7 @@ ea.experiment(
       );
       ea.s.biMapElites(
         name = "bi-me-tree-farthest2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
         emptyArchive = false;
@@ -88,7 +88,7 @@ ea.experiment(
       );
       ea.s.biMapElites(
         name = "bi-me-tree-nearest2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
         emptyArchive = false;
@@ -101,7 +101,7 @@ ea.experiment(
       );
       ea.s.biMapElites(
         name = "bi-me-ann-farthest2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
@@ -136,7 +136,7 @@ ea.experiment(
       );
       ea.s.biMapElites(
         name = "bi-me-ann-nearest2";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = $MLP);
         emptyArchive = false;
@@ -221,21 +221,21 @@ ea.experiment(
       );
       ea.s.biGa(
         name = "bi-ga-ann";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.doubleString();
         mapper = ea.m.dsToNpnds(npnds = $MLP)
       );
       ea.s.biGa(
         name = "bi-ga-tree";
-        fitnessReducer = ea.misc.lossyAverage(memoryFactor = 0.5);
+        fitnessReducer = ea.misc.lossyAverage();
         representation = ea.r.srTree();
         mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf())
       )
 ]) *
     (problem = [ea.p.biSimToBqb(
       simulation = $SIMULATION;
-      qFunction1 = ds.e.pong.scoreDiff1();
-      qFunction2 = ds.e.pong.scoreDiff2();
+      qFunction1 = ds.e.pong.shiftedScoreDiff1();
+      qFunction2 = ds.e.pong.shiftedScoreDiff2();
       type = maximize
     )]) *
     [ea.run()];
