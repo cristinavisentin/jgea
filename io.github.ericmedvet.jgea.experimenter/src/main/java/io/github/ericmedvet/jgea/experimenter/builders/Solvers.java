@@ -114,7 +114,9 @@ public class Solvers {
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("emptyArchive") boolean emptyArchive,
-      @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators
+      @Param("additionalIndividualComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
+      @Param("opponentsSelector") MapElitesBiEvolver.OpponentSelector<G, S, Q, O> opponentsSelector,
+      @Param("fitnessAggregator") Function<List<Q>, Q> fitnessAggregator
   ) {
     return exampleS -> {
       Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
@@ -127,7 +129,9 @@ public class Solvers {
           descriptors,
           fitnessReducer,
           emptyArchive,
-          additionalIndividualComparators
+          additionalIndividualComparators,
+          opponentsSelector,
+          fitnessAggregator
       );
     };
   }
