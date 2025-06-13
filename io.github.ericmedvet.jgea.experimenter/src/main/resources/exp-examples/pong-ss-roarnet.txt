@@ -264,11 +264,13 @@ ea.experiment(
       overwrite = true
     );
     ea.l.savePlotAndCsvForExp(
+      deferred = true;
       path = "../results/{name}/{startTime}/best-vs-self";
       plot = ea.plot.multi.quality(x = ea.f.nOfEvals(); y = ds.e.pong.shiftedScoreDiff1(of = f.composition(of = ea.f.best(); then = $VS_SELF)));
       overwrite = true
     );
     ea.l.savePlotAndCsvForExp(
+      deferred = true;
       path = "../results/{name}/{startTime}/best-vs-opponent";
       plot = ea.plot.multi.quality(x = ea.f.nOfEvals(); y = ds.e.pong.shiftedScoreDiff1(of = f.composition(of = ea.f.best(); then = $VS_OPPONENT)));
       overwrite = true
@@ -279,11 +281,13 @@ ea.experiment(
       overwrite = true
     );
     ea.l.savePlotAndCsvForExp(
+      deferred = true;
       path = "../results/{name}/{startTime}/avg-vs-self";
       plot = ea.plot.multi.xyExp(x = ea.f.nOfEvals(); y = f.avg(of = f.each(mapF = ds.e.pong.shiftedScoreDiff1(of = f.composition(then = $VS_SELF)); of = ea.f.all())));
       overwrite = true
     );
     ea.l.savePlotAndCsvForExp(
+      deferred = true;
       path = "../results/{name}/{startTime}/avg-vs-opponent";
       plot = ea.plot.multi.xyExp(x = ea.f.nOfEvals(); y = f.avg(of = f.each(mapF = ds.e.pong.shiftedScoreDiff1(of = f.composition(then = $VS_OPPONENT)); of = ea.f.all())));
       overwrite = true
