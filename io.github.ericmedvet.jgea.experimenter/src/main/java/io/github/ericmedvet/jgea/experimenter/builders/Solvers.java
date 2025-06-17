@@ -21,6 +21,7 @@
 package io.github.ericmedvet.jgea.experimenter.builders;
 
 import io.github.ericmedvet.jgea.core.ElitistGeneticAlgorithm;
+import io.github.ericmedvet.jgea.core.Factory;
 import io.github.ericmedvet.jgea.core.InvertibleMapper;
 import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
@@ -169,15 +170,12 @@ public class Solvers {
   public static <S, Q> Function<S, CMAEvolutionaryStrategy<S, Q>> cmaEs(
       @Param(value = "name", dS = "cmaEs") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
-      @Param(value = "initialMinV", dD = -1d) double initialMinV,
-      @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
+      @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "nEval", dI = 1000) int nEval
   ) {
     return exampleS -> new CMAEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, List.of(), List.of())
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
+        factory.apply(mapper.exampleFor(exampleS)),
         StopConditions.nOfFitnessEvaluations(nEval)
     );
   }
@@ -235,8 +233,7 @@ public class Solvers {
   public static <S, Q> Function<S, DifferentialEvolution<S, Q>> differentialEvolution(
       @Param(value = "name", dS = "de") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
-      @Param(value = "initialMinV", dD = -1d) double initialMinV,
-      @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
+      @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "populationSize", dI = 15) int populationSize,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "differentialWeight", dD = 0.5) double differentialWeight,
@@ -245,9 +242,7 @@ public class Solvers {
   ) {
     return exampleS -> new DifferentialEvolution<>(
         mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, List.of(), List.of())
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
+        factory.apply(mapper.exampleFor(exampleS)),
         populationSize,
         StopConditions.nOfFitnessEvaluations(nEval),
         differentialWeight,
@@ -499,8 +494,7 @@ public class Solvers {
   public static <S, Q> Function<S, OpenAIEvolutionaryStrategy<S, Q>> openAiEs(
       @Param(value = "name", dS = "openAiEs") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
-      @Param(value = "initialMinV", dD = -1d) double initialMinV,
-      @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
+      @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "sigma", dD = 0.02d) double sigma,
       @Param(value = "batchSize", dI = 30) int batchSize,
       @Param(value = "stepSize", dD = 0.02d) double stepSize,
@@ -511,9 +505,7 @@ public class Solvers {
   ) {
     return exampleS -> new OpenAIEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, List.of(), List.of())
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
+        factory.apply(mapper.exampleFor(exampleS)),
         StopConditions.nOfFitnessEvaluations(nEval),
         batchSize,
         sigma,
@@ -529,8 +521,7 @@ public class Solvers {
   public static <S, Q> Function<S, ParticleSwarmOptimization<S, Q>> pso(
       @Param(value = "name", dS = "pso") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
-      @Param(value = "initialMinV", dD = -1d) double initialMinV,
-      @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
+      @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "nEval", dI = 1000) int nEval,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "w", dD = 0.8d) double w,
@@ -539,9 +530,7 @@ public class Solvers {
   ) {
     return exampleS -> new ParticleSwarmOptimization<>(
         mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, List.of(), List.of())
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
+        factory.apply(mapper.exampleFor(exampleS)),
         StopConditions.nOfFitnessEvaluations(nEval),
         nPop,
         w,
@@ -596,8 +585,7 @@ public class Solvers {
   public static <S, Q> Function<S, SimpleEvolutionaryStrategy<S, Q>> simpleEs(
       @Param(value = "name", dS = "es") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
-      @Param(value = "initialMinV", dD = -1d) double initialMinV,
-      @Param(value = "initialMaxV", dD = 1d) double initialMaxV,
+      @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "sigma", dD = 0.35d) double sigma,
       @Param(value = "parentsRate", dD = 0.33d) double parentsRate,
       @Param(value = "nOfElites", dI = 1) int nOfElites,
@@ -607,9 +595,7 @@ public class Solvers {
   ) {
     return exampleS -> new SimpleEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
-        Representations.doubleString(initialMinV, initialMaxV, List.of(), List.of())
-            .apply(mapper.exampleFor(exampleS))
-            .factory(),
+        factory.apply(mapper.exampleFor(exampleS)),
         nPop,
         StopConditions.nOfFitnessEvaluations(nEval),
         nOfElites,
