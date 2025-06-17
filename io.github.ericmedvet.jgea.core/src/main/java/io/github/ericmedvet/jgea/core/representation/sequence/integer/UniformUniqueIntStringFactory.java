@@ -2,7 +2,7 @@
  * ========================LICENSE_START=================================
  * jgea-core
  * %%
- * Copyright (C) 2018 - 2024 Eric Medvet
+ * Copyright (C) 2018 - 2025 Eric Medvet
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,33 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-
 package io.github.ericmedvet.jgea.core.representation.sequence.integer;
 
-import io.github.ericmedvet.jgea.core.IndependentFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
-public class UniformIntStringFactory implements IndependentFactory<IntString> {
-  protected final int lowerBound;
-  protected final int upperBound;
-  protected final int size;
-
-  public UniformIntStringFactory(int lowerBound, int upperBound, int size) {
-    this.lowerBound = lowerBound;
-    this.upperBound = upperBound;
-    this.size = size;
+public class UniformUniqueIntStringFactory extends UniformIntStringFactory {
+  public UniformUniqueIntStringFactory(int lowerBound, int upperBound, int size) {
+    super(lowerBound, upperBound, size);
+    if (size > (upperBound - lowerBound)) {
+      throw new IllegalArgumentException(
+          "Cannot ensure uniqueness: %d values in [%d-%d[, %d required as length".formatted(
+              upperBound - lowerBound,
+              lowerBound,
+              upperBound,
+              size
+          )
+      );
+    }
   }
 
   @Override
   public IntString build(RandomGenerator random) {
-    return new IntString(
-        IntStream.range(0, size)
-            .mapToObj(i -> random.nextInt(lowerBound, upperBound))
-            .toList(),
-        lowerBound,
-        upperBound
-    );
+    List<Integer> values = new ArrayList<>(IntStream.range(lowerBound, upperBound).boxed().toList());
+    Collections.shuffle(values, random);
+    return new IntString(values.subList(0, Math.min(upperBound - lowerBound, size)), lowerBound, upperBound);
   }
 }

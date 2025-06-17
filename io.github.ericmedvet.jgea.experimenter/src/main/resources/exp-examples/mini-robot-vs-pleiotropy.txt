@@ -2,12 +2,15 @@ $brainMapper = ea.m.dsToNpnds(npnds = ds.num.mlp(innerLayerRatio = 1; nOfInnerLa
 $objName = "arena.coverage[10x10]"
 $eRpresentation = ea.representation.pair(
   first = ea.representation.doubleString();
-  second = ea.representation.intString(mutations = [ea.r.go.oneMutation(mutations = [ea.r.go.isSymbolCopyMutation(); ea.r.go.isFlipMutation()])])
+  second = ea.representation.intString(
+    factory = ea.r.f.isUniformUnique();
+    mutations = [ea.r.go.oneMutation(mutations = [ea.r.go.isSymbolCopyMutation(); ea.r.go.isFlipMutation()])]
+  )
 )
 
 ea.experiment(
   runs = (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
-  (solver = (nEval = [1000]) *
+  (solver = (nEval = [5000]) *
   [
     ea.s.ga(
       name = "ga-pleiotropy-0.2";

@@ -3360,6 +3360,12 @@ Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abb
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString">IntString</abbr>, <abbr title="io.github.ericmedvet.jgea.core.Factory">Factory</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString">IntString</abbr>&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Factories.isUniform()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `ea.representation.factory.isUniqueUniform()`
+
+`ea.r.f.isUniqueUniform()`
+
+Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString">IntString</abbr>, <abbr title="io.github.ericmedvet.jgea.core.Factory">Factory</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString">IntString</abbr>&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Factories.isUniqueUniform()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ## Package `ea.representation.geneticOperator`
 
 Aliases: `ea.r.geneticOperator`, `ea.r.go`, `ea.representation.geneticOperator`, `ea.representation.go`

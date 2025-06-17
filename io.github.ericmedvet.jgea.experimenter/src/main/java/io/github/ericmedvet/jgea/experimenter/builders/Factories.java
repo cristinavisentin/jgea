@@ -24,11 +24,14 @@ import io.github.ericmedvet.jgea.core.representation.sequence.FixedLengthListFac
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitStringFactory;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
+import io.github.ericmedvet.jgea.core.representation.sequence.integer.SequentialIntStringFactory;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.UniformIntStringFactory;
+import io.github.ericmedvet.jgea.core.representation.sequence.integer.UniformUniqueIntStringFactory;
 import io.github.ericmedvet.jgea.core.representation.sequence.numeric.UniformDoubleFactory;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
+
 import java.util.List;
 import java.util.function.Function;
 
@@ -55,8 +58,20 @@ public class Factories {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static Function<IntString, Factory<IntString>> isSequential() {
+    return eIs -> new SequentialIntStringFactory(eIs.lowerBound(), eIs.upperBound(), eIs.size());
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static Function<IntString, Factory<IntString>> isUniform() {
     return eIs -> new UniformIntStringFactory(eIs.lowerBound(), eIs.upperBound(), eIs.size());
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static Function<IntString, Factory<IntString>> isUniformUnique() {
+    return eIs -> new UniformUniqueIntStringFactory(eIs.lowerBound(), eIs.upperBound(), eIs.size());
   }
 
 }
