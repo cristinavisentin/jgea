@@ -27,6 +27,8 @@ import io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegress
 import io.github.ericmedvet.jsdynsym.core.composed.AbstractComposed;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.random.RandomGenerator;
+
 import org.apache.commons.math3.stat.StatUtils;
 
 public class MathUtils {
@@ -178,7 +180,7 @@ public class MathUtils {
     return list;
   }
 
-  public static double[] uniformSample(double min, double max, int count, Random random) {
+  public static double[] uniformSample(double min, double max, int count, RandomGenerator random) {
     double[] values = new double[count];
     for (int i = 0; i < count; i++) {
       values[i] = random.nextDouble() * (max - min) + min;
