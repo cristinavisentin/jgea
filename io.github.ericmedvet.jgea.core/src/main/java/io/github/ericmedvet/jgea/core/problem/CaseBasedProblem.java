@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public interface CaseBasedProblem<S, C, CQ, Q> extends QualityBasedProblem<S, Q> {
+public interface CaseBasedProblem<S, C, CQ, Q> extends MultifidelityQualityBasedProblem<S, Q> {
 
   Function<List<CQ>, Q> aggregateFunction();
 
@@ -44,7 +44,18 @@ public interface CaseBasedProblem<S, C, CQ, Q> extends QualityBasedProblem<S, Q>
   }
 
   @Override
-  default Function<S, Q> qualityFunction() {
-    return s -> aggregateFunction().apply(caseProvider().stream().map(c -> caseFunction().apply(s, c)).toList());
+  default MultifidelityFunction<S, Q> qualityFunction() {
+    return (s, fidelity) -> aggregateFunction().apply(
+        caseProvider().stream()
+            .limit(
+                Math.clamp(
+                    (int) ((double) caseProvider().size() * fidelity),
+                    1,
+                    caseProvider().size()
+                )
+            )
+            .map(c -> caseFunction().apply(s, c))
+            .toList()
+    );
   }
 }
