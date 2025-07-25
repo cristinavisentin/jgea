@@ -71,7 +71,8 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, Collection<I>> all(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation().all();
+    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation()
+        .all();
     return NamedFunction.from(f, "all").compose(beforeF);
   }
 
@@ -123,7 +124,10 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, I> best(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, I> f = state -> state.pocPopulation().firsts().iterator().next();
+    Function<POCPopulationState<I, G, S, Q, ?>, I> f = state -> state.pocPopulation()
+        .firsts()
+        .iterator()
+        .next();
     return NamedFunction.from(f, "best").compose(beforeF);
   }
 
@@ -237,7 +241,11 @@ public class Functions {
       @Param(value = "format", dS = "%2d") String format
   ) {
     Function<Individual<G, S, Q>, Integer> f = i -> descriptor.coordinate(i).bin();
-    return FormattedNamedFunction.from(f, format, "bin[%s]".formatted(NamedFunction.name(descriptor.function())))
+    return FormattedNamedFunction.from(
+        f,
+        format,
+        "bin[%s]".formatted(NamedFunction.name(descriptor.function()))
+    )
         .compose(beforeF);
   }
 
@@ -256,7 +264,8 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, Collection<I>> firsts(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation().firsts();
+    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation()
+        .firsts();
     return NamedFunction.from(f, "firsts").compose(beforeF);
   }
 
@@ -286,7 +295,10 @@ public class Functions {
       @Param(value = "nOfBins", dI = 8) int nOfBins,
       @Param(value = "of", dNPM = "f.identity()") Function<X, Collection<Number>> beforeF
   ) {
-    Function<Collection<Number>, TextPlotter.Miniplot> f = vs -> TextPlotter.histogram(vs.stream().toList(), nOfBins);
+    Function<Collection<Number>, TextPlotter.Miniplot> f = vs -> TextPlotter.histogram(
+        vs.stream().toList(),
+        nOfBins
+    );
     return FormattedNamedFunction.from(f, "%" + nOfBins + "s", "hist").compose(beforeF);
   }
 
@@ -298,7 +310,11 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, Collection<List<Double>>> beforeF,
       @Param(value = "format", dS = "%.2f") String format
   ) {
-    Function<Collection<List<Double>>, Double> f = ps -> Misc.hypervolume2D(ps, minReference, maxReference);
+    Function<Collection<List<Double>>, Double> f = ps -> Misc.hypervolume2D(
+        ps,
+        minReference,
+        maxReference
+    );
     return FormattedNamedFunction.from(f, format, "hv").compose(beforeF);
   }
 
@@ -348,7 +364,10 @@ public class Functions {
         return d.build(iiAdapter.apply(d.imageInfo(dp)), dp);
       }
       if (p instanceof LandscapePlot lsp) {
-        LandscapePlotDrawer d = new LandscapePlotDrawer(configuration, Configuration.LandscapePlot.DEFAULT);
+        LandscapePlotDrawer d = new LandscapePlotDrawer(
+            configuration,
+            Configuration.LandscapePlot.DEFAULT
+        );
         return d.build(iiAdapter.apply(d.imageInfo(lsp)), lsp);
       }
       if (p instanceof XYDataSeriesPlot xyp) {
@@ -418,7 +437,11 @@ public class Functions {
         .stream()
         .distinct()
         .count() / (double) (is.size() - startOffset - endOffset);
-    return FormattedNamedFunction.from(f, format, "is.redundancy[%d;%d]".formatted(startOffset, endOffset))
+    return FormattedNamedFunction.from(
+        f,
+        format,
+        "is.redundancy[%d;%d]".formatted(startOffset, endOffset)
+    )
         .compose(
             beforeF
         );
@@ -429,7 +452,8 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, Collection<I>> lasts(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation().lasts();
+    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation()
+        .lasts();
     return NamedFunction.from(f, "lasts").compose(beforeF);
   }
 
@@ -439,7 +463,8 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, MAMEPopulationState<G, S, Q, ?>> beforeF,
       @Param("n") int n
   ) {
-    Function<MAMEPopulationState<G, S, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = s -> s.archives().get(n);
+    Function<MAMEPopulationState<G, S, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = s -> s.archives()
+        .get(n);
     return NamedFunction.from(f, "maMe.archive[%d]".formatted(n)).compose(beforeF);
   }
 
@@ -487,7 +512,8 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, Collection<I>> mids(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation().mids();
+    Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation()
+        .mids();
     return NamedFunction.from(f, "mids").compose(beforeF);
   }
 
@@ -620,7 +646,11 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, Run<?, ?, ?, ?>> beforeF,
       @Param(value = "format", dS = "%s") String format
   ) {
-    Function<Run<?, ?, ?, ?>, String> f = run -> Utils.interpolate("{%s}".formatted(key), null, run);
+    Function<Run<?, ?, ?, ?>, String> f = run -> Utils.interpolate(
+        "{%s}".formatted(key),
+        null,
+        run
+    );
     return FormattedNamedFunction.from(f, format, name).compose(beforeF);
   }
 
@@ -748,7 +778,10 @@ public class Functions {
         w == -1 ? ii.w() : w,
         h == -1 ? ii.h() : h
     );
-    Function<D, BufferedImage> f = d -> imageBuilder.build(iiAdapter.apply(imageBuilder.imageInfo(d)), d);
+    Function<D, BufferedImage> f = d -> imageBuilder.build(
+        iiAdapter.apply(imageBuilder.imageInfo(d)),
+        d
+    );
     return NamedFunction.from(f, "to.image[%s]".formatted(imageBuilder)).compose(beforeF);
   }
 
@@ -767,7 +800,11 @@ public class Functions {
         h == -1 ? vi.h() : h,
         encoder
     );
-    VideoBuilder<List<D>> videoBuilder = VideoBuilder.from(imageBuilder, Function.identity(), frameRate);
+    VideoBuilder<List<D>> videoBuilder = VideoBuilder.from(
+        imageBuilder,
+        Function.identity(),
+        frameRate
+    );
     Function<List<D>, Video> f = ds -> {
       if (w == -1 && h == -1) {
         return videoBuilder.apply(ds);
@@ -858,7 +895,8 @@ public class Functions {
       @Param(value = "format", dS = "%5.3f") String format
   ) {
     Function<Network, Double> f = n -> (double) n.deadOrIUnwiredOutputGates().size() / (double) n.gates().size();
-    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate").compose(beforeF);
+    return FormattedNamedFunction.from(f, format, "ttpn.deadOrIUnwired.output.gates.rate")
+        .compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -888,7 +926,7 @@ public class Functions {
     return FormattedNamedFunction.from(
         f,
         format,
-        "validation.quality[%s]".formatted(NamedFunction.name(individualF))
+        NamedFunction.composeNames(NamedFunction.name(individualF), "validation.quality")
     )
         .compose(beforeF);
   }
@@ -916,7 +954,11 @@ public class Functions {
     );
     Function<P, Video> f = p -> {
       if (p instanceof DistributionPlot dp) {
-        BoxPlotVideoBuilder vb = new BoxPlotVideoBuilder(vConfiguration, iConfiguration, Configuration.BoxPlot.DEFAULT);
+        BoxPlotVideoBuilder vb = new BoxPlotVideoBuilder(
+            vConfiguration,
+            iConfiguration,
+            Configuration.BoxPlot.DEFAULT
+        );
         return vb.build(viAdapter.apply(vb.videoInfo(dp)), dp);
       }
       if (p instanceof LandscapePlot lsp) {
@@ -932,7 +974,11 @@ public class Functions {
             vConfiguration,
             iConfiguration,
             Configuration.LinesPlot.DEFAULT
-        ) : new PointsPlotVideoBuilder(vConfiguration, iConfiguration, Configuration.PointsPlot.DEFAULT);
+        ) : new PointsPlotVideoBuilder(
+            vConfiguration,
+            iConfiguration,
+            Configuration.PointsPlot.DEFAULT
+        );
         return vb.build(viAdapter.apply(vb.videoInfo(xyp)), xyp);
       }
       if (p instanceof UnivariateGridPlot ugp) {

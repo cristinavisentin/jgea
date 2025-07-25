@@ -47,6 +47,17 @@ ea.experiment(
     ea.l.savePlotForExp(
       path = "../../Documenti/experiments/{name}/{startTime}/best-validation-mse";
       plot = ea.plot.multi.xyExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()))
+    );
+    ea.l.savePlotForRun(
+      path = "../../Documenti/experiments/{name}/{startTime}/{run.solver.name}/{run.problem.name}-{run.randomGenerator.seed}-trajectory";
+      plot = ea.plot.single.xyrsRun(
+        x = ea.f.cumulativeFidelity();
+        ys = [
+          f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()));
+          f.mapValue(key = mse; of = ea.f.validationQuality())
+        ]
+      );
+      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "scheduled.*")
     )
   ]
 )
