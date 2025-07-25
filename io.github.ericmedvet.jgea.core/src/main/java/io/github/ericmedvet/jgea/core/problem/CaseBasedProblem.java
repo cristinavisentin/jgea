@@ -20,6 +20,7 @@
 package io.github.ericmedvet.jgea.core.problem;
 
 import io.github.ericmedvet.jgea.core.util.IndexedProvider;
+import io.github.ericmedvet.jgea.core.util.Naming;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -45,17 +46,20 @@ public interface CaseBasedProblem<S, C, CQ, Q> extends MultifidelityQualityBased
 
   @Override
   default MultifidelityFunction<S, Q> qualityFunction() {
-    return (s, fidelity) -> aggregateFunction().apply(
-        caseProvider().stream()
-            .limit(
-                Math.clamp(
-                    (int) ((double) caseProvider().size() * fidelity),
-                    1,
-                    caseProvider().size()
+    return Naming.named(
+        "%s[%s;%d]".formatted(aggregateFunction(), caseFunction(), caseProvider().size()),
+        (MultifidelityFunction<S, Q>) (s, fidelity) -> aggregateFunction().apply(
+            caseProvider().stream()
+                .limit(
+                    Math.clamp(
+                        (int) ((double) caseProvider().size() * fidelity),
+                        1,
+                        caseProvider().size()
+                    )
                 )
-            )
-            .map(c -> caseFunction().apply(s, c))
-            .toList()
+                .map(c -> caseFunction().apply(s, c))
+                .toList()
+        )
     );
   }
 }

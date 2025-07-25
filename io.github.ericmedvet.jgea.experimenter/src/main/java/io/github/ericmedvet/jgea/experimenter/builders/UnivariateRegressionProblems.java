@@ -53,7 +53,7 @@ public class UnivariateRegressionProblems {
         .keySet()
         .stream()
         .findFirst()
-        .orElseThrow(() -> new RuntimeException("No output y var in datates"));
+        .orElseThrow(() -> new RuntimeException("No output y var in dataset"));
     provider = provider.shuffled(randomGenerator);
     return UnivariateRegressionProblem.from(
         metrics,

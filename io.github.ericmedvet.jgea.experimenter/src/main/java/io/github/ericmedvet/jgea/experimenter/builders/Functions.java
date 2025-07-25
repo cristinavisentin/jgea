@@ -28,6 +28,7 @@ import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
 import io.github.ericmedvet.jgea.core.representation.tree.Tree;
 import io.github.ericmedvet.jgea.core.solver.Individual;
+import io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.State;
 import io.github.ericmedvet.jgea.core.solver.cabea.GridPopulationState;
@@ -216,6 +217,16 @@ public class Functions {
       );
     };
     return NamedFunction.from(f, "csv.plotter").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> cumulativeFidelity(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>> beforeF,
+      @Param(value = "format", dS = "%7.2f") String format
+  ) {
+    Function<MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>, Double> f = MultiFidelityPOCPopulationState::cumulativeFidelity;
+    return FormattedNamedFunction.from(f, format, "cumulative.fidelity").compose(beforeF);
   }
 
   @SuppressWarnings("unused")

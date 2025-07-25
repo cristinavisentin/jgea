@@ -23,6 +23,7 @@ import io.github.ericmedvet.jgea.core.problem.SimpleEBMOProblem;
 import io.github.ericmedvet.jgea.core.representation.NamedUnivariateRealFunction;
 import io.github.ericmedvet.jgea.core.util.IndexedProvider;
 import io.github.ericmedvet.jgea.core.util.Misc;
+import io.github.ericmedvet.jgea.core.util.Naming;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.UnivariateRealFunction;
 import java.util.List;
@@ -94,7 +95,13 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
 
   @Override
   default TriFunction<Map<String, Double>, Double, Double, Outcome> errorFunction() {
-    return (input, actualY, preditectY) -> new Outcome(actualY, preditectY);
+    return Naming.named(
+        "aY|pY",
+        (TriFunction<Map<String, Double>, Double, Double, Outcome>) (input, actualY, preditectY) -> new Outcome(
+            actualY,
+            preditectY
+        )
+    );
   }
 
   @Override
@@ -119,7 +126,6 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
       String yVarName,
       IndexedProvider<Example<Map<String, Double>, Double>> caseProvider,
       IndexedProvider<Example<Map<String, Double>, Double>> validationCaseProvider
-
   ) {
     record HardUnivariateRegressionProblem(
         List<Metric> metrics,

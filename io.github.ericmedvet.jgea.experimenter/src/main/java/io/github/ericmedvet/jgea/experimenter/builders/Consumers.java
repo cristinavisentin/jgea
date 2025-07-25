@@ -55,7 +55,11 @@ public class Consumers {
   ) {
     return Naming.named(
         "%s[f=%s]".formatted(consumer, NamedFunction.name(f)),
-        (x, run, experiment) -> consumer.accept(innerF.apply(f.apply(x)), run, experiment)
+        (TriConsumer<X, Run<?, ?, ?, ?>, Experiment>) (x, run, experiment) -> consumer.accept(
+            innerF.apply(f.apply(x)),
+            run,
+            experiment
+        )
     );
   }
 
@@ -118,7 +122,11 @@ public class Consumers {
   ) {
     return Naming.named(
         "saver[%s;%s]".formatted(NamedFunction.name(f), filePathTemplate + (overwrite ? "(*)" : "")),
-        (x, run, experiment) -> save(f.apply(x), Utils.interpolate(filePathTemplate, experiment, run), overwrite)
+        (TriConsumer<X, Run<?, ?, ?, ?>, Experiment>) (x, run, experiment) -> save(
+            f.apply(x),
+            Utils.interpolate(filePathTemplate, experiment, run),
+            overwrite
+        )
     );
   }
 
@@ -143,7 +151,10 @@ public class Consumers {
     TelegramClient client = new TelegramClient(new File(botIdFilePath), Long.parseLong(chatId));
     return Naming.named(
         "telegram[%s→to:%s]".formatted(NamedFunction.name(f), chatId),
-        (x, run, experiment) -> client.send(Utils.interpolate(titleTemplate, experiment, run), f.apply(x))
+        (TriConsumer<X, Run<?, ?, ?, ?>, Experiment>) (x, run, experiment) -> client.send(
+            Utils.interpolate(titleTemplate, experiment, run),
+            f.apply(x)
+        )
     );
   }
 }

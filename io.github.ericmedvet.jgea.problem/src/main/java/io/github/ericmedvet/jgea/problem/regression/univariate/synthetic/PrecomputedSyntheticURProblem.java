@@ -48,4 +48,14 @@ public class PrecomputedSyntheticURProblem extends PrecomputedTargetEBProblem<Na
   public List<Metric> metrics() {
     return metrics;
   }
+
+  @Override
+  public String toString() {
+    return "%s[p=%d;n=%d;n.val=%d]".formatted(
+        getClass().getSimpleName(),
+        inputProvider().get(0).size(),
+        caseProvider().size(),
+        validationCaseProvider().size()
+    );
+  }
 }

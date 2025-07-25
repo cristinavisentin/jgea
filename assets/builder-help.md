@@ -892,6 +892,17 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, <abbr title="java.lang.String">String</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.csvPlotter()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `ea.function.cumulativeFidelity()`
+
+`ea.f.cumulativeFidelity(of; format)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState">MultiFidelityPOCPopulationState</abbr>&lt;?, ?, ?, ?, ?&gt;&gt;</code> |
+| `format` | s | `%7.2f` | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.cumulativeFidelity()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `ea.function.descBin()`
 
 `ea.f.descBin(descriptor; of; format)`
@@ -3137,7 +3148,7 @@ Aliases: `ea.p.univariateRegression`, `ea.p.ur`, `ea.problem.univariateRegressio
 
 ### Builder `ea.problem.univariateRegression.bundled()`
 
-`ea.p.ur.bundled(provider; metrics; nFolds; testFold; name; xScaling; yScaling)`
+`ea.p.ur.bundled(provider; metrics; nFolds; testFold; randomGenerator; name; xScaling; yScaling)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -3145,6 +3156,7 @@ Aliases: `ea.p.univariateRegression`, `ea.p.ur`, `ea.problem.univariateRegressio
 | `metrics` | e[] | `[mse]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem$Metric">UnivariateRegressionProblem$Metric</abbr>&gt;</code> |
 | `nFolds` | i | `10` | <code>int</code> |
 | `testFold` | i | `0` | <code>int</code> |
+| `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
 | `name` | s | `` | <code><abbr title="java.lang.String">String</abbr></code> |
 | `xScaling` | s | `none` | <code><abbr title="java.lang.String">String</abbr></code> |
 | `yScaling` | s | `none` | <code><abbr title="java.lang.String">String</abbr></code> |
@@ -3153,7 +3165,7 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.problem.regression.univari
 
 ### Builder `ea.problem.univariateRegression.fromData()`
 
-`ea.p.ur.fromData(provider; metrics; nFolds; testFold)`
+`ea.p.ur.fromData(provider; metrics; nFolds; testFold; randomGenerator)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -3161,18 +3173,19 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.problem.regression.univari
 | `metrics` | e[] | `[mse]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem$Metric">UnivariateRegressionProblem$Metric</abbr>&gt;</code> |
 | `nFolds` | i | `10` | <code>int</code> |
 | `testFold` | i | `0` | <code>int</code> |
+| `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem">UnivariateRegressionProblem</abbr></code>; built from `io.github.ericmedvet.jgea.experimenter.builders.UnivariateRegressionProblems.fromData()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.problem.univariateRegression.synthetic()`
 
-`ea.p.ur.synthetic(name; metrics; seed)`
+`ea.p.ur.synthetic(name; metrics; randomGenerator)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
 | `name` | s |  | <code><abbr title="java.lang.String">String</abbr></code> |
 | `metrics` | e[] | `[mse]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem$Metric">UnivariateRegressionProblem$Metric</abbr>&gt;</code> |
-| `seed` | i | `1` | <code>int</code> |
+| `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.problem.regression.univariate.synthetic.SyntheticURProblem">SyntheticURProblem</abbr></code>; built from `io.github.ericmedvet.jgea.experimenter.builders.UnivariateRegressionProblems.synthetic()` by jgea-experimenter:2.7.1-SNAPSHOT
 
@@ -3486,6 +3499,42 @@ Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.operator.Crossover">Crossover</abbr>&lt;X&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.GeneticOperators.oneXover()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+## Package `ea.schedule`
+
+### Builder `ea.schedule.evenPiecewise()`
+
+`ea.schedule.evenPiecewise(name; values)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `evenPiecewise[{values}]` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `values` | d[] | `[0.0, 1.0]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Double">Double</abbr>&gt;</code> |
+
+Produces <code><abbr title="java.util.function.DoubleUnaryOperator">DoubleUnaryOperator</abbr></code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Schedules.evenPiecewise()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.schedule.flat()`
+
+`ea.schedule.flat(name; value)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `flat[{value}]` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `value` | d | `1.0` | <code>double</code> |
+
+Produces <code><abbr title="java.util.function.DoubleUnaryOperator">DoubleUnaryOperator</abbr></code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Schedules.flat()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.schedule.linear()`
+
+`ea.schedule.linear(name; min; max)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `linear[{min}:{max}]` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `min` | d | `0.0` | <code>double</code> |
+| `max` | d | `1.0` | <code>double</code> |
+
+Produces <code><abbr title="java.util.function.DoubleUnaryOperator">DoubleUnaryOperator</abbr></code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Schedules.linear()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ## Package `ea.solver`
 
 Aliases: `ea.s`, `ea.solver`
@@ -3782,6 +3831,26 @@ Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;S, <
 | `iComparators` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.order.PartialComparator">PartialComparator</abbr>&lt;? super <abbr title="io.github.ericmedvet.jgea.core.solver.Individual">Individual</abbr>&lt;G, S, Q&gt;&gt;&gt;</code> |
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;S, <abbr title="io.github.ericmedvet.jgea.core.solver.RandomWalk">RandomWalk</abbr>&lt;G, S, Q&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Solvers.randomWalk()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.solver.scheduledMfGa()`
+
+`ea.s.scheduledMfGa(name; representation; mapper; crossoverP; tournamentRate; minNTournament; nPop; nEval; maxUniquenessAttempts; iComparators; schedule)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `scheduledMfGa[{schedule.name}]` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `representation` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;G, <abbr title="io.github.ericmedvet.jgea.experimenter.Representation">Representation</abbr>&lt;G&gt;&gt;</code> |
+| `mapper` | npm | `ea.m.identity()` | <code><abbr title="io.github.ericmedvet.jgea.core.InvertibleMapper">InvertibleMapper</abbr>&lt;G, S&gt;</code> |
+| `crossoverP` | d | `0.8` | <code>double</code> |
+| `tournamentRate` | d | `0.05` | <code>double</code> |
+| `minNTournament` | i | `3` | <code>int</code> |
+| `nPop` | i | `100` | <code>int</code> |
+| `nEval` | i | `1000` | <code>int</code> |
+| `maxUniquenessAttempts` | i | `100` | <code>int</code> |
+| `iComparators` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.order.PartialComparator">PartialComparator</abbr>&lt;? super <abbr title="io.github.ericmedvet.jgea.core.solver.Individual">Individual</abbr>&lt;G, S, Q&gt;&gt;&gt;</code> |
+| `schedule` | npm | `ea.schedule.flat()` | <code><abbr title="java.util.function.DoubleUnaryOperator">DoubleUnaryOperator</abbr></code> |
+
+Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;S, <abbr title="io.github.ericmedvet.jgea.core.solver.multifidelity.ScheduledFidelityStandardEvolver">ScheduledFidelityStandardEvolver</abbr>&lt;G, S, Q&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Solvers.scheduledMfGa()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.solver.simpleEs()`
 

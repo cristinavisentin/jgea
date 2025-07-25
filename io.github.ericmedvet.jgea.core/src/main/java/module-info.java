@@ -63,5 +63,6 @@ module io.github.ericmedvet.jgea.core {
   exports io.github.ericmedvet.jgea.core.solver.mapelites.strategy;
   exports io.github.ericmedvet.jgea.core.solver.bi;
   exports io.github.ericmedvet.jgea.core.solver.bi.mapelites;
+  exports io.github.ericmedvet.jgea.core.solver.multifidelity;
 
 }

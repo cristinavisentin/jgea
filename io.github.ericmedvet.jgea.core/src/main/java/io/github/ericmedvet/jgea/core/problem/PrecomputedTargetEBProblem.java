@@ -68,4 +68,13 @@ public abstract class PrecomputedTargetEBProblem<S, EI, EO, EQ, Q> implements Ta
   public IndexedProvider<Example<EI, EO>> validationCaseProvider() {
     return validationCaseProvider;
   }
+
+  @Override
+  public String toString() {
+    return "%s[n=%d;n.val=%d]".formatted(
+        getClass().getSimpleName(),
+        caseProvider().size(),
+        validationCaseProvider().size()
+    );
+  }
 }

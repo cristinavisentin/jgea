@@ -47,6 +47,7 @@ import io.github.ericmedvet.jgea.core.solver.es.OpenAIEvolutionaryStrategy;
 import io.github.ericmedvet.jgea.core.solver.es.SimpleEvolutionaryStrategy;
 import io.github.ericmedvet.jgea.core.solver.mapelites.*;
 import io.github.ericmedvet.jgea.core.solver.mapelites.strategy.CoMEStrategy;
+import io.github.ericmedvet.jgea.core.solver.multifidelity.ScheduledFidelityStandardEvolver;
 import io.github.ericmedvet.jgea.core.solver.pso.ParticleSwarmOptimization;
 import io.github.ericmedvet.jgea.core.solver.speciation.LazySpeciator;
 import io.github.ericmedvet.jgea.core.solver.speciation.SpeciatedEvolver;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
@@ -576,6 +578,40 @@ public class Solvers {
           StopConditions.nOfFitnessEvaluations(nEval),
           r.mutations().getFirst(),
           additionalIndividualComparators
+      );
+    };
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q> Function<S, ScheduledFidelityStandardEvolver<G, S, Q>> scheduledMfGa(
+      @Param(value = "name", iS = "scheduledMfGa[{schedule.name}]") String name,
+      @Param("representation") Function<G, Representation<G>> representation,
+      @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
+      @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
+      @Param(value = "tournamentRate", dD = 0.05d) double tournamentRate,
+      @Param(value = "minNTournament", dI = 3) int minNTournament,
+      @Param(value = "nPop", dI = 100) int nPop,
+      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
+      @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators,
+      @Param(value = "schedule", dNPM = "ea.schedule.flat()") DoubleUnaryOperator schedule
+  ) {
+    return exampleS -> {
+      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      return new ScheduledFidelityStandardEvolver<>(
+          mapper.mapperFor(exampleS),
+          r.factory(),
+          nPop,
+          StopConditions.nOfFitnessEvaluations(nEval),
+          r.geneticOperators(crossoverP),
+          new Tournament(Math.max(minNTournament, (int) Math.ceil((double) nPop * tournamentRate))),
+          new Last(),
+          nPop,
+          true,
+          maxUniquenessAttempts,
+          additionalIndividualComparators,
+          schedule
       );
     };
   }
