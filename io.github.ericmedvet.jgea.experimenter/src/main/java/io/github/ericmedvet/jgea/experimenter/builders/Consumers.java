@@ -72,27 +72,23 @@ public class Consumers {
   private static void save(Object o, String filePath, boolean overwrite) {
     File file = null;
     try {
+      file = Misc.robustGetFile(filePath, overwrite);
       switch (o) {
         case BufferedImage image -> {
-          file = Misc.robustGetFile(filePath + ".png", overwrite);
           ImageIO.write(image, "png", file);
         }
         case String s -> {
-          file = Misc.robustGetFile(filePath + ".txt", overwrite);
           Files.writeString(file.toPath(), s, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         }
         case Video video -> {
-          file = Misc.robustGetFile(filePath + ".mp4", overwrite);
           Files.write(file.toPath(), video.data(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         }
         case byte[] data -> {
-          file = Misc.robustGetFile(filePath + ".bin", overwrite);
           try (OutputStream os = new FileOutputStream(file)) {
             os.write(data);
           }
         }
         case NamedParamMap npm -> {
-          file = Misc.robustGetFile(filePath + ".txt", overwrite);
           Files.writeString(
               file.toPath(),
               MapNamedParamMap.prettyToString(npm),
