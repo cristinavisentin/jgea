@@ -1,0 +1,41 @@
+$nEvals = [1000]
+$metrics = [one_minus_abs_cor]
+$accuracyObjective = one_minus_abs_cor
+
+ea.experiment(
+  runs = (randomGenerator = (seed = [1:1:3]) * [m.defaultRG()]) *
+    (problem = [
+      ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.synthetic(name = "keijzer6"; metrics = $metrics));
+      ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.synthetic(name = "nguyen7"; metrics = $metrics));
+      ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "feynman-III-10-19"; metrics = $metrics));
+      ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "concrete"; metrics = $metrics));
+      ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "energy-efficiency"; metrics = $metrics))
+    ]) *
+    (solver = (nEval = $nEvals) * [
+      ea.s.srGp(name = "gp")
+    ]) * [
+    ea.run()
+  ];
+  listeners = [
+    ea.l.console(
+      functions = [
+        ea.f.cumulativeFidelity();
+        ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+        f.mapValue(key = $accuracyObjective; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
+        f.percentile(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = $accuracyObjective; of = ea.f.quality())); p = 75; format = "%6.2f");
+        ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = $accuracyObjective; of = ea.f.quality())));
+        f.mapValue(key = $accuracyObjective; of = ea.f.validationQuality(); format = "%6.2f")
+      ];
+      onlyLast = true
+    );
+    ea.l.savePlotAndCsvForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = $accuracyObjective));
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/best-validation-accuracy.png";
+      plot = ea.plot.multi.xyExp(y = f.mapValue(key = $accuracyObjective; of = ea.f.validationQuality()))
+    )
+  ]
+)

@@ -55,7 +55,7 @@ public class NumericalIndexedProviders {
         case "wine" -> NumericalDataset.fromResourceCSV(".*", "quality", name, limit);
         case "energy-efficiency" -> NumericalDataset.fromResourceCSV("x[0-9]+", "y1", name, limit);
         case "xor" -> NumericalDataset.fromResourceCSV(".*", "y", name, limit);
-        case "feyman-III-10-19" -> NumericalDataset.fromResourceCSV(".*", "target", name, limit);
+        case "feynman-III-10-19" -> NumericalDataset.fromResourceCSV(".*", "target", name, limit);
         default -> throw new IllegalArgumentException("Unknown bundled dataset: %s".formatted(name));
       };
       return dataset.xScaled(xScaling).yScaled(yScaling).prepared();

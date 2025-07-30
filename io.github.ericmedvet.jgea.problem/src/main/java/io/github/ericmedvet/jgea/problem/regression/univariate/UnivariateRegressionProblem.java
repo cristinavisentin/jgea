@@ -26,37 +26,49 @@ import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.core.util.Naming;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.UnivariateRealFunction;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.SequencedMap;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUnivariateRealFunction, Map<String, Double>, Double, UnivariateRegressionProblem.Outcome, Double> {
+  Comparator<Double> MINIMIZE = Double::compareTo;
+  Comparator<Double> MAXIMIZE = (v1, v2) -> {
+    if (Double.isNaN(v2)) {
+      return -1;
+    }
+    if (Double.isNaN(v1)) {
+      return 1;
+    }
+    return Double.compare(v2, v1);
+  };
+
   enum Metric implements Function<List<Outcome>, Double> {
     MAE(
         ys -> ys.stream()
             .mapToDouble(y -> Math.abs(y.predicted - y.actual))
             .average()
-            .orElse(Double.NaN)
+            .orElse(Double.NaN),
+        MINIMIZE
     ), MSE(
         ys -> ys.stream()
             .mapToDouble(y -> (y.predicted - y.actual) * (y.predicted - y.actual))
             .average()
-            .orElse(Double.NaN)
+            .orElse(Double.NaN),
+        MINIMIZE
     ), RMSE(
         ys -> Math.sqrt(
             ys.stream()
                 .mapToDouble(y -> (y.predicted - y.actual) * (y.predicted - y.actual))
                 .average()
                 .orElse(Double.NaN)
-        )
+        ),
+        MINIMIZE
     ), NMSE(
         ys -> ys.stream()
             .mapToDouble(y -> (y.predicted - y.actual) * (y.predicted - y.actual))
             .average()
-            .orElse(Double.NaN) / ys.stream().mapToDouble(y -> y.actual).average().orElse(1d)
+            .orElse(Double.NaN) / ys.stream().mapToDouble(y -> y.actual).average().orElse(1d),
+        MINIMIZE
     ), R2(
         ys -> {
           double sumOfSquaredResiduals = ys.stream()
@@ -67,8 +79,9 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
               .mapToDouble(y -> (actualMean - y.actual) * (actualMean - y.actual))
               .sum();
           return 1d - sumOfSquaredResiduals / sumOfSquaredMeanResiduals;
-        }
-    ), ABS_COR(
+        },
+        MAXIMIZE
+    ), ONE_MINUS_ABS_COR(
         ys -> {
           double actualMean = ys.stream().mapToDouble(y -> y.actual).average().orElseThrow();
           double predictedMean = ys.stream().mapToDouble(y -> y.predicted).average().orElseThrow();
@@ -81,14 +94,19 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
           double sumOfPredictedSquaredMeanResiduals = ys.stream()
               .mapToDouble(y -> (predictedMean - y.predicted) * (predictedMean - y.predicted))
               .sum();
-          return sumOfCrossResiduals / Math.sqrt(sumOfPredictedSquaredMeanResiduals * sumOfActualSquaredMeanResiduals);
-        }
+          return 1d - Math.abs(
+              sumOfCrossResiduals / Math.sqrt(sumOfPredictedSquaredMeanResiduals * sumOfActualSquaredMeanResiduals)
+          );
+        },
+        MAXIMIZE
     );
 
     private final Function<List<Outcome>, Double> function;
+    private final Comparator<Double> comparator;
 
-    Metric(Function<List<Outcome>, Double> function) {
+    Metric(Function<List<Outcome>, Double> function, Comparator<Double> comparator) {
       this.function = function;
+      this.comparator = comparator;
     }
 
     @Override
@@ -96,10 +114,15 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
       return function.apply(ys);
     }
 
+    public Comparator<Double> comparator() {
+      return comparator;
+    }
+
     @Override
     public String toString() {
       return name().toLowerCase();
     }
+
   }
 
   record Outcome(double actual, double predicted) {}
@@ -129,7 +152,7 @@ public interface UnivariateRegressionProblem extends SimpleEBMOProblem<NamedUniv
         .collect(
             Misc.toSequencedMap(
                 Enum::toString,
-                m -> new Objective<>(m, Double::compareTo)
+                m -> new Objective<>(m, m.comparator())
             )
         );
   }

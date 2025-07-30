@@ -147,10 +147,18 @@ public interface NumericalDataset extends IndexedProvider<ExampleBasedProblem.Ex
       String name,
       long limit
   ) throws IOException {
+    InputStream inputStream = NumericalDataset.class.getResourceAsStream(
+        "/datasets/regression/%s.csv".formatted(
+            name
+        )
+    );
+    if (inputStream == null) {
+      throw new IllegalArgumentException("Invalid resource CSV: %s".formatted(name));
+    }
     return fromCSV(
         xVarNamePattern,
         yVarNamePattern,
-        NumericalDataset.class.getResourceAsStream("/datasets/regression/%s.csv".formatted(name)),
+        inputStream,
         limit
     );
   }
