@@ -29,9 +29,31 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public interface MultiFidelityMEPopulationState<G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> extends MEPopulationState<G, S, Q, P> {
+  // TODO add extends of MultiFidelityState
   record LocalState(int nOfQualityEvaluations, int nOfVariations, double fidelity) {}
 
   Archive<LocalState> fidelityArchive();
+
+  static <G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> MultiFidelityMEPopulationState<G, S, Q, P> empty(
+      P problem,
+      Predicate<io.github.ericmedvet.jgea.core.solver.State<?, ?>> stopCondition,
+      List<MapElites.Descriptor<G, S, Q>> descriptors
+  ) {
+    return of(
+        LocalDateTime.now(),
+        0,
+        0,
+        problem,
+        stopCondition,
+        0,
+        0,
+        descriptors,
+        new Archive<>(
+            descriptors.stream().map(MapElites.Descriptor::nOfBins).toList()
+        ),
+        new Archive<>(descriptors.stream().map(MapElites.Descriptor::nOfBins).toList())
+    );
+  }
 
   static <G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> MultiFidelityMEPopulationState<G, S, Q, P> of(
       LocalDateTime startingDateTime,
@@ -72,27 +94,6 @@ public interface MultiFidelityMEPopulationState<G, S, Q, P extends Multifidelity
         descriptors,
         archive,
         fidelityArchive
-    );
-  }
-
-  static <G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> MultiFidelityMEPopulationState<G, S, Q, P> empty(
-      P problem,
-      Predicate<io.github.ericmedvet.jgea.core.solver.State<?, ?>> stopCondition,
-      List<MapElites.Descriptor<G, S, Q>> descriptors
-  ) {
-    return of(
-        LocalDateTime.now(),
-        0,
-        0,
-        problem,
-        stopCondition,
-        0,
-        0,
-        descriptors,
-        new Archive<>(
-            descriptors.stream().map(MapElites.Descriptor::nOfBins).toList()
-        ),
-        new Archive<>(descriptors.stream().map(MapElites.Descriptor::nOfBins).toList())
     );
   }
 

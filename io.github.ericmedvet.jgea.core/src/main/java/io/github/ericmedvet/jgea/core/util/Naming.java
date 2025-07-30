@@ -27,11 +27,7 @@ import io.github.ericmedvet.jgea.core.problem.MultifidelityQualityBasedProblem.M
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jnb.datastructure.TriConsumer;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
+import java.util.function.*;
 
 public class Naming {
 
@@ -69,11 +65,6 @@ public class Naming {
   public static <E, O> Accumulator<E, O> named(String name, Accumulator<E, O> accumulator) {
     return new Accumulator<>() {
       @Override
-      public void done() {
-        accumulator.done();
-      }
-
-      @Override
       public O get() {
         return accumulator.get();
       }
@@ -81,6 +72,11 @@ public class Naming {
       @Override
       public void listen(E e) {
         accumulator.listen(e);
+      }
+
+      @Override
+      public void done() {
+        accumulator.done();
       }
 
       @Override
@@ -93,13 +89,13 @@ public class Naming {
   public static <E> Listener<E> named(String name, Listener<E> listener) {
     return new Listener<>() {
       @Override
-      public void done() {
-        listener.done();
+      public void listen(E e) {
+        listener.listen(e);
       }
 
       @Override
-      public void listen(E e) {
-        listener.listen(e);
+      public void done() {
+        listener.done();
       }
 
       @Override
@@ -235,4 +231,22 @@ public class Naming {
       }
     };
   }
+
+  public static <T> Predicate<T> named(
+      String name,
+      Predicate<T> predicate
+  ) {
+    return new Predicate<>() {
+      @Override
+      public boolean test(T t) {
+        return predicate.test(t);
+      }
+
+      @Override
+      public String toString() {
+        return name;
+      }
+    };
+  }
+
 }

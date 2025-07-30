@@ -74,6 +74,33 @@ public class Solvers {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <G, S, Q> Function<S, AsynchronousScheduledMFMapElites<G, S, Q>> asyncScheduledMfMapElites(
+      @Param(value = "name", iS = "asyncScheduledMfMapElites[{schedule.name}]") String name,
+      @Param("representation") Function<G, Representation<G>> representation,
+      @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
+      @Param(value = "nOfBirthsForIteration", dI = 100) int nOfBirthsForIteration,
+      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param("iComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
+      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
+      @Param(value = "schedule", dNPM = "ea.schedule.flat()") DoubleUnaryOperator schedule
+  ) {
+    return exampleS -> {
+      Representation<G> r = representation.apply(mapper.exampleFor(exampleS));
+      return new AsynchronousScheduledMFMapElites<>(
+          mapper.mapperFor(exampleS),
+          r.factory(),
+          StopConditions.nOfFitnessEvaluations(nEval),
+          additionalIndividualComparators,
+          r.mutations().getFirst(),
+          descriptors,
+          schedule,
+          nOfBirthsForIteration
+      );
+    };
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <G, S, Q, O> Function<S, StandardBiEvolver<G, S, Q, O>> biGa(
       @Param(value = "name", dS = "biGa") String name,
       @Param("representation") Function<G, Representation<G>> representation,
