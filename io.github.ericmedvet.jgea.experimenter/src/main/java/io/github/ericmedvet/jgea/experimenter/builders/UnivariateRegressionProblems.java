@@ -25,6 +25,7 @@ import io.github.ericmedvet.jgea.core.util.IndexedProvider;
 import io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem;
 import io.github.ericmedvet.jgea.problem.regression.univariate.synthetic.*;
 import io.github.ericmedvet.jnb.core.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.random.RandomGenerator;
@@ -34,9 +35,12 @@ public class UnivariateRegressionProblems {
   private UnivariateRegressionProblems() {
   }
 
+  @SuppressWarnings("unused")
   @Alias(
-      name = "bundled", passThroughParams = {@PassThroughParam(name = "name", type = ParamMap.Type.STRING), @PassThroughParam(name = "xScaling", value = "none", type = ParamMap.Type.STRING), @PassThroughParam(name = "yScaling", value = "none", type = ParamMap.Type.STRING)
-      }, value = // spotless:off
+      name = "bundled", passThroughParams = {@PassThroughParam(name = "name", type = ParamMap.Type.STRING),
+      @PassThroughParam(name = "xScaling", value = "none", type = ParamMap.Type.STRING), @PassThroughParam(name =
+      "yScaling", value = "none", type = ParamMap.Type.STRING)
+  }, value = // spotless:off
       """
           fromData(provider = ea.provider.num.fromBundled(name = $name; xScaling = $xScaling; yScaling = $yScaling))
           """) // spotless:on
@@ -46,6 +50,7 @@ public class UnivariateRegressionProblems {
       @Param(value = "metrics", dSs = {"mse"}) List<UnivariateRegressionProblem.Metric> metrics,
       @Param(value = "nFolds", dI = 10) int nFolds,
       @Param(value = "testFold", dI = 0) int testFold,
+      @Param(value = "shuffle", dB = true) boolean shuffle,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator
   ) {
     String yVarName = provider.first()
@@ -54,14 +59,27 @@ public class UnivariateRegressionProblems {
         .stream()
         .findFirst()
         .orElseThrow(() -> new RuntimeException("No output y var in dataset"));
-    provider = provider.shuffled(randomGenerator);
+    if (shuffle) {
+      provider = provider.shuffled(randomGenerator);
+    }
+    IndexedProvider<ExampleBasedProblem.Example<Map<String, Double>, Double>> eProvider =
+        provider.then(e -> new ExampleBasedProblem.Example<>(
+        e.input(),
+        e.output().get(yVarName)
+    ));
+    if (nFolds > 0) {
+      return UnivariateRegressionProblem.from(
+          metrics,
+          yVarName,
+          eProvider.negatedFold(testFold, nFolds),
+          eProvider.fold(testFold, nFolds)
+      );
+    }
     return UnivariateRegressionProblem.from(
         metrics,
         yVarName,
-        provider.negatedFold(testFold, nFolds)
-            .then(e -> new ExampleBasedProblem.Example<>(e.input(), e.output().get(yVarName))),
-        provider.fold(testFold, nFolds)
-            .then(e -> new ExampleBasedProblem.Example<>(e.input(), e.output().get(yVarName)))
+        eProvider,
+        eProvider
     );
   }
 
