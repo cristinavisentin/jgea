@@ -7,9 +7,9 @@ ea.experiment(
     (problem = [
       ea.p.ur.synthetic(name = "keijzer6"; metrics = $metrics);
       ea.p.ur.synthetic(name = "nguyen7"; metrics = $metrics)
-      % ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "feynman-III-10-19"; metrics = $metrics));
-      % ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "concrete"; metrics = $metrics));
-      % ea.p.moToSo(objective = $accuracyObjective; moProblem = ea.p.ur.bundled(name = "energy-efficiency"; metrics = $metrics))
+      % ea.p.ur.bundled(name = "feynman-III-10-19"; metrics = $metrics);
+      % ea.p.ur.bundled(name = "concrete"; metrics = $metrics);
+      % ea.p.ur.bundled(name = "energy-efficiency"; metrics = $metrics)
     ]) *
     (solver = (nEval = $nEvals) * [
       ea.s.nsga2(
