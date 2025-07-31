@@ -22,15 +22,15 @@ package io.github.ericmedvet.jgea.core.solver.mapelites;
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
 import io.github.ericmedvet.jgea.core.order.PartiallyOrderedCollection;
 import io.github.ericmedvet.jgea.core.problem.MultifidelityQualityBasedProblem;
+import io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites.Descriptor;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface MultiFidelityMEPopulationState<G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> extends MEPopulationState<G, S, Q, P> {
-  // TODO add extends of MultiFidelityState
-  record LocalState(int nOfQualityEvaluations, int nOfVariations, double fidelity) {}
+public interface MultiFidelityMEPopulationState<G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> extends MEPopulationState<G, S, Q, P>, MultiFidelityPOCPopulationState<MEIndividual<G, S, Q>, G, S, Q, P> {
+  record LocalState(long nOfQualityEvaluations, double fidelity, double cumulativeFidelity) {}
 
   Archive<LocalState> fidelityArchive();
 
@@ -80,7 +80,8 @@ public interface MultiFidelityMEPopulationState<G, S, Q, P extends Multifidelity
         PartiallyOrderedCollection<MEIndividual<G, S, Q>> pocPopulation,
         List<MapElites.Descriptor<G, S, Q>> descriptors,
         Archive<MEIndividual<G, S, Q>> archive,
-        Archive<LocalState> fidelityArchive
+        Archive<LocalState> fidelityArchive,
+        double cumulativeFidelity
     ) implements MultiFidelityMEPopulationState<G, S, Q, P> {}
     return new HardState<>(
         startingDateTime,
@@ -93,7 +94,8 @@ public interface MultiFidelityMEPopulationState<G, S, Q, P extends Multifidelity
         PartiallyOrderedCollection.from(archive.asMap().values(), comparator),
         descriptors,
         archive,
-        fidelityArchive
+        fidelityArchive,
+        fidelityArchive.asMap().values().stream().mapToDouble(LocalState::cumulativeFidelity).sum()
     );
   }
 
