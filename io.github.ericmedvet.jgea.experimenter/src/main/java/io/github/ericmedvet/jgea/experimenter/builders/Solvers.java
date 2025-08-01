@@ -27,6 +27,7 @@ import io.github.ericmedvet.jgea.core.distance.Jaccard;
 import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.operator.Mutation;
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
+import io.github.ericmedvet.jgea.core.problem.*;
 import io.github.ericmedvet.jgea.core.representation.graph.*;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Constant;
 import io.github.ericmedvet.jgea.core.representation.graph.numeric.Input;
@@ -41,16 +42,17 @@ import io.github.ericmedvet.jgea.core.solver.*;
 import io.github.ericmedvet.jgea.core.solver.bi.StandardBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.bi.mapelites.MapElitesBiEvolver;
 import io.github.ericmedvet.jgea.core.solver.cabea.CellularAutomataBasedSolver;
+import io.github.ericmedvet.jgea.core.solver.cabea.GridPopulationState;
 import io.github.ericmedvet.jgea.core.solver.cabea.SubstrateFiller;
-import io.github.ericmedvet.jgea.core.solver.es.CMAEvolutionaryStrategy;
-import io.github.ericmedvet.jgea.core.solver.es.OpenAIEvolutionaryStrategy;
-import io.github.ericmedvet.jgea.core.solver.es.SimpleEvolutionaryStrategy;
+import io.github.ericmedvet.jgea.core.solver.es.*;
 import io.github.ericmedvet.jgea.core.solver.mapelites.*;
 import io.github.ericmedvet.jgea.core.solver.mapelites.strategy.CoMEStrategy;
 import io.github.ericmedvet.jgea.core.solver.multifidelity.ScheduledFidelityStandardEvolver;
+import io.github.ericmedvet.jgea.core.solver.pso.PSOState;
 import io.github.ericmedvet.jgea.core.solver.pso.ParticleSwarmOptimization;
 import io.github.ericmedvet.jgea.core.solver.speciation.LazySpeciator;
 import io.github.ericmedvet.jgea.core.solver.speciation.SpeciatedEvolver;
+import io.github.ericmedvet.jgea.core.solver.speciation.SpeciatedPOCPopulationState;
 import io.github.ericmedvet.jgea.experimenter.Representation;
 import io.github.ericmedvet.jnb.core.Alias;
 import io.github.ericmedvet.jnb.core.Cacheable;
@@ -60,10 +62,7 @@ import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.DoubleStream;
 
 @Discoverable(prefixTemplate = "ea.solver|s")
@@ -79,7 +78,7 @@ public class Solvers {
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nOfBirthsForIteration", dI = 100) int nOfBirthsForIteration,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") ProgressBasedStopCondition<? super MultiFidelityMEPopulationState<G, S, Q, MultifidelityQualityBasedProblem<S, Q>>> stopCondition,
       @Param("iComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators,
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
       @Param(value = "schedule", dNPM = "ea.schedule.flat()") DoubleUnaryOperator schedule
@@ -89,7 +88,7 @@ public class Solvers {
       return new AsynchronousScheduledMFMapElites<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           additionalIndividualComparators,
           r.mutations().getFirst(),
           descriptors,
@@ -109,7 +108,7 @@ public class Solvers {
       @Param(value = "tournamentRate", dD = 0.05d) double tournamentRate,
       @Param(value = "minNTournament", dI = 3) int minNTournament,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedBiProblem<S, O, Q>>> stopCondition,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("additionalIndividualComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
@@ -120,7 +119,7 @@ public class Solvers {
           mapper.mapperFor(exampleS),
           r.factory(),
           nPop,
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.geneticOperators(crossoverP),
           new Tournament(Math.max(minNTournament, (int) Math.ceil((double) nPop * tournamentRate))),
           new Last(),
@@ -140,7 +139,7 @@ public class Solvers {
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super MEPopulationState<G, S, Q, QualityBasedBiProblem<S, O, Q>>> stopCondition,
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
       @Param("fitnessReducer") BinaryOperator<Q> fitnessReducer,
       @Param("emptyArchive") boolean emptyArchive,
@@ -151,7 +150,7 @@ public class Solvers {
       return new MapElitesBiEvolver<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.mutations().getFirst(),
           nPop,
           descriptors,
@@ -171,7 +170,7 @@ public class Solvers {
       @Param(value = "keepProbability", dD = 0.00d) double keepProbability,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
       @Param(value = "nTour", dI = 1) int nTour,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super GridPopulationState<G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "toroidal", dB = true) boolean toroidal,
       @Param(value = "mooreRadius", dI = 1) int mooreRadius,
       @Param(value = "gridSize", dI = 11) int gridSize,
@@ -183,7 +182,7 @@ public class Solvers {
       return new CellularAutomataBasedSolver<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           substrate.apply(Grid.create(gridSize, gridSize, true)),
           new CellularAutomataBasedSolver.MooreNeighborhood(mooreRadius, toroidal),
           keepProbability,
@@ -200,12 +199,12 @@ public class Solvers {
       @Param(value = "name", dS = "cmaEs") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
-      @Param(value = "nEval", dI = 1000) int nEval
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super CMAESState<S, Q>> stopCondition
   ) {
     return exampleS -> new CMAEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
         factory.apply(mapper.exampleFor(exampleS)),
-        StopConditions.nOfFitnessEvaluations(nEval)
+        stopCondition
     );
   }
 
@@ -220,7 +219,7 @@ public class Solvers {
       @Param("merger") InvertibleMapper<Pair<S1, S2>, S> invertibleMapperMerger,
       @Param(value = "descriptors1") List<MapElites.Descriptor<G1, S1, Q>> descriptors1,
       @Param(value = "descriptors2") List<MapElites.Descriptor<G2, S2, Q>> descriptors2,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super CoMEPopulationState<G1, G2, S1, S2, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "populationSize", dI = 100) int populationSize,
       @Param(value = "nOfOffspring", dI = 50) int nOfOffspring,
       @Param(value = "strategy", dS = "identity") CoMEStrategy.Prepared strategy,
@@ -237,7 +236,7 @@ public class Solvers {
         throw new IllegalArgumentException("Descriptors for representations must be initialized.");
       }
       return new CoMapElites<>(
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r1.factory(),
           r2.factory(),
           mapper1.mapperFor(splitExample.first()),
@@ -264,7 +263,7 @@ public class Solvers {
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "populationSize", dI = 15) int populationSize,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super ListPopulationState<Individual<List<Double>, S, Q>, List<Double>, S, Q, TotalOrderQualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "differentialWeight", dD = 0.5) double differentialWeight,
       @Param(value = "crossoverP", dD = 0.8) double crossoverP,
       @Param(value = "remap") boolean remap
@@ -273,7 +272,7 @@ public class Solvers {
         mapper.mapperFor(exampleS),
         factory.apply(mapper.exampleFor(exampleS)),
         populationSize,
-        StopConditions.nOfFitnessEvaluations(nEval),
+        stopCondition,
         differentialWeight,
         crossoverP,
         remap
@@ -291,7 +290,7 @@ public class Solvers {
       @Param(value = "eliteRate", dD = 0.1d) double eliteRate,
       @Param(value = "minNTournament", dI = 3) int minNTournament,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
       @Param(value = "remap") boolean remap,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
@@ -302,7 +301,7 @@ public class Solvers {
           mapper.mapperFor(exampleS),
           r.factory(),
           nPop,
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.geneticOperators(crossoverP),
           new Tournament(Math.max(minNTournament, (int) Math.ceil((double) nPop * tournamentRate))),
           eliteRate,
@@ -333,7 +332,7 @@ public class Solvers {
       @Param(value = "tournamentRate", dD = 0.05d) double tournamentRate,
       @Param(value = "minNTournament", dI = 3) int minNTournament,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
       @Param(value = "remap") boolean remap,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
@@ -344,7 +343,7 @@ public class Solvers {
           mapper.mapperFor(exampleS),
           r.factory(),
           nPop,
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.geneticOperators(crossoverP),
           new Tournament(Math.max(minNTournament, (int) Math.ceil((double) nPop * tournamentRate))),
           new Last(),
@@ -364,7 +363,7 @@ public class Solvers {
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super MAMEPopulationState<G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param("descriptors1") List<MapElites.Descriptor<G, S, Q>> descriptors1,
       @Param("descriptors2") List<MapElites.Descriptor<G, S, Q>> descriptors2,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
@@ -374,7 +373,7 @@ public class Solvers {
       return new MultiArchiveMapElites<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.mutations().getFirst(),
           nPop,
           List.of(descriptors1, descriptors2),
@@ -390,7 +389,7 @@ public class Solvers {
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super MEPopulationState<G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
       @Param("iComparators") List<PartialComparator<? super MEIndividual<G, S, Q>>> additionalIndividualComparators
   ) {
@@ -399,7 +398,7 @@ public class Solvers {
       return new MapElites<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.mutations().getFirst(),
           nPop,
           descriptors,
@@ -416,7 +415,7 @@ public class Solvers {
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
       @Param(value = "crossoverP", dD = 0.8d) double crossoverP,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, MultiObjectiveProblem<S, Q, Double>>> stopCondition,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
       @Param(value = "remap") boolean remap,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
@@ -427,7 +426,7 @@ public class Solvers {
           mapper.mapperFor(exampleS),
           r.factory(),
           nPop,
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.geneticOperators(crossoverP),
           maxUniquenessAttempts,
           remap,
@@ -447,7 +446,7 @@ public class Solvers {
       @Param(
           value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"}) List<BaseOperator> operators,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super SpeciatedPOCPopulationState<Graph<Node, OperatorGraph.NonValuedArc>, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "arcAdditionRate", dD = 3d) double arcAdditionRate,
       @Param(value = "arcRemovalRate", dD = 0.1d) double arcRemovalRate,
       @Param(value = "nodeAdditionRate", dD = 1d) double nodeAdditionRate,
@@ -503,7 +502,7 @@ public class Solvers {
                   .toList(),
               constants
           ),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           geneticOperators,
           nPop,
           remap,
@@ -530,12 +529,12 @@ public class Solvers {
       @Param(value = "beta1", dD = 0.9d) double beta1,
       @Param(value = "beta2", dD = 0.999d) double beta2,
       @Param(value = "epsilon", dD = 1e-8) double epsilon,
-      @Param(value = "nEval", dI = 1000) int nEval
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super OpenAIESState<S, Q>> stopCondition
   ) {
     return exampleS -> new OpenAIEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
         factory.apply(mapper.exampleFor(exampleS)),
-        StopConditions.nOfFitnessEvaluations(nEval),
+        stopCondition,
         batchSize,
         sigma,
         stepSize,
@@ -551,7 +550,7 @@ public class Solvers {
       @Param(value = "name", dS = "pso") String name,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<List<Double>, S> mapper,
       @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super PSOState<S, Q>> stopCondition,
       @Param(value = "nPop", dI = 100) int nPop,
       @Param(value = "w", dD = 0.8d) double w,
       @Param(value = "phiParticle", dD = 1.5d) double phiParticle,
@@ -560,7 +559,7 @@ public class Solvers {
     return exampleS -> new ParticleSwarmOptimization<>(
         mapper.mapperFor(exampleS),
         factory.apply(mapper.exampleFor(exampleS)),
-        StopConditions.nOfFitnessEvaluations(nEval),
+        stopCondition,
         nPop,
         w,
         phiParticle,
@@ -574,7 +573,7 @@ public class Solvers {
       @Param(value = "name", dS = "rs") String name,
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
   ) {
     return exampleS -> {
@@ -582,7 +581,7 @@ public class Solvers {
       return new RandomSearch<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           additionalIndividualComparators
       );
     };
@@ -594,7 +593,7 @@ public class Solvers {
       @Param(value = "name", dS = "rw") String name,
       @Param("representation") Function<G, Representation<G>> representation,
       @Param(value = "mapper", dNPM = "ea.m.identity()") InvertibleMapper<G, S> mapper,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super POCPopulationState<Individual<G, S, Q>, G, S, Q, QualityBasedProblem<S, Q>>> stopCondition,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators
   ) {
     return exampleS -> {
@@ -602,7 +601,7 @@ public class Solvers {
       return new RandomWalk<>(
           mapper.mapperFor(exampleS),
           r.factory(),
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.mutations().getFirst(),
           additionalIndividualComparators
       );
@@ -619,7 +618,7 @@ public class Solvers {
       @Param(value = "tournamentRate", dD = 0.05d) double tournamentRate,
       @Param(value = "minNTournament", dI = 3) int minNTournament,
       @Param(value = "nPop", dI = 100) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") ProgressBasedStopCondition<? super MultiFidelityPOCPopulationState<Individual<G, S, Q>, G, S, Q, MultifidelityQualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "maxUniquenessAttempts", dI = 100) int maxUniquenessAttempts,
       @Param("iComparators") List<PartialComparator<? super Individual<G, S, Q>>> additionalIndividualComparators,
       @Param(value = "schedule", dNPM = "ea.schedule.flat()") DoubleUnaryOperator schedule
@@ -630,7 +629,7 @@ public class Solvers {
           mapper.mapperFor(exampleS),
           r.factory(),
           nPop,
-          StopConditions.nOfFitnessEvaluations(nEval),
+          stopCondition,
           r.geneticOperators(crossoverP),
           new Tournament(Math.max(minNTournament, (int) Math.ceil((double) nPop * tournamentRate))),
           new Last(),
@@ -653,14 +652,14 @@ public class Solvers {
       @Param(value = "parentsRate", dD = 0.33d) double parentsRate,
       @Param(value = "nOfElites", dI = 1) int nOfElites,
       @Param(value = "nPop", dI = 30) int nPop,
-      @Param(value = "nEval", dI = 1000) int nEval,
+      @Param(value = "stop", dNPM = "ea.sc.nOfQualityEvaluations()") Predicate<? super ListPopulationState<Individual<List<Double>, S, Q>, List<Double>, S, Q, TotalOrderQualityBasedProblem<S, Q>>> stopCondition,
       @Param(value = "remap") boolean remap
   ) {
     return exampleS -> new SimpleEvolutionaryStrategy<>(
         mapper.mapperFor(exampleS),
         factory.apply(mapper.exampleFor(exampleS)),
         nPop,
-        StopConditions.nOfFitnessEvaluations(nEval),
+        stopCondition,
         nOfElites,
         (int) Math.round(nPop * parentsRate),
         sigma,

@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * jgea-core
+ * jgea-experimenter
  * %%
  * Copyright (C) 2018 - 2025 Eric Medvet
  * %%
@@ -17,54 +17,51 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-
-package io.github.ericmedvet.jgea.core.solver;
+package io.github.ericmedvet.jgea.experimenter.builders;
 
 import io.github.ericmedvet.jgea.core.problem.MultifidelityQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.problem.Problem;
 import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
-import io.github.ericmedvet.jgea.core.util.Progress;
-import java.util.function.Predicate;
+import io.github.ericmedvet.jgea.core.solver.*;
+import io.github.ericmedvet.jnb.core.Cacheable;
+import io.github.ericmedvet.jnb.core.Discoverable;
+import io.github.ericmedvet.jnb.core.Param;
 
-public class StopConditions {
-
-  private StopConditions() {
+@Discoverable(prefixTemplate = "ea.stoppingCriterion|sc")
+public class StoppingCriteria {
+  private StoppingCriteria() {
   }
 
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <I extends Individual<G, S, Q>, G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> ProgressBasedStopCondition<MultiFidelityPOCPopulationState<I, G, S, Q, P>> cumulativeFidelity(
-      final double f
+      @Param(value = "v", dD = 1000) int v
   ) {
-    return s -> new Progress(0, f, s.cumulativeFidelity());
+    return StopConditions.cumulativeFidelity(v);
   }
 
   @SuppressWarnings("unused")
-  public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> elapsedMillis(final long n) {
-    return s -> new Progress(0, n, s.elapsedMillis());
-  }
-
-  @SuppressWarnings("unused")
-  public static <I extends Individual<G, S, Q>, G, S, Q, P extends QualityBasedProblem<S, Q>> ProgressBasedStopCondition<POCPopulationState<I, G, S, Q, P>> nOfBirths(
-      final long n
+  @Cacheable
+  public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> elapsed(
+      @Param(value = "v", dD = 10) double v
   ) {
-    return s -> new Progress(0, n, s.nOfBirths());
+    return StopConditions.elapsedMillis(Math.round(v * 1000));
   }
 
   @SuppressWarnings("unused")
-  public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> nOfIterations(final long n) {
-    return s -> new Progress(0, n, s.nOfIterations());
+  @Cacheable
+  public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> nOfIterations(
+      @Param(value = "n", dI = 100) int n
+  ) {
+    return StopConditions.nOfIterations(n);
   }
 
   @SuppressWarnings("unused")
+  @Cacheable
   public static <I extends Individual<G, S, Q>, G, S, Q, P extends QualityBasedProblem<S, Q>> ProgressBasedStopCondition<POCPopulationState<I, G, S, Q, P>> nOfQualityEvaluations(
-      final long n
+      @Param(value = "n", dI = 1000) int n
   ) {
-    return s -> new Progress(0, n, s.nOfQualityEvaluations());
+    return StopConditions.nOfQualityEvaluations(n);
   }
 
-  @SuppressWarnings("unused")
-  public static <I extends Individual<G, S, Q>, G, S, Q extends Comparable<Q>, P extends QualityBasedProblem<S, Q>> Predicate<POCPopulationState<I, G, S, Q, P>> targetFitness(
-      final Q targetQ
-  ) {
-    return s -> s.pocPopulation().firsts().stream().map(Individual::quality).anyMatch(f -> f.compareTo(targetQ) <= 0);
-  }
 }

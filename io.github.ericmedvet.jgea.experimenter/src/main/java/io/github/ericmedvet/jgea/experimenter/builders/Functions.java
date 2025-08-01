@@ -229,7 +229,7 @@ public class Functions {
   @Cacheable
   public static <X> FormattedNamedFunction<X, Double> cumulativeFidelity(
       @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>> beforeF,
-      @Param(value = "format", dS = "%7.2f") String format
+      @Param(value = "format", dS = "%8.1f") String format
   ) {
     Function<MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>, Double> f = MultiFidelityPOCPopulationState::cumulativeFidelity;
     return FormattedNamedFunction.from(f, format, "cumulative.fidelity").compose(beforeF);
