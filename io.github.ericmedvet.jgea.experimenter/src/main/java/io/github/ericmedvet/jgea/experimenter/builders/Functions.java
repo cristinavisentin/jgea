@@ -542,6 +542,45 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X, G, S, Q> NamedFunction<X, Archive<MultiFidelityMEPopulationState.LocalState>> mfMeFidelityArchive(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityMEPopulationState<G, S, Q, ?>> beforeF
+  ) {
+    Function<MultiFidelityMEPopulationState<G, S, Q, ?>, Archive<MultiFidelityMEPopulationState.LocalState>> f = MultiFidelityMEPopulationState::fidelityArchive;
+    return NamedFunction.from(f, "mfMeFidelityArchive").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> mfMeLsCumulativeFidelity(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityMEPopulationState.LocalState> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<MultiFidelityMEPopulationState.LocalState, Double> f = MultiFidelityMEPopulationState.LocalState::cumulativeFidelity;
+    return FormattedNamedFunction.from(f, format, "cumulative.fidelity").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> mfMeLsFidelity(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityMEPopulationState.LocalState> beforeF,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<MultiFidelityMEPopulationState.LocalState, Double> f = MultiFidelityMEPopulationState.LocalState::fidelity;
+    return FormattedNamedFunction.from(f, format, "fidelity").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Long> mfMeLsNOfEvals(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityMEPopulationState.LocalState> beforeF,
+      @Param(value = "format", dS = "%4d") String format
+  ) {
+    Function<MultiFidelityMEPopulationState.LocalState, Long> f = MultiFidelityMEPopulationState.LocalState::nOfQualityEvaluations;
+    return FormattedNamedFunction.from(f, format, "n.evals").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, Collection<I>> mids(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
