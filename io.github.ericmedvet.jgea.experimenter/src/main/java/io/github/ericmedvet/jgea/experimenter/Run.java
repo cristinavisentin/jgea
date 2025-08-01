@@ -30,6 +30,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.core.ParamMap;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
 
@@ -40,6 +41,7 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
     @Param("solver") Function<S, ? extends AbstractPopulationBasedIterativeSolver<? extends POCPopulationState<?, G, S, Q, P>, P, ?, G, S, Q>> solver,
     @Param("problem") P problem,
     @Param("randomGenerator") RandomGenerator randomGenerator,
+    @Param(value = "nOfThreads", dI = -1) int nOfThreads,
     @Param(value = "", injection = Param.Injection.MAP_WITH_DEFAULTS) ParamMap map
 ) {
 
@@ -47,6 +49,19 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
       ExecutorService executorService,
       Listener<? super POCPopulationState<?, G, S, Q, P>> listener
   ) throws SolverException {
-    return solver.apply(problem.example().orElse(null)).solve(problem, randomGenerator, executorService, listener);
+    ExecutorService runExecutorService = nOfThreads > 0 ? Executors.newFixedThreadPool(nOfThreads) : executorService;
+    try {
+      return solver.apply(problem.example().orElse(null))
+          .solve(
+              problem,
+              randomGenerator,
+              runExecutorService,
+              listener
+          );
+    } finally {
+      if (nOfThreads > 0) {
+        runExecutorService.shutdown();
+      }
+    }
   }
 }

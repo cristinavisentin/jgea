@@ -1,0 +1,45 @@
+$treeDesc1 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = ea.predicate.isSrConstant())); min = 1; max = 32; nOfBins = 8)
+$treeDesc2 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = ea.predicate.isSrVariable())); min = 1; max = 32; nOfBins = 8)
+
+ea.experiment(
+  runs = (nOfThreads = [1; 2; 4; 8; 12; 16; 20; 24; 32]) * (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) *
+    (problem = [
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "feynman-III-10-19"));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "concrete"));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "energy-efficiency"))
+    ]) *
+    (solver = (stop = ea.sc.nOfQualityEvaluations(n = 2000)) * [
+      ea.s.asyncScheduledMfMapElites(
+        name = "mf-me-flat";
+        schedule = ea.schedule.flat(value = 1);
+        representation = ea.r.srTree();
+        mapper = ea.m.srTreeToNurf();
+        descriptors = [$treeDesc1; $treeDesc2]
+      );
+      ea.s.srGp(name = "gp")
+    ]) * [
+    ea.run()
+  ];
+  listeners = [
+    ea.l.console(
+      functions = [
+        ea.f.cumulativeFidelity();
+        ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+        f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
+        f.percentile(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())); p = 75; format = "%6.2f");
+        ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
+        f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f")
+      ];
+      onlyLast = true
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/elapsed.svg";
+      plot = ea.plot.multi.yBoxplotExp(
+        y = ea.f.elapsedSecs();
+        xSubplot = ea.f.runString(name = "n of threads"; s = "{run.nOfThreads:%2d}");
+        ySubplot = ea.f.runString(name = problem; s = "{run.problem.name}")
+      );
+      type = svg
+    )
+  ]
+)
