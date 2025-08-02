@@ -786,7 +786,7 @@ public class Mappers {
   @Cacheable
   public static <X> InvertibleMapper<X, NamedUnivariateRealFunction> srTreeToNurf(
       @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Tree<Element>> beforeM,
-      @Param(value = "simplify", dB = false) boolean simplify,
+      @Param(value = "simplify", dB = true) boolean simplify,
       @Param(value = "postOperator", dNPM = "ds.f.doubleOp(activationF=identity)") Function<Double, Double> postOperator
   ) {
     return beforeM.andThen(
