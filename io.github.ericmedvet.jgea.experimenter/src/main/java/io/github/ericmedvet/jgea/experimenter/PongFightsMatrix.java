@@ -27,19 +27,15 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.BiSimulation;
 import io.github.ericmedvet.jsdynsym.control.HomogeneousBiAgentTask;
 import io.github.ericmedvet.jsdynsym.control.pong.PongAgent;
+import io.github.ericmedvet.jsdynsym.control.pong.PongDrawer;
 import io.github.ericmedvet.jsdynsym.control.pong.PongEnvironment;
 import io.github.ericmedvet.jsdynsym.core.numerical.NumericalDynamicalSystem;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -50,14 +46,20 @@ public class PongFightsMatrix {
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
 
-    String folder = "/home/il_bello/IdeaProjects/results/pong-ablation-study/2025-04-07--14-56-10/";
-    String CSVPath1 = folder + "allBest.csv";
-    boolean singleCSV = true;
-    String CSVPath2 = folder + "";
+    String folder = "/home/il_bello/IdeaProjects/results/ss-roarnet/";
+    String CSVPath1 = folder + "allBest_bi.csv";
+    String CSVPath2 = folder + "allBest_trainer.csv";
     String delimiter = ";";
+    boolean singleCSV = false;
+    boolean saveVideo = false;
 
-    String score1 = "ds.e.pong.score1()";
-    String score2 = "ds.e.pong.score2()";
+    String videoFolder = folder + "videos/";
+    if (saveVideo) {
+      Files.createDirectories(Paths.get(videoFolder));
+    }
+
+    String score1 = "ds.e.pong.shiftedScoreDiff1()";
+    String score2 = "ds.e.pong.shiftedScoreDiff2()";
     String numberCollisionsWithBall1 = "ds.e.pong.numberOfCollisionsWithBall1()";
     String numberCollisionsWithBall2 = "ds.e.pong.numberOfCollisionsWithBall2()";
 
@@ -127,10 +129,10 @@ public class PongFightsMatrix {
         opponents.add(new Pair<>(name, opponent));
       }
 
-      opponentIndices.put("simple", opponentNames.size());
-      opponentNames.add("simple");
+      opponentIndices.put("trainer", opponentNames.size());
+      opponentNames.add("trainer");
       for (int i = 0; i < maxSeed; i++) {
-        opponents.add(new Pair<>("simple", new PongAgent()));
+        opponents.add(new Pair<>("trainer", new PongAgent()));
       }
 
       int numOpponents = opponentNames.size();
@@ -143,12 +145,28 @@ public class PongFightsMatrix {
       double[][] totalCollisions2 = new double[numOpponents][numOpponents];
 
       Map<String, Integer> winsMap = new HashMap<>();
+      Map<String, Integer> tieMap = new HashMap<>();
+      Map<String, Integer> winsAgainstSimple = new HashMap<>();
+      Map<String, Integer> tieAgainstSimple = new HashMap<>();
+      Map<String, Integer> matchesPlayed = new HashMap<>();
+      Map<String, Integer> matchesVsSimple = new HashMap<>();
+
       for (String name : opponentNames) {
         winsMap.put(name, 0);
+        tieMap.put(name, 0);
+        winsAgainstSimple.put(name, 0);
+        tieAgainstSimple.put(name, 0);
+        matchesPlayed.put(name, 0);
+        matchesVsSimple.put(name, 0);
       }
 
       HomogeneousBiAgentTask<NumericalDynamicalSystem<?>, double[], double[], PongEnvironment.State> task = HomogeneousBiAgentTask
-          .fromHomogenousBiEnvironment(() -> environment, s -> false, new DoubleRange(0, 60), 0.05);
+          .fromHomogenousBiEnvironment(
+              () -> environment,
+              s -> false,
+              new DoubleRange(0, 60),
+              0.05
+          );
 
       for (Pair<String, NumericalDynamicalSystem<?>> opponent1 : opponents) {
         for (Pair<String, NumericalDynamicalSystem<?>> opponent2 : opponents) {
@@ -173,10 +191,45 @@ public class PongFightsMatrix {
           totalCollisions2[index1][index2] += collisions2;
           matchCounts[index1][index2]++;
 
+          matchesPlayed.put(opponent1.first(), matchesPlayed.get(opponent1.first()) + 1);
+          matchesPlayed.put(opponent2.first(), matchesPlayed.get(opponent2.first()) + 1);
+
+          if (opponent1.first().equals("trainer") && !opponent2.first().equals("trainer")) {
+            matchesVsSimple.put(opponent2.first(), matchesVsSimple.get(opponent2.first()) + 1);
+            if (fitness1 < fitness2 && saveVideo) {
+              String videoPath = videoFolder + opponent1.first() + index1 + "_VS_" + opponent2
+                  .first() + "__" + RandomGenerator.getDefault().nextInt() + ".mp4";
+              PongDrawer pongDrawer = new PongDrawer();
+              pongDrawer.videoBuilder().save(new File(videoPath), matchOutcome);
+            }
+          } else if (opponent2.first().equals("trainer") && !opponent1.first().equals("trainer")) {
+            matchesVsSimple.put(opponent1.first(), matchesVsSimple.get(opponent1.first()) + 1);
+            if (fitness1 > fitness2 && saveVideo) {
+              String videoPath = videoFolder + opponent1.first() + index1 + "_VS_" + opponent2
+                  .first() + "__" + RandomGenerator.getDefault().nextInt() + ".mp4";
+              PongDrawer pongDrawer = new PongDrawer();
+              pongDrawer.videoBuilder().save(new File(videoPath), matchOutcome);
+            }
+          }
+
           if (fitness1 > fitness2) {
             winsMap.put(opponent1.first(), winsMap.get(opponent1.first()) + 1);
+            if (opponent2.first().equals("trainer") && !opponent1.first().equals("trainer")) {
+              winsAgainstSimple.put(opponent1.first(), winsAgainstSimple.get(opponent1.first()) + 1);
+            }
           } else if (fitness2 > fitness1) {
             winsMap.put(opponent2.first(), winsMap.get(opponent2.first()) + 1);
+            if (opponent1.first().equals("trainer") && !opponent2.first().equals("trainer")) {
+              winsAgainstSimple.put(opponent2.first(), winsAgainstSimple.get(opponent2.first()) + 1);
+            }
+          } else {
+            tieMap.put(opponent1.first(), tieMap.get(opponent1.first()) + 1);
+            tieMap.put(opponent2.first(), tieMap.get(opponent2.first()) + 1);
+            if (opponent2.first().equals("trainer") && !opponent1.first().equals("trainer")) {
+              tieAgainstSimple.put(opponent1.first(), tieAgainstSimple.get(opponent1.first()) + 1);
+            } else if (opponent1.first().equals("trainer") && !opponent2.first().equals("trainer")) {
+              tieAgainstSimple.put(opponent2.first(), tieAgainstSimple.get(opponent2.first()) + 1);
+            }
           }
         }
       }
@@ -184,21 +237,30 @@ public class PongFightsMatrix {
       for (int i = 0; i < numOpponents; i++) {
         for (int j = 0; j < numOpponents; j++) {
           if (matchCounts[i][j] > 0) {
-            scoreMatrix[i][j] = (" = " + (totalScore1[i][j] / matchCounts[i][j]) + " - " + (totalScore2[i][j] / matchCounts[i][j]))
-                .replace(".", ",");
-            collisionsMatrix[i][j] = (" = " + (totalCollisions1[i][j] / matchCounts[i][j]) + " - " + (totalCollisions2[i][j] / matchCounts[i][j]))
-                .replace(".", ",");
+            scoreMatrix[i][j] = " = " + (totalScore1[i][j] / matchCounts[i][j]) + " / " + (totalScore2[i][j] / matchCounts[i][j]);
+            collisionsMatrix[i][j] = " = " + (totalCollisions1[i][j] / matchCounts[i][j]) + " / " + (totalCollisions2[i][j] / matchCounts[i][j]);
           }
         }
       }
 
       List<Map.Entry<String, Integer>> ranking = new ArrayList<>(winsMap.entrySet());
-      ranking.sort((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
+      ranking.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
 
       try (BufferedWriter rankingWriter = Files.newBufferedWriter(Paths.get(folder + "ranking.csv"))) {
-        rankingWriter.write("nome;vittorie\n");
+        rankingWriter.write("nome;win_total;tie_total;win_trainer;tie_trainer;fights_total;fights_vs_trainer\n");
         for (Map.Entry<String, Integer> entry : ranking) {
-          rankingWriter.write(entry.getKey() + ";" + entry.getValue() + "\n");
+          String agentName = entry.getKey();
+          String vsSimpleWins = agentName.equals("trainer") ? "-" : String.valueOf(winsAgainstSimple.get(agentName));
+          String totalMatches = String.valueOf(matchesPlayed.get(agentName));
+          String matchesAgainstSimple = agentName.equals("trainer") ? "-" : String.valueOf(
+              matchesVsSimple.get(agentName)
+          );
+          String tieSimple = agentName.equals("trainer") ? "-" : String.valueOf(tieAgainstSimple.get(agentName));
+          String tieTotal = String.valueOf(tieMap.get(agentName));
+          rankingWriter.write(
+              agentName + ";" + entry
+                  .getValue() + ";" + tieTotal + ";" + vsSimpleWins + ";" + tieSimple + ";" + totalMatches + ";" + matchesAgainstSimple + "\n"
+          );
         }
       }
 

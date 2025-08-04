@@ -19,6 +19,12 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
+import io.github.ericmedvet.jgea.core.order.PartialComparator;
+import io.github.ericmedvet.jgea.core.order.PartiallyOrderedCollection;
+import io.github.ericmedvet.jgea.core.solver.Individual;
+import io.github.ericmedvet.jgea.core.solver.bi.AbstractBiEvolver;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.experimenter.drawer.DoubleGridDrawer;
 import io.github.ericmedvet.jgea.problem.ca.MultivariateRealGridCellularAutomaton;
@@ -38,14 +44,55 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Discoverable(prefixTemplate = "ea.misc")
 public class Miscs {
 
   private Miscs() {
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> bestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> {
+      Collection<MEIndividual<G, S, Q>> evaluatedPopulation = population.stream()
+          .filter(i -> i.quality() != null)
+          .toList();
+      Collection<MEIndividual<G, S, Q>> nullQualityPopulation = population.stream()
+          .filter(i -> i.quality() == null)
+          .toList();
+      PartialComparator<MEIndividual<G, S, Q>> partialComparator = (me1, me2) -> problem.qualityComparator()
+          .compare(me1.quality(), me2.quality());
+      List<Collection<MEIndividual<G, S, Q>>> fronts = new ArrayList<>(
+          PartiallyOrderedCollection
+              .from(evaluatedPopulation, partialComparator)
+              .fronts()
+      );
+
+      if (!nullQualityPopulation.isEmpty()) {
+        fronts.add(nullQualityPopulation);
+      }
+      List<MEIndividual<G, S, Q>> opponents = new ArrayList<>();
+      for (Collection<MEIndividual<G, S, Q>> front : fronts) {
+        for (MEIndividual<G, S, Q> individualFromFront : front) {
+          if (opponents.size() >= nOfOpponents) {
+            break;
+          }
+          opponents.add(individualFromFront);
+        }
+        if (opponents.size() >= nOfOpponents) {
+          break;
+        }
+      }
+      return opponents;
+    };
   }
 
   @SuppressWarnings("unused")
@@ -114,14 +161,6 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static BinaryOperator<Double> lossyAverage(
-      @Param(value = "memoryFactor", dD = 0.5) double memoryFactor
-  ) {
-    return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static BufferedImage imgByName(
       @Param("name") String name,
       @Param(value = "gateBGColor", dNPM = "ea.misc.colorByName(name = black)") Color bgColor,
@@ -144,6 +183,14 @@ public class Miscs {
       @Param(value = "marginRate", dD = 0.1) double marginRate
   ) {
     return ImageUtils.stringDrawer(fgColor, bgColor, marginRate).buildRaster(new ImageBuilder.ImageInfo(w, h), s);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static BinaryOperator<Double> lossyAverage(
+      @Param(value = "memoryFactor", dD = 0.5) double memoryFactor
+  ) {
+    return (q1, q2) -> q1 * memoryFactor + (1 - memoryFactor) * q2;
   }
 
   @SuppressWarnings("unused")
@@ -176,6 +223,110 @@ public class Miscs {
                 )
             )
     );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static BinaryOperator<Double> minValue() {
+    return Math::min;
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<Individual<G, S, Q>, S, Q, O> randomSelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> IntStream.range(0, nOfOpponents)
+        .mapToObj(j -> Misc.pickRandomly(population, random))
+        .toList();
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> randomMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> IntStream.range(0, nOfOpponents)
+        .mapToObj(j -> Misc.pickRandomly(population, random))
+        .toList();
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> nearestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> {
+      double[] individualCoordinates = individual.coordinates()
+          .stream()
+          .mapToDouble(MapElites.Descriptor.Coordinate::value)
+          .toArray();
+      BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
+        if (v1.length != v2.length) {
+          throw new IllegalArgumentException("Mismatch in array size");
+        }
+        return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
+      };
+      return population.stream()
+          .filter(candidate -> !candidate.equals(individual))
+          .sorted(
+              Comparator.comparingDouble(
+                  candidate -> euclideanDistance.apply(
+                      individualCoordinates,
+                      candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray()
+                  )
+              )
+          )
+          .limit(nOfOpponents)
+          .collect(Collectors.toList());
+    };
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static Object nullValue() {
+    return null;
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> farthestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> {
+      double[] targetCoordinates = individual.coordinates()
+          .stream()
+          .mapToDouble(MapElites.Descriptor.Coordinate::value)
+          .toArray();
+      BiFunction<double[], double[], Double> euclideanDistance = (v1, v2) -> {
+        if (v1.length != v2.length) {
+          throw new IllegalArgumentException("Mismatch in array size");
+        }
+        return Math.sqrt(IntStream.range(0, v1.length).mapToDouble(i -> Math.pow(v1[i] - v2[i], 2)).sum());
+      };
+      return population.stream()
+          .sorted(
+              Comparator.comparingDouble(
+                  candidate -> -euclideanDistance.apply(
+                      targetCoordinates,
+                      candidate.coordinates().stream().mapToDouble(MapElites.Descriptor.Coordinate::value).toArray()
+                  )
+              )
+          )
+          .limit(nOfOpponents)
+          .collect(Collectors.toList());
+    };
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> oldestMESelector(
+      @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
+  ) {
+    return (population, individual, problem, random) -> population.stream()
+        .sorted(Comparator.comparingLong(MEIndividual::genotypeBirthIteration))
+        .limit(nOfOpponents)
+        .collect(Collectors.toList());
   }
 
   @SuppressWarnings("unused")
