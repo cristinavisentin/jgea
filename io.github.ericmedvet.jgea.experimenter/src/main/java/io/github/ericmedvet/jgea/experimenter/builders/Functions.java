@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
+import io.github.ericmedvet.jgea.core.InvertibleMapper;
 import io.github.ericmedvet.jgea.core.problem.BehaviorBasedProblem;
 import io.github.ericmedvet.jgea.core.problem.MultiTargetProblem;
 import io.github.ericmedvet.jgea.core.problem.Problem;
@@ -45,6 +46,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
+import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.Video;
@@ -126,10 +128,7 @@ public class Functions {
   public static <X, I extends Individual<G, S, Q>, G, S, Q> NamedFunction<X, I> best(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<I, G, S, Q, ?>> beforeF
   ) {
-    Function<POCPopulationState<I, G, S, Q, ?>, I> f = state -> state.pocPopulation()
-        .firsts()
-        .iterator()
-        .next();
+    Function<POCPopulationState<I, G, S, Q, ?>, I> f = state -> state.pocPopulation().firsts().iterator().next();
     return NamedFunction.from(f, "best").compose(beforeF);
   }
 
@@ -183,6 +182,32 @@ public class Functions {
             relative
         );
     return NamedFunction.from(f, "coMe.strategy2.field").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> crossEpistasis(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
+      @Param(value = "startOffset", dI = 0) int startOffset,
+      @Param(value = "endOffset", dI = 0) int endOffset,
+      @Param(value = "splitOffset", dI = 0) int splitOffset,
+      @Param(value = "format", dS = "%5.3f") String format
+  ) {
+    Function<IntString, Double> f = is -> {
+      List<Integer> indexes = is.genes().subList(startOffset, is.genes().size() - endOffset);
+      List<Integer> leftIndexes = indexes.subList(0, splitOffset);
+      List<Integer> rightIndexes = indexes.subList(splitOffset, indexes.size());
+      Set<Integer> commonIndexes = new HashSet<>(leftIndexes);
+      commonIndexes.retainAll(rightIndexes);
+      double leftRate = (double) commonIndexes.size() / (double) leftIndexes.size();
+      double rightRate = (double) commonIndexes.size() / (double) rightIndexes.size();
+      return (leftRate + rightRate) / 2d;
+    };
+    return FormattedNamedFunction.from(
+        f,
+        format,
+        "cross.epistasis[%d;%d;%d]".formatted(startOffset, endOffset, splitOffset)
+    ).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -272,6 +297,18 @@ public class Functions {
   }
 
   @SuppressWarnings("unused")
+  public static <X, G, S> FormattedNamedFunction<X, S> fromMapper(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, G> beforeF,
+      @Param("mapper") InvertibleMapper<G, S> mapper,
+      @Param("example") S example,
+      @Param(value = "name", iS = "{mapper.name}") String name,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    NamedFunction<G, S> f = NamedFunction.from(mapper.mapperFor(example));
+    return FormattedNamedFunction.from(f, format, name).compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
   public static <X, S, Q> FormattedNamedFunction<X, Q> fromProblem(
       @Param(value = "of", dNPM = "f.identity()") Function<X, S> beforeF,
       @Param("problem") QualityBasedProblem<S, Q> problem,
@@ -289,6 +326,25 @@ public class Functions {
   ) {
     Function<Individual<G, ?, ?>, G> f = Individual::genotype;
     return FormattedNamedFunction.from(f, format, "genotype").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, List<Double>> getLayerWeights(
+      @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<MultiLayerPerceptron, List<Double>> f = mlp -> {
+      int[] neurons = new int[mlp.nOfLayers()];
+      for (int i = 0; i < neurons.length; i++) {
+        neurons[i] = mlp.sizeOfLayer(i);
+      }
+      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
+      double[][] requestedWeights = unflat[indexOfLayer];
+      return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
+    };
+    return FormattedNamedFunction.from(f, format, "getLayerWeights").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
