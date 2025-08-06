@@ -21,6 +21,8 @@ package io.github.ericmedvet.jgea.experimenter.builders;
 
 import io.github.ericmedvet.jgea.experimenter.listener.plot.AggregatedXYDataSeriesMRPAF;
 import io.github.ericmedvet.jgea.experimenter.listener.plot.DistributionMRPAF;
+import io.github.ericmedvet.jgea.experimenter.listener.plot.EAggregatedXYDataSeriesMRPAF;
+import io.github.ericmedvet.jgea.experimenter.listener.plot.RAggregatedXYDataSeriesMRPAF;
 import io.github.ericmedvet.jgea.experimenter.listener.plot.ScatterMRPAF;
 import io.github.ericmedvet.jnb.core.*;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
@@ -95,24 +97,41 @@ public class MultiPlots {
       @Param("ySubplot") Function<? super R, String> ySubplotFunction,
       @Param("line") Function<? super R, String> lineFunction,
       @Param("x") Function<? super E, ? extends Number> xFunction,
-      @Param("y") Function<? super E, ? extends Number> yFunction,
+      @Param("y") Function<?, ? extends Number> yFunction,
       @Param(value = "valueAggregator", dNPM = "f.median()") Function<List<Number>, Number> valueAggregator,
       @Param(value = "minAggregator", dNPM = "f.percentile(p=25)") Function<List<Number>, Number> minAggregator,
       @Param(value = "maxAggregator", dNPM = "f.percentile(p=75)") Function<List<Number>, Number> maxAggregator,
       @Param(value = "xRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange xRange,
-      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange
+      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange,
+      @Param("useRunForY") boolean useRunForY
   ) {
-    return new AggregatedXYDataSeriesMRPAF<>(
+    if (useRunForY) {
+      //noinspection unchecked
+      return new RAggregatedXYDataSeriesMRPAF<>(
+          xSubplotFunction,
+          ySubplotFunction,
+          lineFunction,
+          xFunction,
+          valueAggregator,
+          minAggregator,
+          maxAggregator,
+          xRange,
+          yRange,
+          (Function<? super R, ? extends Number>) yFunction
+      );
+    }
+    //noinspection unchecked
+    return new EAggregatedXYDataSeriesMRPAF<>(
         xSubplotFunction,
         ySubplotFunction,
         lineFunction,
         xFunction,
-        yFunction,
         valueAggregator,
         minAggregator,
         maxAggregator,
         xRange,
-        yRange
+        yRange,
+        (Function<? super E, ? extends Number>) yFunction
     );
   }
 

@@ -2457,7 +2457,7 @@ Aliases: `ea.plot.m`, `ea.plot.multi`
 
 ### Builder `ea.plot.multi.quality()`
 
-`ea.plot.m.quality(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; xQuantization; q)`
+`ea.plot.m.quality(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; useRunForY; xQuantization; q)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -2465,12 +2465,13 @@ Aliases: `ea.plot.m`, `ea.plot.multi`
 | `ySubplot` | npm | `ea.f.runString(s = "_"; name = none)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `line` | npm | `ea.f.runString(s = "{run.solver.name}"; name = solver)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `x` | npm | `f.quantized(q = 1; of = ea.f.nOfEvals())` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
-| `y` | npm | `f.composition(of = ea.f.quality(of = ea.f.best()); then = f.identity())` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
+| `y` | npm | `f.composition(of = ea.f.quality(of = ea.f.best()); then = f.identity())` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;?, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `valueAggregator` | npm | `f.median()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `minAggregator` | npm | `f.percentile(p = 25)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `maxAggregator` | npm | `f.percentile(p = 75)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `xRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `yRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
+| `useRunForY` | b | `false` | <code>boolean</code> |
 | `xQuantization` | i | `1` | <code><abbr title="java.lang.String">String</abbr></code> |
 | `q` | npm | `f.identity()` | <code><abbr title="java.lang.String">String</abbr></code> |
 
@@ -2531,7 +2532,7 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot
 
 ### Builder `ea.plot.multi.uniqueness()`
 
-`ea.plot.m.uniqueness(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; xQuantization)`
+`ea.plot.m.uniqueness(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; useRunForY; xQuantization)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -2539,12 +2540,13 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot
 | `ySubplot` | npm | `ea.f.runString(s = "_"; name = none)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `line` | npm | `ea.f.runString(s = "{run.solver.name}"; name = solver)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `x` | npm | `f.quantized(q = 1; of = ea.f.nOfEvals())` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
-| `y` | npm | `f.uniqueness(of = f.each(of = ea.f.all(); mapF = ea.f.genotype()))` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
+| `y` | npm | `f.uniqueness(of = f.each(of = ea.f.all(); mapF = ea.f.genotype()))` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;?, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `valueAggregator` | npm | `f.median()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `minAggregator` | npm | `f.percentile(p = 25)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `maxAggregator` | npm | `f.percentile(p = 75)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `xRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `yRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
+| `useRunForY` | b | `false` | <code>boolean</code> |
 | `xQuantization` | i | `1` | <code><abbr title="java.lang.String">String</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot.AggregatedXYDataSeriesMRPAF">AggregatedXYDataSeriesMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.MultiPlots.xy()` by jgea-experimenter:2.7.1-SNAPSHOT
@@ -2567,7 +2569,7 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot
 
 ### Builder `ea.plot.multi.xy()`
 
-`ea.plot.m.xy(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange)`
+`ea.plot.m.xy(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; useRunForY)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -2575,18 +2577,19 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot
 | `ySubplot` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `line` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `x` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
-| `y` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
+| `y` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;?, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `valueAggregator` | npm | `f.median()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `minAggregator` | npm | `f.percentile(p = 25)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `maxAggregator` | npm | `f.percentile(p = 75)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `xRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `yRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
+| `useRunForY` | b | `false` | <code>boolean</code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot.AggregatedXYDataSeriesMRPAF">AggregatedXYDataSeriesMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.MultiPlots.xy()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.plot.multi.xyExp()`
 
-`ea.plot.m.xyExp(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; xQuantization)`
+`ea.plot.m.xyExp(xSubplot; ySubplot; line; x; y; valueAggregator; minAggregator; maxAggregator; xRange; yRange; useRunForY; xQuantization)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -2594,12 +2597,13 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot
 | `ySubplot` | npm | `ea.f.runString(s = "_"; name = none)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `line` | npm | `ea.f.runString(s = "{run.solver.name}"; name = solver)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super R, <abbr title="java.lang.String">String</abbr>&gt;</code> |
 | `x` | npm | `f.quantized(q = 1; of = ea.f.nOfEvals())` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
-| `y` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;? super E, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
+| `y` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;?, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `valueAggregator` | npm | `f.median()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `minAggregator` | npm | `f.percentile(p = 25)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `maxAggregator` | npm | `f.percentile(p = 75)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Number">Number</abbr>&gt;, <abbr title="java.lang.Number">Number</abbr>&gt;</code> |
 | `xRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `yRange` | npm | `m.range(min = -Infinity; max = Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
+| `useRunForY` | b | `false` | <code>boolean</code> |
 | `xQuantization` | i | `1` | <code><abbr title="java.lang.String">String</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.experimenter.listener.plot.AggregatedXYDataSeriesMRPAF">AggregatedXYDataSeriesMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.MultiPlots.xy()` by jgea-experimenter:2.7.1-SNAPSHOT
