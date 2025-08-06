@@ -32,6 +32,7 @@ import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
 import io.github.ericmedvet.jgea.core.representation.tree.*;
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element;
+import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element.Operator;
 import io.github.ericmedvet.jgea.experimenter.Representation;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
@@ -41,6 +42,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SequencedSet;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -140,12 +142,18 @@ public class Representations {
           IndependentFactory.picker(constantElements)
       );
       IndependentFactory<Element> nonTerminalFactory = IndependentFactory.picker(operators);
+      ToIntFunction<Element> arityFunction = e -> {
+        if (e instanceof Operator o) {
+          return o.arity();
+        }
+        return 0;
+      };
       IndependentFactory<List<Tree<Element>>> treeListFactory = new FixedLengthListFactory<>(
           g.size(),
-          new TreeIndependentFactory<>(minTreeH, maxTreeH, x -> 2, nonTerminalFactory, terminalFactory, 0.5)
+          new TreeIndependentFactory<>(minTreeH, maxTreeH, arityFunction, nonTerminalFactory, terminalFactory, 0.5)
       );
       // single tree factory
-      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(x -> 2, nonTerminalFactory, terminalFactory);
+      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(arityFunction, nonTerminalFactory, terminalFactory);
       // subtree between same position trees
       SubtreeCrossover<Element> subtreeCrossover = new SubtreeCrossover<>(maxTreeH);
       Crossover<List<Tree<Element>>> pairWiseSubtreeCrossover = (list1, list2, rnd) -> IntStream.range(0, list1.size())
@@ -203,9 +211,15 @@ public class Representations {
       );
       IndependentFactory<Element> nonTerminalFactory = IndependentFactory.picker(operators);
       // single tree factory
-      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(x -> 2, nonTerminalFactory, terminalFactory);
+      ToIntFunction<Element> arityFunction = e -> {
+        if (e instanceof Operator o) {
+          return o.arity();
+        }
+        return 0;
+      };
+      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(arityFunction, nonTerminalFactory, terminalFactory);
       return new Representation<>(
-          new RampedHalfAndHalf<>(minTreeH, maxTreeH, x -> 2, nonTerminalFactory, terminalFactory),
+          new RampedHalfAndHalf<>(minTreeH, maxTreeH, arityFunction, nonTerminalFactory, terminalFactory),
           new SubtreeMutation<>(maxTreeH, treeBuilder),
           new SubtreeCrossover<>(maxTreeH)
       );
