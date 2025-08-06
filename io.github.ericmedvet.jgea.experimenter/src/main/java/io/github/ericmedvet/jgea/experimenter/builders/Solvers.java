@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.ElitistGeneticAlgorithm;
+import io.github.ericmedvet.jgea.core.solver.ElitistGeneticAlgorithm;
 import io.github.ericmedvet.jgea.core.Factory;
 import io.github.ericmedvet.jgea.core.InvertibleMapper;
 import io.github.ericmedvet.jgea.core.distance.Jaccard;
