@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.UnaryOperator;
 import java.util.logging.Logger;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
@@ -215,10 +214,6 @@ public interface NumericalDataset extends IndexedProvider<ExampleBasedProblem.Ex
     return from(xVarNames(), yVarNames(), dataPointProvider().shuffled(rnd));
   }
 
-  default NumericalDataset prepared() {
-    return then(UnaryOperator.identity());
-  }
-
   default String summary() {
     StringBuilder sb = new StringBuilder();
     sb.append(
@@ -247,35 +242,6 @@ public interface NumericalDataset extends IndexedProvider<ExampleBasedProblem.Ex
       );
     });
     return sb.toString();
-  }
-
-  default NumericalDataset then(
-      UnaryOperator<ExampleBasedProblem.Example<Map<String, Double>, Map<String, Double>>> operator
-  ) {
-    NumericalDataset thisNumericalDataset = this;
-    IndexedProvider<ExampleBasedProblem.Example<Map<String, Double>, Map<String, Double>>> cached = thisNumericalDataset
-        .then(operator);
-    return new NumericalDataset() {
-      @Override
-      public IndexedProvider<double[]> dataPointProvider() {
-        return thisNumericalDataset.dataPointProvider();
-      }
-
-      @Override
-      public List<String> xVarNames() {
-        return thisNumericalDataset.xVarNames();
-      }
-
-      @Override
-      public List<String> yVarNames() {
-        return thisNumericalDataset.yVarNames();
-      }
-
-      @Override
-      public ExampleBasedProblem.Example<Map<String, Double>, Map<String, Double>> get(int i) {
-        return cached.get(i);
-      }
-    };
   }
 
   default NumericalDataset xScaled(NumericalDataset.Scaling scaling) {
@@ -346,4 +312,12 @@ public interface NumericalDataset extends IndexedProvider<ExampleBasedProblem.Ex
     return dataPointProvider().then(vs -> vs[index]);
   }
 
+  @Override
+  default NumericalDataset cached() {
+    return from(
+        xVarNames(),
+        yVarNames(),
+        dataPointProvider().cached()
+    );
+  }
 }

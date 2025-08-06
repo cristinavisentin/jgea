@@ -60,7 +60,7 @@ public class NumericalIndexedProviders {
         case "feynman-III-10-19" -> NumericalDataset.fromResourceCSV(".*", "target", name, limit);
         default -> throw new IllegalArgumentException("Unknown bundled dataset: %s".formatted(name));
       };
-      return dataset.xScaled(xScaling).yScaled(yScaling).prepared();
+      return dataset.xScaled(xScaling).yScaled(yScaling).cached();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

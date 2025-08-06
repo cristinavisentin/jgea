@@ -128,11 +128,10 @@ public interface IndexedProvider<T> {
 
   default <K> IndexedProvider<K> then(Function<? super T, ? extends K> function) {
     IndexedProvider<T> thisIndexedProvider = this;
-    Map<Integer, K> computed = Collections.synchronizedMap(new HashMap<>(size()));
     return new IndexedProvider<>() {
       @Override
       public K get(int i) {
-        return computed.computeIfAbsent(i, j -> function.apply(thisIndexedProvider.get(j)));
+        return function.apply(thisIndexedProvider.get(i));
       }
 
       @Override
@@ -140,5 +139,9 @@ public interface IndexedProvider<T> {
         return thisIndexedProvider.indexes();
       }
     };
+  }
+
+  default IndexedProvider<T> cached() {
+    return from(stream().toList());
   }
 }
