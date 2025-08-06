@@ -106,6 +106,16 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X> FormattedNamedFunction<X, Double> asDouble(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, String> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<String, Double> f = Double::parseDouble;
+    return FormattedNamedFunction.from(f, format, NamedFunction.name(beforeF)).compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X, B> FormattedNamedFunction<X, B> behavior(
       @Param(value = "of", dNPM = "f.identity()") Function<X, BehaviorBasedProblem.Outcome<B, ?>> beforeF,
       @Param(value = "format", dS = "%s") String format

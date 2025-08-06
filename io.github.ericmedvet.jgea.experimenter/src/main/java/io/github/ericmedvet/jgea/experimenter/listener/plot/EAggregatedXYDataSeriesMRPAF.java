@@ -25,41 +25,41 @@ import java.util.List;
 import java.util.function.Function;
 
 public class EAggregatedXYDataSeriesMRPAF<E, R, K> extends AggregatedXYDataSeriesMRPAF<E, R, K> {
-  private final Function<? super E, ? extends Number> yFunction;
+  private final Function<? super E, ? extends Number> xFunction;
 
   public EAggregatedXYDataSeriesMRPAF(
       Function<? super R, ? extends K> xSubplotFunction,
       Function<? super R, ? extends K> ySubplotFunction,
       Function<? super R, ? extends K> lineFunction,
-      Function<? super E, ? extends Number> xFunction,
+      Function<? super E, ? extends Number> yFunction,
       Function<List<Number>, Number> valueAggregator,
       Function<List<Number>, Number> minAggregator,
       Function<List<Number>, Number> maxAggregator,
       DoubleRange xRange,
       DoubleRange yRange,
-      Function<? super E, ? extends Number> yFunction
+      Function<? super E, ? extends Number> xFunction
   ) {
     super(
         xSubplotFunction,
         ySubplotFunction,
         lineFunction,
-        xFunction,
+        yFunction,
         valueAggregator,
         minAggregator,
         maxAggregator,
         xRange,
         yRange
     );
-    this.yFunction = yFunction;
+    this.xFunction = xFunction;
   }
 
   @Override
-  protected Number yValue(E e, R r) {
-    return yFunction.apply(e);
+  protected Number xValue(E e, R r) {
+    return xFunction.apply(e);
   }
 
   @Override
-  protected String yName() {
-    return NamedFunction.name(yFunction);
+  protected String xName() {
+    return NamedFunction.name(xFunction);
   }
 }

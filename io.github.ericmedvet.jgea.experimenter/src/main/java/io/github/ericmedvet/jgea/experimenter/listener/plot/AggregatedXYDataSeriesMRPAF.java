@@ -28,7 +28,7 @@ import java.util.function.Function;
 public abstract class AggregatedXYDataSeriesMRPAF<E, R, K> extends AbstractMultipleRPAF<E, XYDataSeriesPlot, R, List<XYDataSeries>, K, Table<Number, K, List<Number>>> {
 
   private final Function<? super R, ? extends K> lineFunction;
-  private final Function<? super E, ? extends Number> xFunction;
+  private final Function<? super E, ? extends Number> yFunction;
   private final Function<List<Number>, Number> valueAggregator;
   private final Function<List<Number>, Number> minAggregator;
   private final Function<List<Number>, Number> maxAggregator;
@@ -39,7 +39,7 @@ public abstract class AggregatedXYDataSeriesMRPAF<E, R, K> extends AbstractMulti
       Function<? super R, ? extends K> xSubplotFunction,
       Function<? super R, ? extends K> ySubplotFunction,
       Function<? super R, ? extends K> lineFunction,
-      Function<? super E, ? extends Number> xFunction,
+      Function<? super E, ? extends Number> yFunction,
       Function<List<Number>, Number> valueAggregator,
       Function<List<Number>, Number> minAggregator,
       Function<List<Number>, Number> maxAggregator,
@@ -48,7 +48,7 @@ public abstract class AggregatedXYDataSeriesMRPAF<E, R, K> extends AbstractMulti
   ) {
     super(xSubplotFunction, ySubplotFunction);
     this.lineFunction = lineFunction;
-    this.xFunction = xFunction;
+    this.yFunction = yFunction;
     this.valueAggregator = valueAggregator;
     this.minAggregator = minAggregator;
     this.maxAggregator = maxAggregator;
@@ -114,14 +114,14 @@ public abstract class AggregatedXYDataSeriesMRPAF<E, R, K> extends AbstractMulti
     return new XYDataSeriesPlot(
         "%s vs. %s%s"
             .formatted(
-                yName(),
-                NamedFunction.name(xFunction),
+                NamedFunction.name(yFunction),
+                xName(),
                 subtitle.isEmpty() ? subtitle : (" (%s)".formatted(subtitle))
             ),
         NamedFunction.name(xSubplotFunction),
         NamedFunction.name(ySubplotFunction),
-        NamedFunction.name(xFunction),
-        yName(),
+        xName(),
+        NamedFunction.name(yFunction),
         xRange,
         yRange,
         grid
@@ -135,23 +135,23 @@ public abstract class AggregatedXYDataSeriesMRPAF<E, R, K> extends AbstractMulti
 
   @Override
   protected Table<Number, K, List<Number>> update(K xK, K yK, Table<Number, K, List<Number>> table, E e, R r) {
-    Number x = xFunction.apply(e);
+    Number x = xValue(e, r);
     K lineK = lineFunction.apply(r);
     List<Number> values = table.get(x, lineK);
     if (values == null) {
       values = new ArrayList<>();
       table.set(x, lineK, values);
     }
-    values.add(yValue(e, r));
+    values.add(yFunction.apply(e));
     return table;
   }
 
   @Override
   public String toString() {
-    return "aggregatedXyMRPAF(xFunction=" + xFunction + ";yFunction=" + yName() + ')';
+    return "aggregatedXyMRPAF(xFunction=" + xName() + ";yFunction=" + yFunction + ')';
   }
 
-  protected abstract Number yValue(E e, R r);
+  protected abstract Number xValue(E e, R r);
 
-  protected abstract String yName();
+  protected abstract String xName();
 }

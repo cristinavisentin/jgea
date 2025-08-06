@@ -96,8 +96,8 @@ public class MultiPlots {
       @Param("xSubplot") Function<? super R, String> xSubplotFunction,
       @Param("ySubplot") Function<? super R, String> ySubplotFunction,
       @Param("line") Function<? super R, String> lineFunction,
-      @Param("x") Function<? super E, ? extends Number> xFunction,
-      @Param("y") Function<?, ? extends Number> yFunction,
+      @Param("x") Function<?, ? extends Number> xFunction,
+      @Param("y") Function<? super E, ? extends Number> yFunction,
       @Param(value = "valueAggregator", dNPM = "f.median()") Function<List<Number>, Number> valueAggregator,
       @Param(value = "minAggregator", dNPM = "f.percentile(p=25)") Function<List<Number>, Number> minAggregator,
       @Param(value = "maxAggregator", dNPM = "f.percentile(p=75)") Function<List<Number>, Number> maxAggregator,
@@ -111,13 +111,13 @@ public class MultiPlots {
           xSubplotFunction,
           ySubplotFunction,
           lineFunction,
-          xFunction,
+          yFunction,
           valueAggregator,
           minAggregator,
           maxAggregator,
           xRange,
           yRange,
-          (Function<? super R, ? extends Number>) yFunction
+          (Function<? super R, ? extends Number>) xFunction
       );
     }
     //noinspection unchecked
@@ -125,13 +125,13 @@ public class MultiPlots {
         xSubplotFunction,
         ySubplotFunction,
         lineFunction,
-        xFunction,
+        yFunction,
         valueAggregator,
         minAggregator,
         maxAggregator,
         xRange,
         yRange,
-        (Function<? super E, ? extends Number>) yFunction
+        (Function<? super E, ? extends Number>) xFunction
     );
   }
 
