@@ -252,7 +252,6 @@ public class AsynchronousScheduledMFMapElites<G, S, Q> extends AbstractPopulatio
         .forEach(
             i -> executor.submit(
                 variationRunnable(
-                    problem.qualityFunction(),
                     individualMap,
                     nOfEvaluationsMap,
                     currentFidelityMap,
@@ -312,7 +311,6 @@ public class AsynchronousScheduledMFMapElites<G, S, Q> extends AbstractPopulatio
   }
 
   private Runnable variationRunnable(
-      MultifidelityQualityBasedProblem.MultifidelityFunction<S, Q> qualityFunction,
       Map<List<Integer>, MEIndividual<G, S, Q>> individualMap,
       Map<List<Integer>, Long> nOfEvaluationsMap,
       Map<List<Integer>, Double> currentFidelityMap,
@@ -410,7 +408,6 @@ public class AsynchronousScheduledMFMapElites<G, S, Q> extends AbstractPopulatio
         if (!stopped.get()) {
           executor.submit(
               variationRunnable(
-                  qualityFunction,
                   individualMap,
                   nOfEvaluationsMap,
                   currentFidelityMap,
