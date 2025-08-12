@@ -31,7 +31,6 @@ import io.github.ericmedvet.jnb.core.ParamMap;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
 
@@ -51,7 +50,7 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
       Listener<? super POCPopulationState<?, G, S, Q, P>> listener
   ) throws SolverException {
     if (nOfThreads > 0) {
-      executor = Executors.newFixedThreadPool(nOfThreads);
+      executor = new LimitedExecutorService(executor, nOfThreads, false);
     }
     try {
       return solver.apply(problem.example().orElse(null))

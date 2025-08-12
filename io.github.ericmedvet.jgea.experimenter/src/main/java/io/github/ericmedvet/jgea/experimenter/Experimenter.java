@@ -68,7 +68,7 @@ public class Experimenter {
     this(
         Executors.newFixedThreadPool(nOfConcurrentRuns),
         Executors.newFixedThreadPool(nOfThreads),
-        Executors.newCachedThreadPool(),
+        Executors.newVirtualThreadPerTaskExecutor(),
         true
     );
   }
