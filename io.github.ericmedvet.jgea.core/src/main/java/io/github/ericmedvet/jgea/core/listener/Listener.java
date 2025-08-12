@@ -22,7 +22,6 @@ package io.github.ericmedvet.jgea.core.listener;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import java.util.Collection;
 import java.util.List;
-
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;

@@ -50,7 +50,7 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
       Executor executor,
       Listener<? super POCPopulationState<?, G, S, Q, P>> listener
   ) throws SolverException {
-    if (nOfThreads>0) {
+    if (nOfThreads > 0) {
       executor = Executors.newFixedThreadPool(nOfThreads);
     }
     try {
@@ -63,7 +63,7 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
           );
     } finally {
       if (nOfThreads > 0) {
-        ((ExecutorService)executor).shutdown();
+        ((ExecutorService) executor).shutdown();
       }
     }
   }

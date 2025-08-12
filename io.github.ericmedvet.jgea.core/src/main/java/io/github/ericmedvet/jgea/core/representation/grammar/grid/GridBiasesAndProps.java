@@ -323,8 +323,7 @@ public class GridBiasesAndProps {
                       developeEntry.getKey(),
                       factoryChooserEntry.getKey(),
                       finalL
-                  ) +
-                  mappingMetrics.stream()
+                  ) + mappingMetrics.stream()
                       .map(Map.Entry::getValue)
                       .map(f -> f.applyAsDouble((List<Mapped<?>>) mappeds, factoryChooser.distance))
                       .map("%6.4f"::formatted)
