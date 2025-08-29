@@ -23,17 +23,21 @@ import io.github.ericmedvet.jnb.datastructure.*;
 import io.github.ericmedvet.jviz.core.plot.DistributionPlot;
 import io.github.ericmedvet.jviz.core.plot.XYPlot;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
-public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, DistributionPlot, R, List<DistributionPlot.Data>, K, Map<K, List<Number>>> {
+public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, DistributionPlot, R, List<DistributionPlot.Data>, K, Map<K, Map<R, List<Number>>>> {
+
   protected final Function<? super E, X> predicateValueFunction;
   private final Function<? super R, ? extends K> lineFunction;
   private final Function<? super E, ? extends Number> yFunction;
   private final Predicate<? super X> predicate;
+  private final UnaryOperator<List<Number>> rFilter;
   private final DoubleRange yRange;
 
   public DistributionMRPAF(
@@ -43,6 +47,7 @@ public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, Distr
       Function<? super E, ? extends Number> yFunction,
       Function<? super E, X> predicateValueFunction,
       Predicate<? super X> predicate,
+      UnaryOperator<List<Number>> rFilter,
       DoubleRange yRange
   ) {
     super(xSubplotFunction, ySubplotFunction);
@@ -50,17 +55,24 @@ public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, Distr
     this.yFunction = yFunction;
     this.predicateValueFunction = predicateValueFunction;
     this.predicate = predicate;
+    this.rFilter = rFilter;
     this.yRange = yRange;
   }
 
   @Override
-  protected List<DistributionPlot.Data> buildData(K xK, K yK, Map<K, List<Number>> map) {
+  protected List<DistributionPlot.Data> buildData(K xK, K yK, Map<K, Map<R, List<Number>>> map) {
     return map.entrySet()
         .stream()
         .map(
             e -> new DistributionPlot.Data(
                 FormattedFunction.format(lineFunction).formatted(e.getKey()),
-                e.getValue().stream().map(Number::doubleValue).toList()
+                e.getValue()
+                    .values()
+                    .stream()
+                    .map(rFilter)
+                    .flatMap(Collection::stream)
+                    .map(Number::doubleValue)
+                    .toList()
             )
         )
         .toList();
@@ -85,7 +97,10 @@ public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, Distr
     } else if (grid.w() == 1 && grid.h() > 1) {
       subtitle = "↓ %s".formatted(NamedFunction.name(ySubplotFunction));
     } else if (grid.w() > 1 && grid.h() > 1) {
-      subtitle = "→ %s, ↓ %s".formatted(NamedFunction.name(xSubplotFunction), NamedFunction.name(ySubplotFunction));
+      subtitle = "→ %s, ↓ %s".formatted(
+          NamedFunction.name(xSubplotFunction),
+          NamedFunction.name(ySubplotFunction)
+      );
     }
     return new DistributionPlot(
         "%s distribution%s"
@@ -103,17 +118,24 @@ public class DistributionMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, Distr
   }
 
   @Override
-  protected Map<K, List<Number>> init(K xK, K yK) {
+  protected Map<K, Map<R, List<Number>>> init(K xK, K yK) {
     return new HashMap<>();
   }
 
   @Override
-  protected Map<K, List<Number>> update(K xK, K yK, Map<K, List<Number>> map, E e, R r) {
+  protected Map<K, Map<R, List<Number>>> update(
+      K xK,
+      K yK,
+      Map<K, Map<R, List<Number>>> map,
+      E e,
+      R r
+  ) {
     X predicateValue = predicateValueFunction.apply(e);
     if (predicate.test(predicateValue)) {
       K lineK = lineFunction.apply(r);
-      List<Number> values = map.computeIfAbsent(lineK, k -> new ArrayList<>());
-      values.add(yFunction.apply(e));
+      map.computeIfAbsent(lineK, k -> new HashMap<>())
+          .computeIfAbsent(r, thisR -> new ArrayList<>())
+          .add(yFunction.apply(e));
     }
     return map;
   }

@@ -26,6 +26,7 @@ import io.github.ericmedvet.jgea.experimenter.listener.plot.RAggregatedXYDataSer
 import io.github.ericmedvet.jgea.experimenter.listener.plot.ScatterMRPAF;
 import io.github.ericmedvet.jnb.core.*;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
+import io.github.ericmedvet.jviz.core.plot.XYDataSeries;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -57,8 +58,13 @@ public class MultiPlots {
       @Param("predicateValue") Function<E, X> predicateValueFunction,
       @Param(value = "condition", dNPM = "predicate.gtEq(t=1)") Predicate<X> condition,
       @Param(value = "xRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange xRange,
-      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange
+      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange,
+      @Param(value = "limitOneYForRun", dB = true) boolean limitOneYForRun
   ) {
+    UnaryOperator<List<XYDataSeries.Point>> rFilter = limitOneYForRun ? values -> List.of(
+        values.getLast()
+    ) : UnaryOperator
+        .identity();
     return new ScatterMRPAF<>(
         xSubplotFunction,
         ySubplotFunction,
@@ -67,6 +73,7 @@ public class MultiPlots {
         yFunction,
         predicateValueFunction,
         condition,
+        rFilter,
         xRange,
         yRange
     );
@@ -171,8 +178,11 @@ public class MultiPlots {
       @Param("y") Function<? super E, ? extends Number> yFunction,
       @Param("predicateValue") Function<E, X> predicateValueFunction,
       @Param(value = "condition", dNPM = "predicate.gtEq(t=1)") Predicate<X> condition,
-      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange
+      @Param(value = "yRange", dNPM = "m.range(min=-Infinity;max=Infinity)") DoubleRange yRange,
+      @Param(value = "limitOneYForRun", dB = true) boolean limitOneYForRun
   ) {
+    UnaryOperator<List<Number>> rFilter = limitOneYForRun ? values -> List.of(values.getLast()) : UnaryOperator
+        .identity();
     return new DistributionMRPAF<>(
         xSubplotFunction,
         ySubplotFunction,
@@ -180,6 +190,7 @@ public class MultiPlots {
         yFunction,
         predicateValueFunction,
         condition,
+        rFilter,
         yRange
     );
   }

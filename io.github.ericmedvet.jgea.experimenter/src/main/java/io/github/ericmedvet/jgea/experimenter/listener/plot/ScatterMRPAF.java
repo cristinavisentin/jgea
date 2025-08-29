@@ -25,19 +25,22 @@ import io.github.ericmedvet.jviz.core.plot.XYDataSeries;
 import io.github.ericmedvet.jviz.core.plot.XYDataSeriesPlot;
 import io.github.ericmedvet.jviz.core.plot.XYPlot;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
-public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeriesPlot, R, List<XYDataSeries>, K, Map<K, List<XYDataSeries.Point>>> {
+public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeriesPlot, R, List<XYDataSeries>, K, Map<K, Map<R, List<XYDataSeries.Point>>>> {
 
   private final Function<? super R, ? extends K> groupFunction;
   private final Function<? super E, ? extends Number> xFunction;
   private final Function<? super E, ? extends Number> yFunction;
   private final Function<? super E, X> predicateValueFunction;
   private final Predicate<? super X> predicate;
+  private final UnaryOperator<List<XYDataSeries.Point>> rFilter;
   private final DoubleRange xRange;
   private final DoubleRange yRange;
 
@@ -49,6 +52,7 @@ public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeri
       Function<? super E, ? extends Number> yFunction,
       Function<? super E, X> predicateValueFunction,
       Predicate<? super X> predicate,
+      UnaryOperator<List<XYDataSeries.Point>> rFilter,
       DoubleRange xRange,
       DoubleRange yRange
   ) {
@@ -58,18 +62,24 @@ public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeri
     this.yFunction = yFunction;
     this.predicateValueFunction = predicateValueFunction;
     this.predicate = predicate;
+    this.rFilter = rFilter;
     this.xRange = xRange;
     this.yRange = yRange;
   }
 
   @Override
-  protected List<XYDataSeries> buildData(K xK, K yK, Map<K, List<XYDataSeries.Point>> map) {
+  protected List<XYDataSeries> buildData(K xK, K yK, Map<K, Map<R, List<XYDataSeries.Point>>> map) {
     return map.entrySet()
         .stream()
         .map(
             entry -> XYDataSeries.of(
                 FormattedFunction.format(groupFunction).formatted(entry.getKey()),
                 entry.getValue()
+                    .values()
+                    .stream()
+                    .map(rFilter)
+                    .flatMap(Collection::stream)
+                    .toList()
             )
         )
         .toList();
@@ -94,7 +104,10 @@ public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeri
     } else if (grid.w() == 1 && grid.h() > 1) {
       subtitle = "↓ %s".formatted(NamedFunction.name(ySubplotFunction));
     } else if (grid.w() > 1 && grid.h() > 1) {
-      subtitle = "→ %s, ↓ %s".formatted(NamedFunction.name(xSubplotFunction), NamedFunction.name(ySubplotFunction));
+      subtitle = "→ %s, ↓ %s".formatted(
+          NamedFunction.name(xSubplotFunction),
+          NamedFunction.name(ySubplotFunction)
+      );
     }
     return new XYDataSeriesPlot(
         "%s vs. %s%s"
@@ -114,17 +127,23 @@ public class ScatterMRPAF<E, R, K, X> extends AbstractMultipleRPAF<E, XYDataSeri
   }
 
   @Override
-  protected Map<K, List<XYDataSeries.Point>> init(K xK, K yK) {
+  protected Map<K, Map<R, List<XYDataSeries.Point>>> init(K xK, K yK) {
     return new HashMap<>();
   }
 
   @Override
-  protected Map<K, List<XYDataSeries.Point>> update(K xK, K yK, Map<K, List<XYDataSeries.Point>> map, E e, R r) {
+  protected Map<K, Map<R, List<XYDataSeries.Point>>> update(
+      K xK,
+      K yK,
+      Map<K, Map<R, List<XYDataSeries.Point>>> map,
+      E e,
+      R r
+  ) {
     X predicateValue = predicateValueFunction.apply(e);
     if (predicate.test(predicateValue)) {
       K groupK = groupFunction.apply(r);
-      map.putIfAbsent(groupK, new ArrayList<>());
-      map.get(groupK)
+      map.computeIfAbsent(groupK, k -> new HashMap<>())
+          .computeIfAbsent(r, thisR -> new ArrayList<>())
           .add(
               new XYDataSeries.Point(
                   Value.of(xFunction.apply(e).doubleValue()),
