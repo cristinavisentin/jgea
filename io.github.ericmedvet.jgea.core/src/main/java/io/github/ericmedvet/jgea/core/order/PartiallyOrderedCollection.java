@@ -42,8 +42,10 @@ public interface PartiallyOrderedCollection<T> extends Sized {
     );
   }
 
-  static <T> PartiallyOrderedCollection<T> from(Collection<T> ts, PartialComparator<? super T> comparator) {
-    PartiallyOrderedCollection<T> poc = new FastDAGPOC<>(comparator);
+  static <T> PartiallyOrderedCollection<T> from(Collection<T> ts, PartialComparator<? super T> partialComparator) {
+    PartiallyOrderedCollection<T> poc = partialComparator.isTotal() ? new TotalOrderPOC<>(
+        partialComparator.comparator()
+    ) : new FastDAGPOC<>(partialComparator);
     ts.forEach(poc::add);
     List<? extends Collection<T>> fronts = poc.fronts();
     return new PartiallyOrderedCollection<>() {
@@ -54,7 +56,7 @@ public interface PartiallyOrderedCollection<T> extends Sized {
 
       @Override
       public PartialComparator<? super T> comparator() {
-        return comparator;
+        return partialComparator;
       }
 
       @Override

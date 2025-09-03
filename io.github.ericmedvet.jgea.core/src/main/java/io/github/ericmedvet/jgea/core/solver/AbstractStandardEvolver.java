@@ -25,6 +25,7 @@ import io.github.ericmedvet.jgea.core.operator.GeneticOperator;
 import io.github.ericmedvet.jgea.core.order.FastDAGPOC;
 import io.github.ericmedvet.jgea.core.order.PartialComparator;
 import io.github.ericmedvet.jgea.core.order.PartiallyOrderedCollection;
+import io.github.ericmedvet.jgea.core.order.TotalOrderPOC;
 import io.github.ericmedvet.jgea.core.problem.MultiObjectiveProblem;
 import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
 import io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem;
@@ -204,7 +205,10 @@ public abstract class AbstractStandardEvolver<T extends POCPopulationState<I, G,
       T state,
       RandomGenerator random
   ) {
-    PartiallyOrderedCollection<I> orderedPopulation = new FastDAGPOC<>(partialComparator(state.problem()));
+    PartialComparator<? super I> partialComparator = partialComparator(state.problem());
+    PartiallyOrderedCollection<I> orderedPopulation = partialComparator.isTotal() ? new TotalOrderPOC<>(
+        partialComparator.comparator()
+    ) : new FastDAGPOC<>(partialComparator);
     population.forEach(orderedPopulation::add);
     // check if trivial case: total order or one objective and worst selector
     if (state.problem() instanceof TotalOrderQualityBasedProblem<?, ?> || (state

@@ -23,10 +23,10 @@ import java.util.*;
 
 public class TotalOrderPOC<T> extends AbstractPartiallyOrderedCollection<T> {
   private final Comparator<SequencedCollection<T>> frontComparator;
-  private final Comparator<T> comparator;
+  private final Comparator<? super T> comparator;
   private final List<SequencedCollection<T>> fronts;
 
-  public TotalOrderPOC(Comparator<T> comparator) {
+  public TotalOrderPOC(Comparator<? super T> comparator) {
     super(PartialComparator.from(comparator));
     this.comparator = comparator;
     this.frontComparator = Comparator.comparing(SequencedCollection::getFirst, comparator);
