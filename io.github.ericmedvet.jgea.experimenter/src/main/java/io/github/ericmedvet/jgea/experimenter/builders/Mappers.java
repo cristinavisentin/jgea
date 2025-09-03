@@ -469,11 +469,12 @@ public class Mappers {
   @Cacheable
   public static <X> InvertibleMapper<X, NamedMultivariateRealFunction> multiSrTreeToNmrf(
       @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, List<Tree<Element>>> beforeM,
+      @Param("simplify") boolean simplify,
       @Param(value = "postOperator", dNPM = "ds.f.doubleOp(activationF=identity)") Function<Double, Double> postOperator
   ) {
     return beforeM.andThen(
         InvertibleMapper.from(
-            (nmrf, ts) -> new TreeBasedMultivariateRealFunction(ts, nmrf.xVarNames(), nmrf.yVarNames())
+            (nmrf, ts) -> new TreeBasedMultivariateRealFunction(ts, nmrf.xVarNames(), nmrf.yVarNames(), simplify)
                 .andThen(toOperator(postOperator)),
             nmrf -> TreeBasedMultivariateRealFunction.sampleFor(nmrf.xVarNames(), nmrf.yVarNames()),
             "multiSrTreeToNmrf[po=%s]".formatted(postOperator)
@@ -786,7 +787,7 @@ public class Mappers {
   @Cacheable
   public static <X> InvertibleMapper<X, NamedUnivariateRealFunction> srTreeToNurf(
       @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, Tree<Element>> beforeM,
-      @Param(value = "simplify", dB = true) boolean simplify,
+      @Param("simplify") boolean simplify,
       @Param(value = "postOperator", dNPM = "ds.f.doubleOp(activationF=identity)") Function<Double, Double> postOperator
   ) {
     return beforeM.andThen(

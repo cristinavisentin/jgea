@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -43,20 +42,22 @@ public class TreeBasedMultivariateRealFunction implements NamedMultivariateRealF
       List<Tree<Element>> trees,
       List<String> xVarNames,
       List<String> yVarNames,
-      DoubleUnaryOperator postOperator
+      DoubleUnaryOperator postOperator,
+      boolean simplify
   ) {
     this.xVarNames = xVarNames;
     this.yVarNames = yVarNames;
     this.postOperator = postOperator;
-    setParams(trees);
+    setParams(simplify ? trees.stream().map(NumericTreeUtils::simplify).toList() : trees);
   }
 
   public TreeBasedMultivariateRealFunction(
       List<Tree<Element>> trees,
       List<String> xVarNames,
-      List<String> yVarNames
+      List<String> yVarNames,
+      boolean simplify
   ) {
-    this(trees, xVarNames, yVarNames, x -> x);
+    this(trees, xVarNames, yVarNames, x -> x, simplify);
   }
 
   public static List<Tree<Element>> sampleFor(List<String> xVarNames, List<String> yVarNames) {
@@ -69,13 +70,6 @@ public class TreeBasedMultivariateRealFunction implements NamedMultivariateRealF
                 .toList()
         )
     );
-  }
-
-  public static Function<List<Tree<Element>>, NamedMultivariateRealFunction> mapper(
-      List<String> xVarNames,
-      List<String> yVarNames
-  ) {
-    return ts -> new TreeBasedMultivariateRealFunction(ts, xVarNames, yVarNames);
   }
 
   @Override
