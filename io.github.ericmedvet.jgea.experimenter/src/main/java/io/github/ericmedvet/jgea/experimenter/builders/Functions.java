@@ -34,11 +34,7 @@ import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.State;
 import io.github.ericmedvet.jgea.core.solver.cabea.GridPopulationState;
 import io.github.ericmedvet.jgea.core.solver.mapelites.*;
-import io.github.ericmedvet.jgea.core.util.FunctionUtils;
-import io.github.ericmedvet.jgea.core.util.Misc;
-import io.github.ericmedvet.jgea.core.util.Progress;
-import io.github.ericmedvet.jgea.core.util.Sized;
-import io.github.ericmedvet.jgea.core.util.TextPlotter;
+import io.github.ericmedvet.jgea.core.util.*;
 import io.github.ericmedvet.jgea.experimenter.Run;
 import io.github.ericmedvet.jgea.experimenter.Utils;
 import io.github.ericmedvet.jnb.core.Cacheable;
@@ -281,10 +277,15 @@ public class Functions {
   @SuppressWarnings("unused")
   @Cacheable
   public static <X> FormattedNamedFunction<X, Double> cumulativeFidelity(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>> beforeF,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<?, ?, ?, ?, ?>> beforeF,
       @Param(value = "format", dS = "%8.1f") String format
   ) {
-    Function<MultiFidelityPOCPopulationState<?, ?, ?, ?, ?>, Double> f = MultiFidelityPOCPopulationState::cumulativeFidelity;
+    Function<POCPopulationState<?, ?, ?, ?, ?>, Double> f = s -> {
+      if (s instanceof MultiFidelityPOCPopulationState<?, ?, ?, ?, ?> mfS) {
+        return mfS.cumulativeFidelity();
+      }
+      return (double) s.nOfQualityEvaluations();
+    };
     return FormattedNamedFunction.from(f, format, "cumulative.fidelity").compose(beforeF);
   }
 

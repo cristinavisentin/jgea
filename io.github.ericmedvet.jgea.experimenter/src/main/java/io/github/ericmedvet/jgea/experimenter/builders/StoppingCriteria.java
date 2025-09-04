@@ -19,10 +19,10 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.problem.MultifidelityQualityBasedProblem;
 import io.github.ericmedvet.jgea.core.problem.Problem;
 import io.github.ericmedvet.jgea.core.problem.QualityBasedProblem;
 import io.github.ericmedvet.jgea.core.solver.*;
+import io.github.ericmedvet.jgea.core.util.Progress;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
@@ -34,10 +34,16 @@ public class StoppingCriteria {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <I extends Individual<G, S, Q>, G, S, Q, P extends MultifidelityQualityBasedProblem<S, Q>> ProgressBasedStopCondition<MultiFidelityPOCPopulationState<I, G, S, Q, P>> cumulativeFidelity(
+  public static <I extends Individual<G, S, Q>, G, S, Q, P extends QualityBasedProblem<S, Q>> ProgressBasedStopCondition<POCPopulationState<I, G, S, Q, P>> cumulativeFidelity(
       @Param(value = "v", dD = 1000) int v
   ) {
-    return StopConditions.cumulativeFidelity(v);
+    return s -> {
+      if (s instanceof MultiFidelityPOCPopulationState<?, ?, ?, ?, ?> mfS) {
+        return new Progress(0, v, mfS.cumulativeFidelity());
+      } else {
+        return new Progress(0, v, s.nOfQualityEvaluations());
+      }
+    };
   }
 
   @SuppressWarnings("unused")
@@ -45,7 +51,7 @@ public class StoppingCriteria {
   public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> elapsed(
       @Param(value = "v", dD = 10) double v
   ) {
-    return StopConditions.elapsedMillis(Math.round(v * 1000));
+    return s -> new Progress(0, Math.round(v * 1000), s.elapsedMillis());
   }
 
   @SuppressWarnings("unused")
@@ -53,7 +59,7 @@ public class StoppingCriteria {
   public static <P extends Problem<S>, S> ProgressBasedStopCondition<State<P, S>> nOfIterations(
       @Param(value = "n", dI = 100) int n
   ) {
-    return StopConditions.nOfIterations(n);
+    return s -> new Progress(0, n, s.nOfIterations());
   }
 
   @SuppressWarnings("unused")
@@ -61,7 +67,7 @@ public class StoppingCriteria {
   public static <I extends Individual<G, S, Q>, G, S, Q, P extends QualityBasedProblem<S, Q>> ProgressBasedStopCondition<POCPopulationState<I, G, S, Q, P>> nOfQualityEvaluations(
       @Param(value = "n", dI = 1000) int n
   ) {
-    return StopConditions.nOfQualityEvaluations(n);
+    return s -> new Progress(0, n, s.nOfQualityEvaluations());
   }
 
 }

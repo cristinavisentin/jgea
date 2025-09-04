@@ -2,14 +2,16 @@ $treeDesc1 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(
 $treeDesc2 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = ea.predicate.isSrVariable())); min = 1; max = 64; nOfBins = 8)
 
 ea.experiment(
-  runs = (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
+  runs = (randomGenerator = (seed = [1:1:3]) * [m.defaultRG()]) *
     (problem = [
       ea.p.moToSo(objective = mse; moProblem = ea.p.ur.synthetic(name = "keijzer6"));
       ea.p.moToSo(objective = mse; moProblem = ea.p.ur.synthetic(name = "nguyen7"));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.synthetic(name = "korns12"));
       ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "concrete"; xScaling = standardization; yScaling = symmetric_min_max));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "wine"; xScaling = standardization; yScaling = symmetric_min_max));
       ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "energy-efficiency"; xScaling = standardization; yScaling = symmetric_min_max))
     ]) *
-    (solver = (stop = ea.sc.elapsed(v = 10)) * [
+    (solver = (stop = ea.sc.elapsed(v = 1)) * [
       ea.s.asyncScheduledMfMapElites(
         name = "mf-me-flat";
         schedule = ea.schedule.flat(value = 1);
@@ -49,30 +51,36 @@ ea.experiment(
         descriptors = [$treeDesc1; $treeDesc2]
       );
       ea.s.scheduledMfGa(
-        name = "mf-gp-flat";
+        name = "mf-ga-flat";
         schedule = ea.schedule.flat(value = 1);
         representation = ea.r.srTree();
         mapper = ea.m.srTreeToNurf()
       );
       ea.s.scheduledMfGa(
-        name = "mf-gp-flat-quarter";
+        name = "mf-ga-flat-quarter";
         schedule = ea.schedule.flat(value = 0.25);
         representation = ea.r.srTree();
         mapper = ea.m.srTreeToNurf()
       );
       ea.s.scheduledMfGa(
-        name = "mf-gp-linear";
+        name = "mf-ga-linear";
         schedule = ea.schedule.linear(min = 0; max = 1);
         representation = ea.r.srTree();
         mapper = ea.m.srTreeToNurf()
       );
       ea.s.scheduledMfGa(
-        name = "mf-gp-half-linear";
+        name = "mf-ga-half-linear";
         schedule = ea.schedule.evenPiecewise(values = [0; 1; 1]);
         representation = ea.r.srTree();
         mapper = ea.m.srTreeToNurf()
       );
-      ea.s.srGp(name = "gp")
+      ea.s.mapElites(
+        name = "me";
+        representation = ea.r.srTree();
+        mapper = ea.m.srTreeToNurf();
+        descriptors = [$treeDesc1; $treeDesc2]
+      );
+      ea.s.srGp(name = "ga")
     ]) * [
     ea.run()
   ];
@@ -88,105 +96,119 @@ ea.experiment(
       ];
       onlyLast = true
     );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = mse));
-      type = svg
-    );
+
+    % ========= CONVERGENCE PLOTS
+%    ea.l.savePlotForExp(
+%      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
+%      plot = ea.plot.multi.quality(q = f.mapValue(key = mse));
+%      type = svg
+%    );
+%    ea.l.savePlotForExp(
+%      path = "../../Documenti/experiments/{name}/{startTime}/best-validation.svg";
+%      plot = ea.plot.multi.xyExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
+%      type = svg
+%    );
+
+    % ========= BOX PLOTS
     ea.l.savePlotForExp(
       path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness.svg";
       plot = ea.plot.multi.qualityBoxplot(q = f.mapValue(key = mse));
-      type = svg;
-      configuration = ea.plot.conf.image(
-        axesShow = all;
-        axesIndependences = [all]
-      )
-    );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-validation-mse.svg";
-      plot = ea.plot.multi.xyExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
       type = svg
     );
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-mse.svg";
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation.svg";
       plot = ea.plot.multi.yBoxplotExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
-      type = svg;
-      configuration = ea.plot.conf.image(
-        axesShow = all;
-        axesIndependences = [all]
-      )
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
     );
-    ea.l.saveForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-mse-vs-elapsed.svg";
-      of = ea.plot.multi.scatterExp(
-        x = ea.f.elapsedSecs();
-        y = f.mapValue(key = mse; of = ea.f.validationQuality())
-      );
-      processor = ea.f.imagePlotter(
-        configuration = ea.plot.conf.image(
-          axesShow = all;
-          axesIndependences = [all]
-        );
-        secondary = true;
-        type = svg
-      );
-      overwrite = true
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-elapsed.svg";
+      plot = ea.plot.multi.yBoxplotExp(y = ea.f.elapsedSecs());
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
     );
-    ea.l.saveForRun(
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-cf.svg";
+      plot = ea.plot.multi.yBoxplotExp(y = ea.f.cumulativeFidelity());
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-evals.svg";
+      plot = ea.plot.multi.yBoxplotExp(y = ea.f.nOfEvals());
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
+    );
+
+    % ========= SCATTER PLOTS
+    ea.l.savePlotForExp(
       path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness-vs-elapsed.svg";
-      of = ea.plot.multi.scatterExp(
+      plot = ea.plot.multi.scatterExp(
         x = ea.f.elapsedSecs();
         y = f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()))
       );
-      processor = ea.f.imagePlotter(
-        configuration = ea.plot.conf.image(
-          axesShow = all;
-          axesIndependences = [all]
-        );
-        secondary = true;
-        type = svg
-      );
-      overwrite = true
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg
     );
-    ea.l.saveForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-mse-vs-cf.svg";
-      of = ea.plot.multi.scatterExp(
-        x = ea.f.cumulativeFidelity();
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-vs-elapsed.svg";
+      plot = ea.plot.multi.scatterExp(
+        x = ea.f.elapsedSecs();
         y = f.mapValue(key = mse; of = ea.f.validationQuality())
       );
-      processor = ea.f.imagePlotter(
-        configuration = ea.plot.conf.image(
-          axesShow = all;
-          axesIndependences = [all]
-        );
-        secondary = true;
-        type = svg
-      );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "mf-.*");
-      overwrite = true
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg
     );
-    ea.l.saveForRun(
+    ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness-vs-cf.svg";
-      of = ea.plot.multi.scatterExp(
+      plot = ea.plot.multi.scatterExp(
         x = ea.f.cumulativeFidelity();
         y = f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()))
       );
-      processor = ea.f.imagePlotter(
-        configuration = ea.plot.conf.image(
-          axesShow = all;
-          axesIndependences = [all]
-        );
-        secondary = true;
-        type = svg
-      );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "mf-.*");
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg;
       overwrite = true
     );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-vs-cf.svg";
+      plot = ea.plot.multi.scatterExp(
+        x = ea.f.cumulativeFidelity();
+        y = f.mapValue(key = mse; of = ea.f.validationQuality())
+      );
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness-vs-evals.svg";
+      plot = ea.plot.multi.scatterExp(
+        x = ea.f.nOfEvals();
+        y = f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()))
+      );
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation-vs-evals.svg";
+      plot = ea.plot.multi.scatterExp(
+        x = ea.f.nOfEvals();
+        y = f.mapValue(key = mse; of = ea.f.validationQuality())
+      );
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      secondary = true;
+      type = svg
+    );
+
+    % ========= ARCHIVE PLOTS
     ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/{run.solver.name}/{run.problem.name}/{run.randomGenerator.seed}-archive.svg";
       plot = ea.plot.single.me(
-        q = f.mapValue(key = mse);
-        condition = predicate.inD(values = [1])
+        q = f.mapValue(key = mse)
       );
       condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*me.*");
       type = svg
@@ -197,7 +219,7 @@ ea.experiment(
         values = [ea.f.mfMeLsFidelity()];
         grids = [ea.f.archiveToGrid(of = ea.f.mfMeFidelityArchive())]
       );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*me.*");
+      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "mf-me.*");
       type = svg
     );
     ea.l.savePlotForRun(
@@ -206,9 +228,11 @@ ea.experiment(
         values = [ea.f.mfMeLsCumulativeFidelity()];
         grids = [ea.f.archiveToGrid(of = ea.f.mfMeFidelityArchive())]
       );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*me.*");
+      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "mf-me.*");
       type = svg
     );
+
+    % ========= TRAJECTORY PLOTS
     ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/{run.solver.name}/{run.problem.name}/{run.randomGenerator.seed}-trajectory.svg";
       plot = ea.plot.single.xyrsRun(
@@ -218,9 +242,7 @@ ea.experiment(
           f.mapValue(key = mse; of = ea.f.validationQuality())
         ]
       );
-      type = svg;
-      secondary = true;
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = ".*mf.*")
+      type = svg
     )
   ]
 )
