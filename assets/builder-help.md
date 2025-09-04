@@ -991,7 +991,7 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
-| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState">MultiFidelityPOCPopulationState</abbr>&lt;?, ?, ?, ?, ?&gt;&gt;</code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.solver.POCPopulationState">POCPopulationState</abbr>&lt;?, ?, ?, ?, ?&gt;&gt;</code> |
 | `format` | s | `%8.1f` | <code><abbr title="java.lang.String">String</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.cumulativeFidelity()` by jgea-experimenter:2.7.1-SNAPSHOT
@@ -4306,7 +4306,7 @@ Aliases: `ea.sc`, `ea.stoppingCriterion`
 | --- | --- | --- | --- |
 | `v` | i |  | <code>int</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jgea.core.solver.ProgressBasedStopCondition">ProgressBasedStopCondition</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState">MultiFidelityPOCPopulationState</abbr>&lt;I, G, S, Q, P&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.StoppingCriteria.cumulativeFidelity()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.solver.ProgressBasedStopCondition">ProgressBasedStopCondition</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.solver.POCPopulationState">POCPopulationState</abbr>&lt;I, G, S, Q, P&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.StoppingCriteria.cumulativeFidelity()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.stoppingCriterion.elapsed()`
 
