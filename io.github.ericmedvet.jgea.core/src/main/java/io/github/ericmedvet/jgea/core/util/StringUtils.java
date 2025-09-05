@@ -22,8 +22,8 @@ package io.github.ericmedvet.jgea.core.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.LocalDateTime;
+import java.util.IllegalFormatException;
 
 public class StringUtils {
 
@@ -47,16 +47,22 @@ public class StringUtils {
   }
 
   public static int formatSize(String format) {
-    int size;
-    Matcher matcher = Pattern.compile("\\d++").matcher(format);
-    if (matcher.find()) {
-      size = Integer.parseInt(matcher.group());
-      if (format.contains("+")) {
-        size = size + 1;
-      }
-      return size;
+    try {
+      return format.formatted(0).length();
+    } catch (IllegalFormatException e) {
+      // ignore
     }
-    return String.format(format, (Object[]) null).length();
+    try {
+      return format.formatted(0.1).length();
+    } catch (IllegalFormatException e) {
+      // ignore
+    }
+    try {
+      return format.formatted(LocalDateTime.now()).length();
+    } catch (IllegalFormatException e) {
+      // ignore
+    }
+    return format.formatted("").length();
   }
 
   public static String getUserMachineName() {
