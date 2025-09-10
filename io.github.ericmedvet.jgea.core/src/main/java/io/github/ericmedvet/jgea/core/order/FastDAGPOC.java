@@ -106,6 +106,7 @@ public class FastDAGPOC<T> extends AbstractPartiallyOrderedCollection<T> {
       node.afterNodes.forEach(id -> nodeMap.get(id).beforeNodes.remove(node.id));
       node.afterNodes.forEach(id -> updateNodeFront(nodeMap.get(id)));
     }
+    precomputedFronts = null;
     return true;
   }
 

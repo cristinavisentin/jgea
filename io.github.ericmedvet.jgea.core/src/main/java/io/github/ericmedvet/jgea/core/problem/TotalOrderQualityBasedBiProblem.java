@@ -29,20 +29,6 @@ public interface TotalOrderQualityBasedBiProblem<S, O, Q> extends QualityBasedBi
 
   Comparator<Q> totalOrderComparator();
 
-  @Override
-  default PartialComparator<Q> qualityComparator() {
-    return (q1, q2) -> {
-      int outcome = totalOrderComparator().compare(q1, q2);
-      if (outcome == 0) {
-        return PartialComparator.PartialComparatorOutcome.SAME;
-      }
-      if (outcome < 0) {
-        return PartialComparator.PartialComparatorOutcome.BEFORE;
-      }
-      return PartialComparator.PartialComparatorOutcome.AFTER;
-    };
-  }
-
   static <S, O, Q> TotalOrderQualityBasedBiProblem<S, O, Q> from(
       QualityBasedBiProblem<S, O, Q> qbBiProblem,
       Comparator<Q> comparator
@@ -78,5 +64,10 @@ public interface TotalOrderQualityBasedBiProblem<S, O, Q> extends QualityBasedBi
         totalOrderComparator,
         example
     );
+  }
+
+  @Override
+  default PartialComparator<Q> qualityComparator() {
+    return PartialComparator.from(totalOrderComparator());
   }
 }
