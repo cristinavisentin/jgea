@@ -52,6 +52,7 @@ import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NumericalParametrized;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems;
+import io.github.ericmedvet.jsdynsym.core.StatelessSystem;
 import io.github.ericmedvet.jsdynsym.core.composed.Stepped;
 import io.github.ericmedvet.jsdynsym.core.numerical.*;
 import io.github.ericmedvet.jsdynsym.core.numerical.named.NamedMultivariateRealFunction;
@@ -239,6 +240,29 @@ public class Mappers {
                 0d
             ),
             "dsToNpnds[npnds=%s]".formatted(builder)
+        )
+    );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X, P extends MultivariateRealFunction & NumericalParametrized<P>> InvertibleMapper<X, NamedMultivariateRealFunction> dsToNmrf(
+      @Param(value = "of", dNPM = "ea.m.identity()") InvertibleMapper<X, List<Double>> beforeM,
+      @Param("npmrf") NumericalDynamicalSystems.Builder<P, StatelessSystem.State> builder
+  ) {
+    return beforeM.andThen(
+        InvertibleMapper.from(
+            (p, params) -> NamedMultivariateRealFunction.from(
+                builder.apply(p.nOfInputs(), p.nOfOutputs())
+                    .withParams(params.stream().mapToDouble(v -> v).toArray()),
+                p.xVarNames(),
+                p.yVarNames()
+            ),
+            p -> Collections.nCopies(
+                builder.apply(p.nOfInputs(), p.nOfOutputs()).getParams().length,
+                0d
+            ),
+            "dsToNmrf[npmrf=%s]".formatted(builder)
         )
     );
   }

@@ -430,12 +430,13 @@ Aliases: `ds.num`, `dynSys.num`, `dynamicalSystem.num`
 
 ### Builder `dynamicalSystem.num.drn()`
 
-`ds.num.drn(timeRange; innerNeuronsRatio; activationFunction; threshold; timeResolution)`
+`ds.num.drn(timeRange; innerNeuronsRatio; innerNeurons; activationFunction; threshold; timeResolution)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
 | `timeRange` | npm | `m.range(min = 0; max = 1)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `innerNeuronsRatio` | d | `1.0` | <code>double</code> |
+| `innerNeurons` | i |  | <code>int</code> |
 | `activationFunction` | e | `TANH` | <code><abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron$ActivationFunction">MultiLayerPerceptron$ActivationFunction</abbr></code> |
 | `threshold` | d | `0.1` | <code>double</code> |
 | `timeResolution` | d | `0.16666` | <code>double</code> |
@@ -467,12 +468,13 @@ Produces <code><abbr title="io.github.ericmedvet.jsdynsym.buildable.builders.Num
 
 ### Builder `dynamicalSystem.num.mlp()`
 
-`ds.num.mlp(innerLayerRatio; nOfInnerLayers; activationFunction)`
+`ds.num.mlp(innerLayerRatio; nOfInnerLayers; innerLayers; activationFunction)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
 | `innerLayerRatio` | d | `0.65` | <code>double</code> |
 | `nOfInnerLayers` | i | `1` | <code>int</code> |
+| `innerLayers` | i[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Integer">Integer</abbr>&gt;</code> |
 | `activationFunction` | e | `TANH` | <code><abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron$ActivationFunction">MultiLayerPerceptron$ActivationFunction</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems$Builder">NumericalDynamicalSystems$Builder</abbr>&lt;<abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron">MultiLayerPerceptron</abbr>, <abbr title="io.github.ericmedvet.jsdynsym.core.StatelessSystem$State">StatelessSystem$State</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems.mlp()` by jgea-experimenter:2.7.1-SNAPSHOT
@@ -1067,18 +1069,6 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, G&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.genotype()` by jgea-experimenter:2.7.1-SNAPSHOT
 
-### Builder `ea.function.getLayerWeights()`
-
-`ea.f.getLayerWeights(indexOfLayer; of; format)`
-
-| Param | Type | Default | Java type |
-| --- | --- | --- | --- |
-| `indexOfLayer` | i | `0` | <code>int</code> |
-| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron">MultiLayerPerceptron</abbr>&gt;</code> |
-| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
-
-Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Double">Double</abbr>&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.getLayerWeights()` by jgea-experimenter:2.7.1-SNAPSHOT
-
 ### Builder `ea.function.hist()`
 
 `ea.f.hist(nOfBins; of)`
@@ -1129,6 +1119,16 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, <abbr title="java.lang.Object">Object</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.imagePlotter()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `ea.function.inner()`
+
+`ea.f.inner(of)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.composed.Composed">Composed</abbr>&lt;I&gt;&gt;</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, I&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.inner()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `ea.function.isCrossRedundancy()`
 
 `ea.f.isCrossRedundancy(of; startOffset; endOffset; splitOffset; format)`
@@ -1165,6 +1165,18 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 | `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.solver.POCPopulationState">POCPopulationState</abbr>&lt;I, G, S, Q, ?&gt;&gt;</code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, <abbr title="java.util.Collection">Collection</abbr>&lt;I&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.lasts()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.function.layerWeights()`
+
+`ea.f.layerWeights(indexOfLayer; of; format)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `indexOfLayer` | i | `0` | <code>int</code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron">MultiLayerPerceptron</abbr>&gt;</code> |
+| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Double">Double</abbr>&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.layerWeights()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.function.maMeArchive()`
 
@@ -2007,6 +2019,17 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.InvertibleMapper">Inv
 | `range` | npm | `ds.range(min = -1; max = 1)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.core.InvertibleMapper">InvertibleMapper</abbr>&lt;X, <abbr title="io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString">IntString</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Mappers.dsToIs()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.mapper.dsToNmrf()`
+
+`ea.m.dsToNmrf(of; npmrf)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `of` | npm | `ea.m.identity()` | <code><abbr title="io.github.ericmedvet.jgea.core.InvertibleMapper">InvertibleMapper</abbr>&lt;X, <abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Double">Double</abbr>&gt;&gt;</code> |
+| `npmrf` | npm |  | <code><abbr title="io.github.ericmedvet.jsdynsym.buildable.builders.NumericalDynamicalSystems$Builder">NumericalDynamicalSystems$Builder</abbr>&lt;P, <abbr title="io.github.ericmedvet.jsdynsym.core.StatelessSystem$State">StatelessSystem$State</abbr>&gt;</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.InvertibleMapper">InvertibleMapper</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.numerical.named.NamedMultivariateRealFunction">NamedMultivariateRealFunction</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Mappers.dsToNmrf()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.mapper.dsToNpnds()`
 

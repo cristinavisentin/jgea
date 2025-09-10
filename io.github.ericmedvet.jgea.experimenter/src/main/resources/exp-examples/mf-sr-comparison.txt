@@ -4,9 +4,10 @@ $annDesc1 = ea.s.me.d.descriptor(
   f = f.mathOp(
     op = divide;
     args = [
-      f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0); condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
-      f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 0))
-    ]
+      f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
+      f.size()
+    ];
+    of = ea.f.layerWeights(of = ea.f.inner(of = ea.f.inner(of = ea.f.solution())); indexOfLayer = 0)
   );
   min = 0.0;
   max = 1.0;
@@ -16,9 +17,10 @@ $annDesc2 = ea.s.me.d.descriptor(
   f = f.mathOp(
     op = divide;
     args = [
-      f.size(of = f.filter(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1); condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
-      f.size(of = ea.f.getLayerWeights(of = ea.f.solution(); indexOfLayer = 1))
-    ]
+      f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
+      f.size()
+    ];
+    of = ea.f.layerWeights(of = ea.f.inner(of = ea.f.inner(of = ea.f.solution())); indexOfLayer = 1)
   );
   min = 0.0;
   max = 1.0;
@@ -36,21 +38,18 @@ ea.experiment(
       ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "energy-efficiency"; xScaling = standardization; yScaling = symmetric_min_max))
     ]) *
     (solver = (stop = ea.sc.cumulativeFidelity(v = 1000)) * [
+      ea.s.asyncScheduledMfMapElites(
+        name = "ann-mf-me-half-linear";
+        schedule = ea.schedule.evenPiecewise(values = [0; 1; 1]);
+        representation = ea.r.doubleString();
+        mapper = ea.m.nmrfToNurf(of = ea.m.dsToNmrf(npmrf = ds.num.mlp(innerLayers = [64])));
+        descriptors = [$annDesc1; $annDesc2]
+      );
       ea.s.scheduledMfGa(
         name = "mf-ga-linear";
         schedule = ea.schedule.linear(min = 0; max = 1);
         representation = ea.r.srTree();
         mapper = ea.m.srTreeToNurf()
-      );
-      ea.s.asyncScheduledMfMapElites(
-        name = "mf-me-half-linear";
-        schedule = ea.schedule.evenPiecewise(values = [0; 1; 1]);
-        representation = ea.r.doubleString();
-        mapper = ea.m.nmrfToNurf(of = ea.m.ntissToNmrf(of = ea.m.dsToNpnds(npnds = ds.num.mlp(
-          nOfInnerLayers = 1;
-          innerLayerRatio = 4
-        ))));
-        descriptors = [$annDesc1; $annDesc2]
       );
       ea.s.asyncScheduledMfMapElites(
         name = "mf-me-flat";

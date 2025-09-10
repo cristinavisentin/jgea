@@ -53,6 +53,7 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
+import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
@@ -395,7 +396,7 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, List<Double>> getLayerWeights(
+  public static <X> FormattedNamedFunction<X, List<Double>> layerWeights(
       @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
       @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
       @Param(value = "format", dS = "%s") String format
@@ -409,7 +410,7 @@ public class Functions {
       double[][] requestedWeights = unflat[indexOfLayer];
       return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
     };
-    return FormattedNamedFunction.from(f, format, "getLayerWeights").compose(beforeF);
+    return FormattedNamedFunction.from(f, format, "layerWeights[%d]".formatted(indexOfLayer)).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -520,6 +521,15 @@ public class Functions {
       );
     };
     return NamedFunction.from(f, "image.plotter").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X, I> NamedFunction<X, I> inner(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Composed<I>> beforeF
+  ) {
+    Function<Composed<I>, I> f = Composed::inner;
+    return NamedFunction.from(f, "inner").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
