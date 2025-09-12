@@ -33,18 +33,8 @@ import io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.State;
 import io.github.ericmedvet.jgea.core.solver.cabea.GridPopulationState;
-import io.github.ericmedvet.jgea.core.solver.mapelites.Archive;
-import io.github.ericmedvet.jgea.core.solver.mapelites.CoMEPopulationState;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MAMEPopulationState;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MEPopulationState;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
-import io.github.ericmedvet.jgea.core.solver.mapelites.MultiFidelityMEPopulationState;
-import io.github.ericmedvet.jgea.core.util.FunctionUtils;
-import io.github.ericmedvet.jgea.core.util.Misc;
-import io.github.ericmedvet.jgea.core.util.Progress;
-import io.github.ericmedvet.jgea.core.util.Sized;
-import io.github.ericmedvet.jgea.core.util.TextPlotter;
+import io.github.ericmedvet.jgea.core.solver.mapelites.*;
+import io.github.ericmedvet.jgea.core.util.*;
 import io.github.ericmedvet.jgea.experimenter.Run;
 import io.github.ericmedvet.jgea.experimenter.Utils;
 import io.github.ericmedvet.jnb.core.Cacheable;
@@ -53,46 +43,20 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
-import io.github.ericmedvet.jsdynsym.core.composed.Composed;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.DistributionPlot;
-import io.github.ericmedvet.jviz.core.plot.LandscapePlot;
-import io.github.ericmedvet.jviz.core.plot.UnivariateGridPlot;
-import io.github.ericmedvet.jviz.core.plot.VectorialFieldPlot;
-import io.github.ericmedvet.jviz.core.plot.XYDataSeriesPlot;
-import io.github.ericmedvet.jviz.core.plot.XYPlot;
-import io.github.ericmedvet.jviz.core.plot.csv.DistributionPlotCsvBuilder;
-import io.github.ericmedvet.jviz.core.plot.csv.LandscapePlotCsvBuilder;
-import io.github.ericmedvet.jviz.core.plot.csv.UnivariateGridPlotCsvBuilder;
-import io.github.ericmedvet.jviz.core.plot.csv.VectorialFieldPlotCsvBuilder;
-import io.github.ericmedvet.jviz.core.plot.csv.XYDataSeriesPlotCsvBuilder;
-import io.github.ericmedvet.jviz.core.plot.image.BoxPlotDrawer;
+import io.github.ericmedvet.jviz.core.plot.*;
+import io.github.ericmedvet.jviz.core.plot.csv.*;
+import io.github.ericmedvet.jviz.core.plot.image.*;
 import io.github.ericmedvet.jviz.core.plot.image.Configuration;
-import io.github.ericmedvet.jviz.core.plot.image.LandscapePlotDrawer;
-import io.github.ericmedvet.jviz.core.plot.image.LinesPlotDrawer;
-import io.github.ericmedvet.jviz.core.plot.image.PointsPlotDrawer;
-import io.github.ericmedvet.jviz.core.plot.image.UnivariateGridPlotDrawer;
-import io.github.ericmedvet.jviz.core.plot.image.VectorialFieldPlotDrawer;
-import io.github.ericmedvet.jviz.core.plot.video.AbstractXYDataSeriesPlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.BoxPlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.LandscapePlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.LinesPlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.PointsPlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.UnivariatePlotVideoBuilder;
-import io.github.ericmedvet.jviz.core.plot.video.VectorialFieldVideoBuilder;
+import io.github.ericmedvet.jviz.core.plot.video.*;
 import io.github.ericmedvet.jviz.core.util.VideoUtils;
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -396,25 +360,6 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, List<Double>> layerWeights(
-      @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
-      @Param(value = "format", dS = "%s") String format
-  ) {
-    Function<MultiLayerPerceptron, List<Double>> f = mlp -> {
-      int[] neurons = new int[mlp.nOfLayers()];
-      for (int i = 0; i < neurons.length; i++) {
-        neurons[i] = mlp.sizeOfLayer(i);
-      }
-      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
-      double[][] requestedWeights = unflat[indexOfLayer];
-      return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
-    };
-    return FormattedNamedFunction.from(f, format, "layerWeights[%d]".formatted(indexOfLayer)).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X> FormattedNamedFunction<X, TextPlotter.Miniplot> hist(
       @Param(value = "nOfBins", dI = 8) int nOfBins,
       @Param(value = "of", dNPM = "f.identity()") Function<X, Collection<Number>> beforeF
@@ -525,15 +470,6 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X, I> NamedFunction<X, I> inner(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, Composed<I>> beforeF
-  ) {
-    Function<Composed<I>, I> f = Composed::inner;
-    return NamedFunction.from(f, "inner").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> isCrossRedundancy(
       @Param(value = "of", dNPM = "f.identity()") Function<X, IntString> beforeF,
       @Param(value = "startOffset", dI = 0) int startOffset,
@@ -589,6 +525,25 @@ public class Functions {
     Function<POCPopulationState<I, G, S, Q, ?>, Collection<I>> f = state -> state.pocPopulation()
         .lasts();
     return NamedFunction.from(f, "lasts").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X> FormattedNamedFunction<X, List<Double>> layerWeights(
+      @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
+      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<MultiLayerPerceptron, List<Double>> f = mlp -> {
+      int[] neurons = new int[mlp.nOfLayers()];
+      for (int i = 0; i < neurons.length; i++) {
+        neurons[i] = mlp.sizeOfLayer(i);
+      }
+      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
+      double[][] requestedWeights = unflat[indexOfLayer];
+      return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
+    };
+    return FormattedNamedFunction.from(f, format, "layerWeights[%d]".formatted(indexOfLayer)).compose(beforeF);
   }
 
   @SuppressWarnings("unused")

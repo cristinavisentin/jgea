@@ -7,7 +7,7 @@ $annDesc1 = ea.s.me.d.descriptor(
       f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
       f.size()
     ];
-    of = ea.f.layerWeights(of = ea.f.inner(of = ea.f.inner(of = ea.f.solution())); indexOfLayer = 0)
+    of = ea.f.layerWeights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution())); indexOfLayer = 0)
   );
   min = 0.0;
   max = 1.0;
@@ -20,7 +20,7 @@ $annDesc2 = ea.s.me.d.descriptor(
       f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
       f.size()
     ];
-    of = ea.f.layerWeights(of = ea.f.inner(of = ea.f.inner(of = ea.f.solution())); indexOfLayer = 1)
+    of = ea.f.layerWeights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution())); indexOfLayer = 1)
   );
   min = 0.0;
   max = 1.0;

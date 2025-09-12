@@ -1119,16 +1119,6 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, <abbr title="java.lang.Object">Object</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.imagePlotter()` by jgea-experimenter:2.7.1-SNAPSHOT
 
-### Builder `ea.function.inner()`
-
-`ea.f.inner(of)`
-
-| Param | Type | Default | Java type |
-| --- | --- | --- | --- |
-| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.composed.Composed">Composed</abbr>&lt;I&gt;&gt;</code> |
-
-Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, I&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Functions.inner()` by jgea-experimenter:2.7.1-SNAPSHOT
-
 ### Builder `ea.function.isCrossRedundancy()`
 
 `ea.f.isCrossRedundancy(of; startOffset; endOffset; splitOffset; format)`
