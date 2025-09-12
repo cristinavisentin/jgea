@@ -694,8 +694,8 @@ public class BiggerNetworks {
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = iArraySumbiggerNetwork;
-    ProgramSynthesisProblem psb = iArraySumpsb;
+    Network goodNetwork = triLongestStringGoodNetwork;
+    ProgramSynthesisProblem psb = triLongestStringpsb;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);
@@ -722,3 +722,5 @@ public class BiggerNetworks {
     System.out.println(psb.qualityFunction().apply(runner.asInstrumentedProgram(goodNetwork)));
   }
 }
+
+// Just testing bigger networks

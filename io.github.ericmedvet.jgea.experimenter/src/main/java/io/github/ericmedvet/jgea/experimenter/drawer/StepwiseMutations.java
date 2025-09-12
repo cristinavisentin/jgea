@@ -693,7 +693,7 @@ public class StepwiseMutations {
     Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
     List<Mutation<Network>> mutations = List.of(giMutation, grMutation, wsMutation);
 
-
+// Specify the network
     Network network = vProductGoodNetwork;
     ProgramSynthesisProblem psb = vProductpsb;
     int times = 100;

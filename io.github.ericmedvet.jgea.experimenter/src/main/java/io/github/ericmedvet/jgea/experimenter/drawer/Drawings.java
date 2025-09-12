@@ -38,7 +38,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
 
-public class Main {
+public class Drawings {
 
   public static void main(String[] args) throws IOException {
 
