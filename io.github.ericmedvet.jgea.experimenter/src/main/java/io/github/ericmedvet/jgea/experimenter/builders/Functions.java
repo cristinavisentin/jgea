@@ -20,6 +20,7 @@
 package io.github.ericmedvet.jgea.experimenter.builders;
 
 import io.github.ericmedvet.jgea.core.InvertibleMapper;
+import io.github.ericmedvet.jgea.core.order.PartialComparator;
 import io.github.ericmedvet.jgea.core.problem.BehaviorBasedProblem;
 import io.github.ericmedvet.jgea.core.problem.MultiTargetProblem;
 import io.github.ericmedvet.jgea.core.problem.Problem;
@@ -43,7 +44,6 @@ import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
-import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.Video;
@@ -85,7 +85,7 @@ public class Functions {
       @Param(value = "format", dS = "%4.2f") String format
   ) {
     Function<Archive<G>, Double> f = a -> (double) a.asMap().size() / (double) a.capacity();
-    return FormattedNamedFunction.from(f, format, "archive.coverage").compose(beforeF);
+    return FormattedNamedFunction.from(f, format, "coverage").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -163,7 +163,7 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, CoMEPopulationState<G, ?, S, ?, ?, Q, ?>> beforeF
   ) {
     Function<CoMEPopulationState<G, ?, S, ?, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = CoMEPopulationState::archive1;
-    return NamedFunction.from(f, "coMe.archive1").compose(beforeF);
+    return NamedFunction.from(f, "archive1").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -172,7 +172,7 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, CoMEPopulationState<?, G, ?, S, ?, Q, ?>> beforeF
   ) {
     Function<CoMEPopulationState<?, G, ?, S, ?, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = CoMEPopulationState::archive2;
-    return NamedFunction.from(f, "coMe.archive2").compose(beforeF);
+    return NamedFunction.from(f, "archive2").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -529,32 +529,13 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, List<Double>> layerWeights(
-      @Param(value = "indexOfLayer", dI = 0) int indexOfLayer,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, MultiLayerPerceptron> beforeF,
-      @Param(value = "format", dS = "%s") String format
-  ) {
-    Function<MultiLayerPerceptron, List<Double>> f = mlp -> {
-      int[] neurons = new int[mlp.nOfLayers()];
-      for (int i = 0; i < neurons.length; i++) {
-        neurons[i] = mlp.sizeOfLayer(i);
-      }
-      double[][][] unflat = MultiLayerPerceptron.unflat(mlp.getParams(), neurons);
-      double[][] requestedWeights = unflat[indexOfLayer];
-      return Arrays.stream(requestedWeights).flatMapToDouble(Arrays::stream).boxed().toList();
-    };
-    return FormattedNamedFunction.from(f, format, "layerWeights[%d]".formatted(indexOfLayer)).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X, G, S, Q> NamedFunction<X, Archive<? extends MEIndividual<G, S, Q>>> maMeArchive(
       @Param(value = "of", dNPM = "f.identity()") Function<X, MAMEPopulationState<G, S, Q, ?>> beforeF,
       @Param("n") int n
   ) {
     Function<MAMEPopulationState<G, S, Q, ?>, Archive<? extends MEIndividual<G, S, Q>>> f = s -> s.archives()
         .get(n);
-    return NamedFunction.from(f, "maMe.archive[%d]".formatted(n)).compose(beforeF);
+    return NamedFunction.from(f, "archive[%d]".formatted(n)).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -563,7 +544,7 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, MEPopulationState<G, S, Q, ?>> beforeF
   ) {
     Function<MEPopulationState<G, S, Q, ?>, Archive<MEIndividual<G, S, Q>>> f = MEPopulationState::archive;
-    return NamedFunction.from(f, "meArchive").compose(beforeF);
+    return NamedFunction.from(f, "archive").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -602,7 +583,7 @@ public class Functions {
       @Param(value = "of", dNPM = "f.identity()") Function<X, MultiFidelityMEPopulationState<G, S, Q, ?>> beforeF
   ) {
     Function<MultiFidelityMEPopulationState<G, S, Q, ?>, Archive<MultiFidelityMEPopulationState.LocalState>> f = MultiFidelityMEPopulationState::fidelityArchive;
-    return NamedFunction.from(f, "mfMeFidelityArchive").compose(beforeF);
+    return NamedFunction.from(f, "fidelity.archive").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -731,6 +712,29 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <X, G, S, Q, I extends Individual<G, S, Q>> NamedFunction<X, Archive<MEIndividual<G, S, Q>>> postArchive(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, Collection<I>> beforeF,
+      @Param("descriptors") List<MapElites.Descriptor<G, S, Q>> descriptors,
+      @Param("qComparator") Function<X, PartialComparator<? super Q>> qPartialComparatorFunction
+  ) {
+    Function<X, Archive<MEIndividual<G, S, Q>>> f = x -> {
+      Collection<I> individuals = beforeF.apply(x);
+      List<MEIndividual<G, S, Q>> meIndividuals = individuals.stream()
+          .map(i -> MEIndividual.from(i, descriptors))
+          .toList();
+      Archive<MEIndividual<G, S, Q>> archive = new Archive<>(
+          descriptors.stream().map(MapElites.Descriptor::nOfBins).toList()
+      );
+      PartialComparator<MEIndividual<G, S, Q>> iPartialComparator = qPartialComparatorFunction.apply(x)
+          .comparing(MEIndividual::quality);
+      meIndividuals.forEach(i -> archive.put(i.bins(), i, iPartialComparator));
+      return archive;
+    };
+    return NamedFunction.from(f, "archive[%s]".formatted(descriptors));
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <X, P extends Problem<S>, S> NamedFunction<X, P> problem(
       @Param(value = "of", dNPM = "f.identity()") Function<X, State<P, S>> beforeF
   ) {
@@ -755,6 +759,16 @@ public class Functions {
   ) {
     Function<Individual<?, ?, Q>, Q> f = Individual::quality;
     return FormattedNamedFunction.from(f, format, "quality").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <X, Q> FormattedNamedFunction<X, PartialComparator<Q>> qualityComparator(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, QualityBasedProblem<?, Q>> beforeF,
+      @Param(value = "format", dS = "%s") String format
+  ) {
+    Function<QualityBasedProblem<?, Q>, PartialComparator<Q>> f = QualityBasedProblem::qualityComparator;
+    return FormattedNamedFunction.from(f, format, "quality.comparator").compose(beforeF);
   }
 
   @SuppressWarnings("unused")

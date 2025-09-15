@@ -7,7 +7,7 @@ $annDesc1 = ea.s.me.d.descriptor(
       f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
       f.size()
     ];
-    of = ea.f.layerWeights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution())); indexOfLayer = 0)
+    of = f.flat(of = f.nTh(of = ds.f.weights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution()))); n = 0))
   );
   min = 0.0;
   max = 1.0;
@@ -20,10 +20,29 @@ $annDesc2 = ea.s.me.d.descriptor(
       f.size(of = f.filter(condition = predicate.all(conditions = [predicate.lt(t = 0.5); predicate.gt(t = -0.5)])));
       f.size()
     ];
-    of = ea.f.layerWeights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution())); indexOfLayer = 1)
+    of = f.flat(of = f.nTh(of = ds.f.weights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution()))); n = 1))
   );
   min = 0.0;
   max = 1.0;
+  nOfBins = 8
+)
+
+$annAltDesc1 = ea.s.me.d.descriptor(
+  f = f.avg(of = f.each(
+    of = f.nTh(of = ds.f.weights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution()))); n = 0);
+    mapF = f.sd()
+  ));
+  min = 0.0;
+  max = 3.0;
+  nOfBins = 8
+)
+$annAltDesc2 = ea.s.me.d.descriptor(
+  f = f.avg(of = f.each(
+    of = f.nTh(of = ds.f.weights(of = ds.f.inner(of = ds.f.inner(of = ea.f.solution()))); n = 1);
+    mapF = f.sd()
+  ));
+  min = 0.0;
+  max = 3.0;
   nOfBins = 8
 )
 
@@ -39,11 +58,11 @@ ea.experiment(
     ]) *
     (solver = (stop = ea.sc.cumulativeFidelity(v = 1000)) * [
       ea.s.asyncScheduledMfMapElites(
-        name = "ann-mf-me-half-linear";
+        name = "ann-alt-mf-me-half-linear";
         schedule = ea.schedule.evenPiecewise(values = [0; 1; 1]);
         representation = ea.r.doubleString();
-        mapper = ea.m.nmrfToNurf(of = ea.m.dsToNmrf(npmrf = ds.num.mlp(innerLayers = [64])));
-        descriptors = [$annDesc1; $annDesc2]
+        mapper = ea.m.nmrfToNurf(of = ea.m.dsToNmrf(npmrf = ds.num.mlp(innerLayers = [8])));
+        descriptors = [$annAltDesc1; $annAltDesc2]
       );
       ea.s.scheduledMfGa(
         name = "mf-ga-linear";
@@ -126,12 +145,18 @@ ea.experiment(
   listeners = [
     ea.l.console(
       functions = [
-        ea.f.cumulativeFidelity();
         ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
         f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
-        f.percentile(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())); p = 75; format = "%6.2f");
         ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
         f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f");
+        ea.f.cumulativeFidelity();
+        ea.f.archiveCoverage(of = ea.f.meArchive());
+        ea.f.archiveCoverage(of = ea.f.postArchive(
+          of = ea.f.all();
+          descriptors = [$annAltDesc1; $annAltDesc2];
+          qComparator = ea.f.qualityComparator(of = ea.f.problem())
+        ));
+        f.avg(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
         ea.f.timestamp()
       ];
       onlyLast = true
