@@ -86,7 +86,7 @@ public class Starter {
     public boolean help;
 
     @Parameter(
-        names = {"--expHeadLines"}, description = "Additional experiment description lines that will be put at the head of thee experiment " + "description.")
+        names = {"--expHeadLines"}, description = "Additional experiment description lines that will be put at the head of the experiment " + "description.")
     public List<String> expHeadLines = List.of();
   }
 
