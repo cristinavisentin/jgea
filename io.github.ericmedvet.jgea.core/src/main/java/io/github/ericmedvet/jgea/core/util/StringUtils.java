@@ -24,6 +24,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.IllegalFormatException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringUtils {
 
@@ -31,6 +33,7 @@ public class StringUtils {
   public static final char VARIATION_DOWN = '↘';
   public static final char VARIATION_SAME = '=';
   private static final String COLLAPSER_REGEX = "[.→\\[\\]]+";
+  private static final String COLLAPSED_PIECE_REGEX = "\\w";
 
   private StringUtils() {
   }
@@ -39,8 +42,9 @@ public class StringUtils {
     StringBuilder acronym = new StringBuilder();
     String[] pieces = name.split(COLLAPSER_REGEX);
     for (String piece : pieces) {
-      if (!piece.isEmpty()) {
-        acronym.append(piece.charAt(0));
+      Matcher matcher = Pattern.compile(COLLAPSED_PIECE_REGEX).matcher(piece);
+      if (matcher.find()) {
+        acronym.append(piece, matcher.start(), matcher.end());
       }
     }
     return acronym.toString();

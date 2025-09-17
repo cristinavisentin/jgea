@@ -4952,6 +4952,17 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Integer">Integer</abbr>&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.gridW()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `function.iApply()`
+
+`f.iApply(iF; of)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `iF` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="java.util.function.Function">Function</abbr>&lt;T, R&gt;&gt;</code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, T&gt;</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, R&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.iApply()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `function.iComposition()`
 
 `f.iComposition(of; before; then)`
