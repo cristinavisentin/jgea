@@ -19,29 +19,19 @@
  */
 package io.github.ericmedvet.jgea.experimenter.drawer;
 
-import io.github.ericmedvet.jgea.core.order.ParetoDominance;
-import io.github.ericmedvet.jgea.core.order.PartialComparator;
-import io.github.ericmedvet.jgea.core.representation.programsynthesis.InstrumentedProgram;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.Program;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ProgramExecutionException;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.*;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.Base;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.Composed;
-import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.StringParser;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.TypeException;
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element;
-import io.github.ericmedvet.jgea.core.util.IntRange;
 import io.github.ericmedvet.jgea.problem.programsynthesis.Problems;
 import io.github.ericmedvet.jgea.problem.programsynthesis.ProgramSynthesisProblem;
-import io.github.ericmedvet.jgea.problem.programsynthesis.synthetic.PrecomputedSyntheticPSProblem;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
-import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import java.io.File;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.random.RandomGenerator;
 
 public class VideoMaker {
 
@@ -106,11 +96,14 @@ public class VideoMaker {
     drawer.show(n);
     Runner runner = new Runner(100000, 100000, 100000, 10000, false);
 
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        "somethingverylong",
-        "dog",
-        "ocean"
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
     System.out.println("Wire contents: " + outcome.wireContents());
     System.out.println("Outputs: " + outcome.outputs());
 
@@ -121,24 +114,25 @@ public class VideoMaker {
   }
 
   private static void triLongestString() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
-    Network n = new Network(List.of(
-        Gate.input(Base.STRING),
-        Gate.input(Base.STRING),
-        Gate.input(Base.STRING),
-        Gates.sSplitter(),
-        Gates.sSplitter(),
-        Gates.sSplitter(),
-        Gates.length(),
-        Gates.length(),
-        Gates.length(),
-        Gates.iBefore(),
-        Gates.select(),
-        Gates.sSplitter(),
-        Gates.length(),
-        Gates.iBefore(),
-        Gates.select(),
-        Gate.output(Base.STRING)
-    ),
+    Network n = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING)
+        ),
         Set.of(
             Wire.of(0, 0, 3, 0),
             Wire.of(0, 0, 10, 1),
@@ -165,11 +159,14 @@ public class VideoMaker {
     drawer.show(n);
     Runner runner = new Runner(100000, 100000, 100000, 10000, false);
 
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        "somethingverylong",
-        "dog",
-        "ocean"
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
     System.out.println("Wire contents: " + outcome.wireContents());
     System.out.println("Outputs: " + outcome.outputs());
 
@@ -206,10 +203,13 @@ public class VideoMaker {
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     drawer.show(n);
     Runner runner = new Runner(1000, 1000, 1000, 100, false);
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        List.of(1.0, 2.0, 3.0),
-        List.of(4.0, 5.0, 6.0)
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of(1.0, 2.0, 3.0),
+            List.of(4.0, 5.0, 6.0)
+        )
+    );
     TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
     videoBuilder.save(new File("../ttpn-vProduct.mp4"), outcome);
     System.out.println(outcome);
@@ -241,9 +241,12 @@ public class VideoMaker {
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     drawer.show(n);
     Runner runner = new Runner(1000, 1000, 1000, 100, false);
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        List.of("somethingverylong")
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of("somethingverylong")
+        )
+    );
     TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
     videoBuilder.save(new File("../ttpn-sLengther.mp4"), outcome);
     System.out.println(outcome);

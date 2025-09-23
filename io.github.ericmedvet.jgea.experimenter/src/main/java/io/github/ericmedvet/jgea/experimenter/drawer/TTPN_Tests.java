@@ -305,11 +305,14 @@ public class TTPN_Tests {
     drawer.show(n);
     Runner runner = new Runner(100000, 100000, 100000, 10000, false);
 
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        "somethingverylong",
-        "dog",
-        "ocean"
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
     System.out.println("Wire contents: " + outcome.wireContents());
     System.out.println("Outputs: " + outcome.outputs());
 
@@ -320,24 +323,25 @@ public class TTPN_Tests {
   }
 
   private static void triLongestString() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
-    Network n = new Network(List.of(
-        Gate.input(Base.STRING),
-        Gate.input(Base.STRING),
-        Gate.input(Base.STRING),
-        Gates.sSplitter(),
-        Gates.sSplitter(),
-        Gates.sSplitter(),
-        Gates.length(),
-        Gates.length(),
-        Gates.length(),
-        Gates.iBefore(),
-        Gates.select(),
-        Gates.sSplitter(),
-        Gates.length(),
-        Gates.iBefore(),
-        Gates.select(),
-        Gate.output(Base.STRING)
-    ),
+    Network n = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING)
+        ),
         Set.of(
             Wire.of(0, 0, 3, 0),
             Wire.of(0, 0, 10, 1),
@@ -364,11 +368,14 @@ public class TTPN_Tests {
     drawer.show(n);
     Runner runner = new Runner(100000, 100000, 100000, 10000, false);
 
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        "somethingverylong",
-        "dog",
-        "ocean"
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
     System.out.println("Wire contents: " + outcome.wireContents());
     System.out.println("Outputs: " + outcome.outputs());
 
@@ -405,10 +412,13 @@ public class TTPN_Tests {
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     drawer.show(n);
     Runner runner = new Runner(1000, 1000, 1000, 100, false);
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        List.of(1.0, 2.0, 3.0),
-        List.of(4.0, 5.0, 6.0)
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of(1.0, 2.0, 3.0),
+            List.of(4.0, 5.0, 6.0)
+        )
+    );
     TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
     videoBuilder.save(new File("../ttpn-vProduct.mp4"), outcome);
     System.out.println(outcome);
@@ -440,9 +450,12 @@ public class TTPN_Tests {
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     drawer.show(n);
     Runner runner = new Runner(1000, 1000, 1000, 100, false);
-    Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(
-        List.of("somethingverylong")
-    ));
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of("somethingverylong")
+        )
+    );
     TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
     videoBuilder.save(new File("../ttpn-sLengther.mp4"), outcome);
     System.out.println(outcome);
