@@ -38,6 +38,8 @@ import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.datastructure.Pair;
+
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SequencedSet;
@@ -184,6 +186,17 @@ public class Representations {
       @Param("second") Function<G2, Representation<G2>> r2
   ) {
     return p -> Representation.pair(r1.apply(p.first()), r2.apply(p.second()));
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static <G> Function<G, Representation<G>> seeded(
+      @Param("of") Function<G, Representation<G>> representation,
+      @Param("seeds") Collection<G> seeds,
+      @Param(value = "seededRate", dD = 0.01) double seededRate,
+      @Param(value = "mutatedRate", dD = 0.49) double mutatedRate
+  ) {
+    return g -> Representation.seeded(seeds, representation.apply(g), seededRate, mutatedRate);
   }
 
   @SuppressWarnings("unused")
