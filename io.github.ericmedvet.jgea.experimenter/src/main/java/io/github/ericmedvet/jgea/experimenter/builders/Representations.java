@@ -28,15 +28,23 @@ import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.Gramma
 import io.github.ericmedvet.jgea.core.representation.grammar.string.cfggp.GrammarRampedHalfAndHalf;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.*;
 import io.github.ericmedvet.jgea.core.representation.sequence.FixedLengthListFactory;
+import io.github.ericmedvet.jgea.core.representation.sequence.UniformCrossover;
 import io.github.ericmedvet.jgea.core.representation.sequence.bit.BitString;
 import io.github.ericmedvet.jgea.core.representation.sequence.integer.IntString;
 import io.github.ericmedvet.jgea.core.representation.tree.*;
+import io.github.ericmedvet.jgea.core.representation.tree.numeric.ConstantsMutation;
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element;
+import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element.Constant;
 import io.github.ericmedvet.jgea.core.representation.tree.numeric.Element.Operator;
 import io.github.ericmedvet.jgea.experimenter.Representation;
+import io.github.ericmedvet.jnb.core.Alias;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
+import io.github.ericmedvet.jnb.core.ParamMap;
+import io.github.ericmedvet.jnb.core.ParamMap.Type;
+import io.github.ericmedvet.jnb.core.PassThroughParam;
+import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -44,11 +52,14 @@ import java.util.List;
 import java.util.SequencedSet;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Discoverable(prefixTemplate = "ea.representation|r")
 public class Representations {
+
   private Representations() {
   }
 
@@ -58,7 +69,8 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.bsUniform()") Function<BitString, Factory<BitString>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.bsFlipMutation()"
       }) List<Function<BitString, Mutation<BitString>>> mutations,
-      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.bsUniformXover(); mutation = ea.r.go.bsFlipMutation())"
+      @Param(value = "xovers", dNPMs = {
+          "ea.r.go.composedXover(xover = ea.r.go.bsUniformXover(); mutation = ea.r.go.bsFlipMutation())"
       }) List<Function<BitString, Crossover<BitString>>> xovers
   ) {
     return eBs -> new Representation<>(
@@ -88,7 +100,8 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.dsGaussianMutation()"
       }) List<Function<List<Double>, Mutation<List<Double>>>> mutations,
-      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.dsSegmentGeometricXover(); mutation = ea.r.go.dsGaussianMutation())"
+      @Param(value = "xovers", dNPMs = {
+          "ea.r.go.composedXover(xover = ea.r.go.dsSegmentGeometricXover(); mutation = ea.r.go.dsGaussianMutation())"
       }) List<Function<List<Double>, Crossover<List<Double>>>> xovers
   ) {
     return eDs -> new Representation<>(
@@ -104,7 +117,8 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.isUniform()") Function<IntString, Factory<IntString>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.isFlipMutation()"
       }) List<Function<IntString, Mutation<IntString>>> mutations,
-      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.isUniformXover(); mutation = ea.r.go.isFlipMutation())"
+      @Param(value = "xovers", dNPMs = {
+          "ea.r.go.composedXover(xover = ea.r.go.isUniformXover(); mutation = ea.r.go.isFlipMutation())"
       }) List<Function<IntString, Crossover<IntString>>> xovers
   ) {
     return eIs -> new Representation<>(
@@ -114,69 +128,35 @@ public class Representations {
     );
   }
 
+  @Alias(name = "multiSRTree", value = "list(of = ea.r.srTree())")
   @SuppressWarnings("unused")
   @Cacheable
-  public static Function<List<Tree<Element>>, Representation<List<Tree<Element>>>> multiSRTree(
-      @Param(
-          value = "constants", dDs = {0.1, 1, 10}) List<Double> constants,
-      @Param(
-          value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"}) List<Element.Operator> operators,
-      @Param(value = "minTreeH", dI = 4) int minTreeH,
-      @Param(value = "maxTreeH", dI = 10) int maxTreeH
+  public static <G> Function<List<G>, Representation<List<G>>> list(
+      @Param("of") Function<G, Representation<G>> representation,
+      @Param(value = "uniformCrossover", dB = true) boolean uniformCrossover
   ) {
-    return g -> {
-      List<Element.Variable> variables = g.stream()
-          .map(
-              t -> t.visitDepth()
-                  .stream()
-                  .filter(e -> e instanceof Element.Variable)
-                  .map(e -> ((Element.Variable) e).name())
-                  .toList()
-          )
-          .flatMap(List::stream)
-          .distinct()
-          .map(Element.Variable::new)
+    return egs -> {
+      Representation<G> innerR = representation.apply(egs.getFirst());
+      List<Mutation<List<G>>> mutations = innerR.mutations().stream()
+          .map(innerMut -> (Mutation<List<G>>) (gs, random) -> gs.stream()
+              .map(g -> innerMut.mutate(g, random)).toList())
           .toList();
-      List<Element.Constant> constantElements = constants.stream().map(Element.Constant::new).toList();
-      IndependentFactory<Element> terminalFactory = IndependentFactory.oneOf(
-          IndependentFactory.picker(variables),
-          IndependentFactory.picker(constantElements)
-      );
-      IndependentFactory<Element> nonTerminalFactory = IndependentFactory.picker(operators);
-      ToIntFunction<Element> arityFunction = e -> {
-        if (e instanceof Operator o) {
-          return o.arity();
-        }
-        return 0;
-      };
-      IndependentFactory<List<Tree<Element>>> treeListFactory = new FixedLengthListFactory<>(
-          g.size(),
-          new TreeIndependentFactory<>(minTreeH, maxTreeH, arityFunction, nonTerminalFactory, terminalFactory, 0.5)
-      );
-      // single tree factory
-      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(arityFunction, nonTerminalFactory, terminalFactory);
-      // subtree between same position trees
-      SubtreeCrossover<Element> subtreeCrossover = new SubtreeCrossover<>(maxTreeH);
-      Crossover<List<Tree<Element>>> pairWiseSubtreeCrossover = (list1, list2, rnd) -> IntStream.range(0, list1.size())
-          .mapToObj(i -> subtreeCrossover.recombine(list1.get(i), list2.get(i), rnd))
+      List<Crossover<List<G>>> crossovers = innerR.crossovers().stream()
+          .map(innerXOver -> (Crossover<List<G>>) (gs1, gs2, random) -> IntStream.range(0,
+                  egs.size()).mapToObj(j -> innerXOver.recombine(gs1.get(j), gs2.get(j), random))
+              .toList())
           .toList();
-      // swap trees
-      Crossover<List<Tree<Element>>> uniformCrossover = (list1, list2, rnd) -> IntStream.range(0, list1.size())
-          .mapToObj(i -> rnd.nextDouble() < 0.5 ? list1.get(i) : list2.get(i))
-          .toList();
-      // subtree mutation
-      SubtreeMutation<Element> subtreeMutation = new SubtreeMutation<>(maxTreeH, treeBuilder);
-      Mutation<List<Tree<Element>>> allSubtreeMutations = (list, rnd) -> list.stream()
-          .map(t -> subtreeMutation.mutate(t, rnd))
-          .toList();
+      if (uniformCrossover) {
+        crossovers = Stream.concat(crossovers.stream(), Stream.of(new UniformCrossover<G>()))
+            .toList();
+      }
       return new Representation<>(
-          treeListFactory,
-          List.of(allSubtreeMutations),
-          List.of(pairWiseSubtreeCrossover, uniformCrossover)
+          new FixedLengthListFactory<>(egs.size(), innerR.factory().independent()),
+          mutations,
+          crossovers
       );
     };
   }
-
 
   @SuppressWarnings("unused")
   @Cacheable
@@ -204,9 +184,14 @@ public class Representations {
       @Param(
           value = "constants", dDs = {0.1, 1, 10}) List<Double> constants,
       @Param(
-          value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"}) List<Element.Operator> operators,
+          value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division",
+          "prot_log"}) List<Element.Operator> operators,
       @Param(value = "minTreeH", dI = 4) int minTreeH,
-      @Param(value = "maxTreeH", dI = 10) int maxTreeH
+      @Param(value = "maxTreeH", dI = 10) int maxTreeH,
+      @Param("ephemeral") boolean ephemeral,
+      @Param(value = "ephemeralMinV", dD = -5d) double ephemeralMinV,
+      @Param(value = "ephemeralMinV", dD = 5d) double ephemeralMaxV,
+      @Param(value = "ephemeralSigmaMut", dD = 0.25) double ephemeralSigmaMut
   ) {
     return g -> {
       List<Element.Variable> variables = g.visitDepth()
@@ -216,10 +201,16 @@ public class Representations {
           .distinct()
           .map(Element.Variable::new)
           .toList();
-      List<Element.Constant> constantElements = constants.stream().map(Element.Constant::new).toList();
+      List<Element.Constant> constantElements = constants.stream()
+          .map(Element.Constant::new)
+          .toList();
+      DoubleRange ephemeralRange = new DoubleRange(ephemeralMinV, ephemeralMaxV);
+      IndependentFactory<Element> ephemeralFactory = random -> new Constant(
+          ephemeralRange.denormalize(random.nextDouble())
+      );
       IndependentFactory<Element> terminalFactory = IndependentFactory.oneOf(
           IndependentFactory.picker(variables),
-          IndependentFactory.picker(constantElements)
+          ephemeral ? ephemeralFactory : IndependentFactory.picker(constantElements)
       );
       IndependentFactory<Element> nonTerminalFactory = IndependentFactory.picker(operators);
       // single tree factory
@@ -229,11 +220,24 @@ public class Representations {
         }
         return 0;
       };
-      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(arityFunction, nonTerminalFactory, terminalFactory);
+      TreeBuilder<Element> treeBuilder = new GrowTreeBuilder<>(
+          arityFunction,
+          nonTerminalFactory,
+          terminalFactory
+      );
       return new Representation<>(
-          new RampedHalfAndHalf<>(minTreeH, maxTreeH, arityFunction, nonTerminalFactory, terminalFactory),
-          new SubtreeMutation<>(maxTreeH, treeBuilder),
-          new SubtreeCrossover<>(maxTreeH)
+          new RampedHalfAndHalf<>(
+              minTreeH,
+              maxTreeH,
+              arityFunction,
+              nonTerminalFactory,
+              terminalFactory
+          ),
+          ephemeral ? List.of(
+              new SubtreeMutation<>(maxTreeH, treeBuilder),
+              new ConstantsMutation(ephemeralSigmaMut)
+          ) : List.of(new SubtreeMutation<>(maxTreeH, treeBuilder)),
+          List.of(new SubtreeCrossover<>(maxTreeH))
       );
     };
   }
@@ -244,7 +248,31 @@ public class Representations {
       @Param(value = "maxNOfGates", dI = 32) int maxNOfGates,
       @Param(value = "maxNOfAttempts", dI = 10) int maxNOfAttempts,
       @Param(value = "subnetSizeRate", dD = 0.33) double subnetSizeRate,
-      @Param(value = "gates", dNPMs = {"ea.ttpn.gate.bAnd()", "ea.ttpn.gate.bNot()", "ea.ttpn.gate.bOr()", "ea.ttpn" + ".gate.bXor()", "ea.ttpn.gate.concat()", "ea.ttpn.gate.equal()", "ea.ttpn.gate.iTh()", "ea.ttpn" + ".gate.length" + "()", "ea.ttpn.gate.noop()", "ea.ttpn.gate.pairer()", "ea.ttpn.gate.queuer()", "ea.ttpn" + ".gate.select()", "ea" + ".ttpn.gate.sequencer()", "ea.ttpn.gate.sink()", "ea.ttpn.gate" + ".splitter()", "ea" + ".ttpn.gate.unpairer()", "ea" + ".ttpn.gate.iBefore()", "ea.ttpn.gate.iPMathOperator" + "(operator = addition)", "ea.ttpn.gate.iPMathOperator" + "(operator = " + "subtraction)", "ea.ttpn.gate" + ".iPMathOperator(operator = " + "multiplication)", "ea.ttpn.gate" + ".iPMathOperator(operator = division)", "ea.ttpn.gate.iRange()", "ea" + ".ttpn.gate.iSMult()", "ea.ttpn" + ".gate" + ".iSPMult()", "ea.ttpn.gate.iSPSum" + "()", "ea.ttpn.gate.iSSum()", "ea" + ".ttpn.gate.iToR()", "ea.ttpn.gate.rBefore" + "()", "ea.ttpn.gate" + ".repeater()", "ea.ttpn.gate.rPMathOperator" + "(operator =" + " addition)", "ea.ttpn.gate" + ".rPMathOperator" + "(operator = subtraction)", "ea.ttpn.gate" + ".rPMathOperator(operator = multiplication)", "ea" + ".ttpn" + ".gate.rPMathOperator(operator = division)", "ea" + ".ttpn.gate.rSMult()", "ea.ttpn.gate.rSPMult()", "ea" + ".ttpn.gate.rSPSum()", "ea.ttpn.gate.rSSum()", "ea" + ".ttpn.gate.rToI()", "ea.ttpn.gate.sBefore()", "ea.ttpn" + ".gate.sConcat()", "ea.ttpn.gate" + ".sSplitter()", "ea.ttpn.gate.bConst(value = true)", "ea.ttpn" + ".gate.iConst" + "(value = 0)", "ea.ttpn" + ".gate.iConst(value = 1)", "ea.ttpn.gate.iConst(value = 2)", "ea" + ".ttpn.gate.iConst" + "(value = 5)", "ea.ttpn.gate.rConst(value = 0)", "ea.ttpn.gate.rConst(value = 0.1)", "ea.ttpn.gate.rConst" + "(value = 0" + ".2)", "ea.ttpn.gate.rConst(value =" + " 0.5)", "ea.ttpn.gate.sPSequencer()"}) List<Gate> gates,
+      @Param(value = "gates", dNPMs = {"ea.ttpn.gate.bAnd()", "ea.ttpn.gate.bNot()",
+          "ea.ttpn.gate.bOr()", "ea.ttpn" + ".gate.bXor()", "ea.ttpn.gate.concat()",
+          "ea.ttpn.gate.equal()", "ea.ttpn.gate.iTh()", "ea.ttpn" + ".gate.length" + "()",
+          "ea.ttpn.gate.noop()", "ea.ttpn.gate.pairer()", "ea.ttpn.gate.queuer()",
+          "ea.ttpn" + ".gate.select()", "ea" + ".ttpn.gate.sequencer()", "ea.ttpn.gate.sink()",
+          "ea.ttpn.gate" + ".splitter()", "ea" + ".ttpn.gate.unpairer()",
+          "ea" + ".ttpn.gate.iBefore()", "ea.ttpn.gate.iPMathOperator" + "(operator = addition)",
+          "ea.ttpn.gate.iPMathOperator" + "(operator = " + "subtraction)",
+          "ea.ttpn.gate" + ".iPMathOperator(operator = " + "multiplication)",
+          "ea.ttpn.gate" + ".iPMathOperator(operator = division)", "ea.ttpn.gate.iRange()",
+          "ea" + ".ttpn.gate.iSMult()", "ea.ttpn" + ".gate" + ".iSPMult()",
+          "ea.ttpn.gate.iSPSum" + "()", "ea.ttpn.gate.iSSum()", "ea" + ".ttpn.gate.iToR()",
+          "ea.ttpn.gate.rBefore" + "()", "ea.ttpn.gate" + ".repeater()",
+          "ea.ttpn.gate.rPMathOperator" + "(operator =" + " addition)",
+          "ea.ttpn.gate" + ".rPMathOperator" + "(operator = subtraction)",
+          "ea.ttpn.gate" + ".rPMathOperator(operator = multiplication)",
+          "ea" + ".ttpn" + ".gate.rPMathOperator(operator = division)",
+          "ea" + ".ttpn.gate.rSMult()", "ea.ttpn.gate.rSPMult()", "ea" + ".ttpn.gate.rSPSum()",
+          "ea.ttpn.gate.rSSum()", "ea" + ".ttpn.gate.rToI()", "ea.ttpn.gate.sBefore()",
+          "ea.ttpn" + ".gate.sConcat()", "ea.ttpn.gate" + ".sSplitter()",
+          "ea.ttpn.gate.bConst(value = true)", "ea.ttpn" + ".gate.iConst" + "(value = 0)",
+          "ea.ttpn" + ".gate.iConst(value = 1)", "ea.ttpn.gate.iConst(value = 2)",
+          "ea" + ".ttpn.gate.iConst" + "(value = 5)", "ea.ttpn.gate.rConst(value = 0)",
+          "ea.ttpn.gate.rConst(value = 0.1)", "ea.ttpn.gate.rConst" + "(value = 0" + ".2)",
+          "ea.ttpn.gate.rConst(value =" + " 0.5)", "ea.ttpn.gate.sPSequencer()"}) List<Gate> gates,
       @Param("forbiddenGates") List<Gate> forbiddenGates,
       @Param(value = "avoidDeadGates", dB = true) boolean avoidDeadGates
   ) {

@@ -1,0 +1,63 @@
+ea.experiment(
+  runs = (randomGenerator = (seed = [1:1:10]) * [m.defaultRG()]) *
+    (problem = [
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.synthetic(name = "keijzer6"));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.synthetic(name = "nguyen7"));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "concrete"; xScaling = standardization; yScaling = symmetric_min_max));
+      ea.p.moToSo(objective = mse; moProblem = ea.p.ur.bundled(name = "energy-efficiency"; xScaling = standardization; yScaling = symmetric_min_max))
+    ]) *
+    (solver = (stop = ea.sc.nOfQualityEvaluations(n = 5000)) * [
+      ea.s.ga(name = "gp-consts"; mapper = ea.m.srTreeToNurf(); representation = ea.r.srTree(
+      ));
+      ea.s.ga(name = "gp-ephemeral"; mapper = ea.m.srTreeToNurf(); representation = ea.r.srTree(
+        ephemeral = true
+      ));
+      ea.s.ga(name = "gp-ops"; mapper = ea.m.srTreeToNurf(); representation = ea.r.srTree(
+        operators = [addition; subtraction; multiplication; prot_division; prot_log; re_lu; ternary]
+      ));
+      ea.s.ga(name = "gp-ephemeral+ops"; mapper = ea.m.srTreeToNurf(); representation = ea.r.srTree(
+        ephemeral = true;
+        operators = [addition; subtraction; multiplication; prot_division; prot_log; re_lu; ternary]
+      ))
+    ]) * [
+    ea.run()
+  ];
+  listeners = [
+    ea.l.console(
+      functions = [
+        ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
+        f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
+        ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
+        f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f");
+        ea.f.timestamp()
+      ];
+      onlyLast = true
+    );
+
+    % ========= CONVERGENCE PLOTS
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
+      plot = ea.plot.multi.quality(q = f.mapValue(key = mse));
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/best-validation.svg";
+      plot = ea.plot.multi.xyExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
+      type = svg
+    );
+
+    % ========= BOX PLOTS
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness.svg";
+      plot = ea.plot.multi.qualityBoxplot(q = f.mapValue(key = mse));
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
+    );
+    ea.l.savePlotForExp(
+      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation.svg";
+      plot = ea.plot.multi.yBoxplotExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
+      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      type = svg
+    )
+  ]
+)

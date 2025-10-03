@@ -3817,7 +3817,7 @@ Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;G, <
 
 ### Builder `ea.representation.srTree()`
 
-`ea.r.srTree(constants; operators; minTreeH; maxTreeH)`
+`ea.r.srTree(constants; operators; minTreeH; maxTreeH; ephemeral; ephemeralMinV; ephemeralMinV; ephemeralSigmaMut)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -3825,6 +3825,10 @@ Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;G, <
 | `operators` | e[] | `[+, -, *, p÷, plog]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.tree.numeric.Element$Operator">Element$Operator</abbr>&gt;</code> |
 | `minTreeH` | i | `4` | <code>int</code> |
 | `maxTreeH` | i | `10` | <code>int</code> |
+| `ephemeral` | b | `false` | <code>boolean</code> |
+| `ephemeralMinV` | d | `-5.0` | <code>double</code> |
+| `ephemeralMinV` | d | `5.0` | <code>double</code> |
+| `ephemeralSigmaMut` | d | `0.25` | <code>double</code> |
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.tree.Tree">Tree</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.tree.numeric.Element">Element</abbr>&gt;, <abbr title="io.github.ericmedvet.jgea.experimenter.Representation">Representation</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.tree.Tree">Tree</abbr>&lt;<abbr title="io.github.ericmedvet.jgea.core.representation.tree.numeric.Element">Element</abbr>&gt;&gt;&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Representations.srTree()` by jgea-experimenter:2.7.1-SNAPSHOT
 
