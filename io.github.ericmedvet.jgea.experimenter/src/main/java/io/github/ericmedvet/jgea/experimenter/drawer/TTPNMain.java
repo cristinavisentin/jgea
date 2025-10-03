@@ -193,7 +193,7 @@ public class TTPNMain {
     //drawer.show(n);
     //drawer.show(pn);
     //drawer.show(mn);
-    //drawer.show(new ImageBuilder.ImageInfo(600, 300), n);
+    //drawer.show(new Drawer.ImageInfo(600, 300), n);
 
     BackTracingNetworkFactory nf = new BackTracingNetworkFactory(
         List.of(Composed.sequence(Base.REAL), Composed.sequence(Base.REAL)),

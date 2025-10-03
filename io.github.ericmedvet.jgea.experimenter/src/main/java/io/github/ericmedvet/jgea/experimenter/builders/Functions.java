@@ -45,7 +45,6 @@ import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
-import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import io.github.ericmedvet.jviz.core.plot.*;
@@ -439,7 +438,7 @@ public class Functions {
       @Param("secondary") boolean secondary,
       @Param(value = "type", dS = "png") String type
   ) {
-    UnaryOperator<ImageBuilder.ImageInfo> iiAdapter = ii -> new ImageBuilder.ImageInfo(
+    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
         w == -1 ? ii.w() : w,
         h == -1 ? ii.h() : h
     );
@@ -938,30 +937,53 @@ public class Functions {
   @Cacheable
   public static <X, D> NamedFunction<X, Object> toImage(
       @Param(value = "of", dNPM = "f.identity()") Function<X, D> beforeF,
-      @Param("image") ImageBuilder<D> imageBuilder,
+      @Param("drawer") Drawer<D> drawer,
       @Param(value = "w", dI = -1) int w,
       @Param(value = "h", dI = -1) int h,
       @Param(value = "type", dS = "png") String type
   ) {
-    UnaryOperator<ImageBuilder.ImageInfo> iiAdapter = ii -> new ImageBuilder.ImageInfo(
+    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
         w == -1 ? ii.w() : w,
         h == -1 ? ii.h() : h
     );
     Function<D, Object> f = d -> switch (type.toLowerCase()) {
-      case "png" -> imageBuilder.buildRaster(iiAdapter.apply(imageBuilder.imageInfo(d)), d);
-      case "svg" -> imageBuilder.buildVectorial(iiAdapter.apply(imageBuilder.imageInfo(d)), d);
+      case "png" -> drawer.buildRaster(iiAdapter.apply(drawer.imageInfo(d)), d);
+      case "svg" -> drawer.buildVectorial(iiAdapter.apply(drawer.imageInfo(d)), d);
       default -> throw new IllegalArgumentException(
           "Invalid type '%s', which is not 'png' nor 'svg'".formatted(type)
       );
     };
-    return NamedFunction.from(f, "to.image[%s]".formatted(imageBuilder)).compose(beforeF);
+    return NamedFunction.from(f, "to.image[%s]".formatted(drawer)).compose(beforeF);
+  }
+
+  public static <X, D> NamedFunction<X, Object> toMultiImage(
+      @Param(value = "of", dNPM = "f.identity()") Function<X, List<D>> beforeF,
+      @Param("drawer") Drawer<D> drawer,
+      @Param(value = "w", dI = -1) int w,
+      @Param(value = "h", dI = -1) int h,
+      @Param(value = "type", dS = "png") String type,
+      @Param(value = "arrangement", dS = "horizontal") Drawer.Arrangement arrangement
+  ) {
+    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
+        w == -1 ? ii.w() : w,
+        h == -1 ? ii.h() : h
+    );
+    Drawer<List<D>> multiDrawer = drawer.multi(arrangement);
+    Function<List<D>, Object> f = ds -> switch (type.toLowerCase()) {
+      case "png" -> multiDrawer.buildRaster(iiAdapter.apply(multiDrawer.imageInfo(ds)), ds);
+      case "svg" -> multiDrawer.buildVectorial(iiAdapter.apply(multiDrawer.imageInfo(ds)), ds);
+      default -> throw new IllegalArgumentException(
+          "Invalid type '%s', which is not 'png' nor 'svg'".formatted(type)
+      );
+    };
+    return NamedFunction.from(f, "to.image[%s]".formatted(drawer)).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
   @Cacheable
   public static <X, D> NamedFunction<X, Video> toImagesVideo(
       @Param(value = "of", dNPM = "f.identity()") Function<X, List<D>> beforeF,
-      @Param("image") ImageBuilder<D> imageBuilder,
+      @Param("drawer") Drawer<D> drawer,
       @Param(value = "w", dI = -1) int w,
       @Param(value = "h", dI = -1) int h,
       @Param(value = "frameRate", dD = 10) double frameRate,
@@ -973,7 +995,7 @@ public class Functions {
         encoder
     );
     VideoBuilder<List<D>> videoBuilder = VideoBuilder.from(
-        imageBuilder,
+        drawer,
         Function.identity(),
         frameRate
     );
@@ -983,7 +1005,7 @@ public class Functions {
       }
       return videoBuilder.build(viAdapter.apply(videoBuilder.videoInfo(ds)), ds);
     };
-    return NamedFunction.from(f, "to.images.video[%s]".formatted(imageBuilder))
+    return NamedFunction.from(f, "to.images.video[%s]".formatted(drawer))
         .compose(beforeF);
   }
 

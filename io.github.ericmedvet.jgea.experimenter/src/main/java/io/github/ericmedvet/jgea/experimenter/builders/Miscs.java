@@ -38,7 +38,6 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import io.github.ericmedvet.jsdynsym.control.Simulation;
 import io.github.ericmedvet.jsdynsym.control.SimulationOutcomeDrawer;
 import io.github.ericmedvet.jviz.core.drawer.Drawer;
-import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -215,7 +214,7 @@ public class Miscs {
       @Param(value = "marginRate", dD = 0.1) double marginRate
   ) {
     return ImageUtils.imageDrawer(bgColor, marginRate)
-        .buildRaster(new ImageBuilder.ImageInfo(w, h), ImageUtils.loadFromResource(name));
+        .buildRaster(new Drawer.ImageInfo(w, h), ImageUtils.loadFromResource(name));
   }
 
   @SuppressWarnings("unused")
@@ -228,7 +227,7 @@ public class Miscs {
       @Param(value = "h", dI = 15) int h,
       @Param(value = "marginRate", dD = 0.1) double marginRate
   ) {
-    return ImageUtils.stringDrawer(fgColor, bgColor, marginRate).buildRaster(new ImageBuilder.ImageInfo(w, h), s);
+    return ImageUtils.stringDrawer(fgColor, bgColor, marginRate).buildRaster(new Drawer.ImageInfo(w, h), s);
   }
 
   @SuppressWarnings("unused")

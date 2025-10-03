@@ -23,7 +23,7 @@ import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.Runne
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.Wire;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.Type;
 import io.github.ericmedvet.jgea.problem.image.ImageUtils;
-import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
+import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.Video;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import io.github.ericmedvet.jviz.core.util.VideoUtils;
@@ -88,7 +88,7 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
   public Video build(VideoInfo videoInfo, Runner.TTPNInstrumentedOutcome outcome) {
     TTPNDrawer drawer = new TTPNDrawer(configuration.drawerConfiguration);
     // obtain network image and structure
-    ImageBuilder.ImageInfo imageInfo = new ImageBuilder.ImageInfo(videoInfo.w(), videoInfo.h());
+    Drawer.ImageInfo imageInfo = new Drawer.ImageInfo(videoInfo.w(), videoInfo.h());
     BufferedImage networkImage = drawer.buildRaster(imageInfo, outcome.network());
     TTPNDrawer.Metrics m = TTPNDrawer.Metrics.of(
         networkImage.getWidth(),
@@ -132,7 +132,7 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
   @Override
   public VideoInfo videoInfo(Runner.TTPNInstrumentedOutcome outcome) {
     TTPNDrawer drawer = new TTPNDrawer(configuration.drawerConfiguration);
-    ImageBuilder.ImageInfo imageInfo = drawer.imageInfo(outcome.network());
+    Drawer.ImageInfo imageInfo = drawer.imageInfo(outcome.network());
     return new VideoInfo(
         imageInfo.w(),
         imageInfo.h(),

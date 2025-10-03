@@ -41,9 +41,6 @@ import io.github.ericmedvet.jnb.core.Alias;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
-import io.github.ericmedvet.jnb.core.ParamMap;
-import io.github.ericmedvet.jnb.core.ParamMap.Type;
-import io.github.ericmedvet.jnb.core.PassThroughParam;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jnb.datastructure.Pair;
 import java.util.Collection;
@@ -52,7 +49,6 @@ import java.util.List;
 import java.util.SequencedSet;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -69,8 +65,7 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.bsUniform()") Function<BitString, Factory<BitString>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.bsFlipMutation()"
       }) List<Function<BitString, Mutation<BitString>>> mutations,
-      @Param(value = "xovers", dNPMs = {
-          "ea.r.go.composedXover(xover = ea.r.go.bsUniformXover(); mutation = ea.r.go.bsFlipMutation())"
+      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.bsUniformXover(); mutation = ea.r.go.bsFlipMutation())"
       }) List<Function<BitString, Crossover<BitString>>> xovers
   ) {
     return eBs -> new Representation<>(
@@ -100,8 +95,7 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.dsUniform()") Function<List<Double>, Factory<List<Double>>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.dsGaussianMutation()"
       }) List<Function<List<Double>, Mutation<List<Double>>>> mutations,
-      @Param(value = "xovers", dNPMs = {
-          "ea.r.go.composedXover(xover = ea.r.go.dsSegmentGeometricXover(); mutation = ea.r.go.dsGaussianMutation())"
+      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.dsSegmentGeometricXover(); mutation = ea.r.go.dsGaussianMutation())"
       }) List<Function<List<Double>, Crossover<List<Double>>>> xovers
   ) {
     return eDs -> new Representation<>(
@@ -117,8 +111,7 @@ public class Representations {
       @Param(value = "factory", dNPM = "ea.r.f.isUniform()") Function<IntString, Factory<IntString>> factory,
       @Param(value = "mutations", dNPMs = {"ea.r.go.isFlipMutation()"
       }) List<Function<IntString, Mutation<IntString>>> mutations,
-      @Param(value = "xovers", dNPMs = {
-          "ea.r.go.composedXover(xover = ea.r.go.isUniformXover(); mutation = ea.r.go.isFlipMutation())"
+      @Param(value = "xovers", dNPMs = {"ea.r.go.composedXover(xover = ea.r.go.isUniformXover(); mutation = ea.r.go.isFlipMutation())"
       }) List<Function<IntString, Crossover<IntString>>> xovers
   ) {
     return eIs -> new Representation<>(
@@ -137,14 +130,24 @@ public class Representations {
   ) {
     return egs -> {
       Representation<G> innerR = representation.apply(egs.getFirst());
-      List<Mutation<List<G>>> mutations = innerR.mutations().stream()
-          .map(innerMut -> (Mutation<List<G>>) (gs, random) -> gs.stream()
-              .map(g -> innerMut.mutate(g, random)).toList())
+      List<Mutation<List<G>>> mutations = innerR.mutations()
+          .stream()
+          .map(
+              innerMut -> (Mutation<List<G>>) (gs, random) -> gs.stream()
+                  .map(g -> innerMut.mutate(g, random))
+                  .toList()
+          )
           .toList();
-      List<Crossover<List<G>>> crossovers = innerR.crossovers().stream()
-          .map(innerXOver -> (Crossover<List<G>>) (gs1, gs2, random) -> IntStream.range(0,
-                  egs.size()).mapToObj(j -> innerXOver.recombine(gs1.get(j), gs2.get(j), random))
-              .toList())
+      List<Crossover<List<G>>> crossovers = innerR.crossovers()
+          .stream()
+          .map(
+              innerXOver -> (Crossover<List<G>>) (gs1, gs2, random) -> IntStream.range(
+                  0,
+                  egs.size()
+              )
+                  .mapToObj(j -> innerXOver.recombine(gs1.get(j), gs2.get(j), random))
+                  .toList()
+          )
           .toList();
       if (uniformCrossover) {
         crossovers = Stream.concat(crossovers.stream(), Stream.of(new UniformCrossover<G>()))
@@ -184,8 +187,7 @@ public class Representations {
       @Param(
           value = "constants", dDs = {0.1, 1, 10}) List<Double> constants,
       @Param(
-          value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division",
-          "prot_log"}) List<Element.Operator> operators,
+          value = "operators", dSs = {"addition", "subtraction", "multiplication", "prot_division", "prot_log"}) List<Element.Operator> operators,
       @Param(value = "minTreeH", dI = 4) int minTreeH,
       @Param(value = "maxTreeH", dI = 10) int maxTreeH,
       @Param("ephemeral") boolean ephemeral,
@@ -248,31 +250,7 @@ public class Representations {
       @Param(value = "maxNOfGates", dI = 32) int maxNOfGates,
       @Param(value = "maxNOfAttempts", dI = 10) int maxNOfAttempts,
       @Param(value = "subnetSizeRate", dD = 0.33) double subnetSizeRate,
-      @Param(value = "gates", dNPMs = {"ea.ttpn.gate.bAnd()", "ea.ttpn.gate.bNot()",
-          "ea.ttpn.gate.bOr()", "ea.ttpn" + ".gate.bXor()", "ea.ttpn.gate.concat()",
-          "ea.ttpn.gate.equal()", "ea.ttpn.gate.iTh()", "ea.ttpn" + ".gate.length" + "()",
-          "ea.ttpn.gate.noop()", "ea.ttpn.gate.pairer()", "ea.ttpn.gate.queuer()",
-          "ea.ttpn" + ".gate.select()", "ea" + ".ttpn.gate.sequencer()", "ea.ttpn.gate.sink()",
-          "ea.ttpn.gate" + ".splitter()", "ea" + ".ttpn.gate.unpairer()",
-          "ea" + ".ttpn.gate.iBefore()", "ea.ttpn.gate.iPMathOperator" + "(operator = addition)",
-          "ea.ttpn.gate.iPMathOperator" + "(operator = " + "subtraction)",
-          "ea.ttpn.gate" + ".iPMathOperator(operator = " + "multiplication)",
-          "ea.ttpn.gate" + ".iPMathOperator(operator = division)", "ea.ttpn.gate.iRange()",
-          "ea" + ".ttpn.gate.iSMult()", "ea.ttpn" + ".gate" + ".iSPMult()",
-          "ea.ttpn.gate.iSPSum" + "()", "ea.ttpn.gate.iSSum()", "ea" + ".ttpn.gate.iToR()",
-          "ea.ttpn.gate.rBefore" + "()", "ea.ttpn.gate" + ".repeater()",
-          "ea.ttpn.gate.rPMathOperator" + "(operator =" + " addition)",
-          "ea.ttpn.gate" + ".rPMathOperator" + "(operator = subtraction)",
-          "ea.ttpn.gate" + ".rPMathOperator(operator = multiplication)",
-          "ea" + ".ttpn" + ".gate.rPMathOperator(operator = division)",
-          "ea" + ".ttpn.gate.rSMult()", "ea.ttpn.gate.rSPMult()", "ea" + ".ttpn.gate.rSPSum()",
-          "ea.ttpn.gate.rSSum()", "ea" + ".ttpn.gate.rToI()", "ea.ttpn.gate.sBefore()",
-          "ea.ttpn" + ".gate.sConcat()", "ea.ttpn.gate" + ".sSplitter()",
-          "ea.ttpn.gate.bConst(value = true)", "ea.ttpn" + ".gate.iConst" + "(value = 0)",
-          "ea.ttpn" + ".gate.iConst(value = 1)", "ea.ttpn.gate.iConst(value = 2)",
-          "ea" + ".ttpn.gate.iConst" + "(value = 5)", "ea.ttpn.gate.rConst(value = 0)",
-          "ea.ttpn.gate.rConst(value = 0.1)", "ea.ttpn.gate.rConst" + "(value = 0" + ".2)",
-          "ea.ttpn.gate.rConst(value =" + " 0.5)", "ea.ttpn.gate.sPSequencer()"}) List<Gate> gates,
+      @Param(value = "gates", dNPMs = {"ea.ttpn.gate.bAnd()", "ea.ttpn.gate.bNot()", "ea.ttpn.gate.bOr()", "ea.ttpn" + ".gate.bXor()", "ea.ttpn.gate.concat()", "ea.ttpn.gate.equal()", "ea.ttpn.gate.iTh()", "ea.ttpn" + ".gate.length" + "()", "ea.ttpn.gate.noop()", "ea.ttpn.gate.pairer()", "ea.ttpn.gate.queuer()", "ea.ttpn" + ".gate.select()", "ea" + ".ttpn.gate.sequencer()", "ea.ttpn.gate.sink()", "ea.ttpn.gate" + ".splitter()", "ea" + ".ttpn.gate.unpairer()", "ea" + ".ttpn.gate.iBefore()", "ea.ttpn.gate.iPMathOperator" + "(operator = addition)", "ea.ttpn.gate.iPMathOperator" + "(operator = " + "subtraction)", "ea.ttpn.gate" + ".iPMathOperator(operator = " + "multiplication)", "ea.ttpn.gate" + ".iPMathOperator(operator = division)", "ea.ttpn.gate.iRange()", "ea" + ".ttpn.gate.iSMult()", "ea.ttpn" + ".gate" + ".iSPMult()", "ea.ttpn.gate.iSPSum" + "()", "ea.ttpn.gate.iSSum()", "ea" + ".ttpn.gate.iToR()", "ea.ttpn.gate.rBefore" + "()", "ea.ttpn.gate" + ".repeater()", "ea.ttpn.gate.rPMathOperator" + "(operator =" + " addition)", "ea.ttpn.gate" + ".rPMathOperator" + "(operator = subtraction)", "ea.ttpn.gate" + ".rPMathOperator(operator = multiplication)", "ea" + ".ttpn" + ".gate.rPMathOperator(operator = division)", "ea" + ".ttpn.gate.rSMult()", "ea.ttpn.gate.rSPMult()", "ea" + ".ttpn.gate.rSPSum()", "ea.ttpn.gate.rSSum()", "ea" + ".ttpn.gate.rToI()", "ea.ttpn.gate.sBefore()", "ea.ttpn" + ".gate.sConcat()", "ea.ttpn.gate" + ".sSplitter()", "ea.ttpn.gate.bConst(value = true)", "ea.ttpn" + ".gate.iConst" + "(value = 0)", "ea.ttpn" + ".gate.iConst(value = 1)", "ea.ttpn.gate.iConst(value = 2)", "ea" + ".ttpn.gate.iConst" + "(value = 5)", "ea.ttpn.gate.rConst(value = 0)", "ea.ttpn.gate.rConst(value = 0.1)", "ea.ttpn.gate.rConst" + "(value = 0" + ".2)", "ea.ttpn.gate.rConst(value =" + " 0.5)", "ea.ttpn.gate.sPSequencer()"}) List<Gate> gates,
       @Param("forbiddenGates") List<Gate> forbiddenGates,
       @Param(value = "avoidDeadGates", dB = true) boolean avoidDeadGates
   ) {

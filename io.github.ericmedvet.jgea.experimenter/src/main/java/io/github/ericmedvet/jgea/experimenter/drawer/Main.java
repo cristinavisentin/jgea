@@ -28,7 +28,7 @@ import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron;
 import io.github.ericmedvet.jsdynsym.core.numerical.named.NamedMultivariateRealFunction;
-import io.github.ericmedvet.jviz.core.drawer.ImageBuilder;
+import io.github.ericmedvet.jviz.core.drawer.Drawer;
 import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import java.awt.*;
 import java.io.File;
@@ -58,23 +58,23 @@ public class Main {
     );
     drawer.show(prob.getTargetGrid());
     ImageUtils.stringDrawer(Color.WHITE, Color.BLACK, 0.1)
-        .show(new ImageBuilder.ImageInfo(100, 100), "\uD83D\uDC31");
+        .show(new Drawer.ImageInfo(100, 100), "\uD83D\uDC31");
     ImageUtils.imageDrawer(Color.BLACK, 0.1)
-        .show(new ImageBuilder.ImageInfo(15, 15), ImageUtils.loadFromResource("grin.png"));
+        .show(new Drawer.ImageInfo(15, 15), ImageUtils.loadFromResource("grin.png"));
 
     ImageUtils.stringDrawer(Color.WHITE, Color.BLACK, 0)
-        .save(new ImageBuilder.ImageInfo(15, 15), new File("../target-+.png"), "+");
+        .save(new Drawer.ImageInfo(15, 15), new File("../target-+.png"), "+");
     ImageUtils.stringDrawer(Color.WHITE, Color.BLACK, 0)
-        .save(new ImageBuilder.ImageInfo(15, 15), new File("../target-x.png"), "x");
+        .save(new Drawer.ImageInfo(15, 15), new File("../target-x.png"), "x");
     ImageUtils.imageDrawer(Color.BLACK, 0.1)
         .save(
-            new ImageBuilder.ImageInfo(15, 15),
+            new Drawer.ImageInfo(15, 15),
             new File("../target-avocado.png"),
             ImageUtils.loadFromResource("avocado.png")
         );
     ImageUtils.imageDrawer(Color.BLACK, 0.1)
         .save(
-            new ImageBuilder.ImageInfo(15, 15),
+            new Drawer.ImageInfo(15, 15),
             new File("../target-tongue.png"),
             ImageUtils.loadFromResource("stuck_out_tongue_winking_eye.png")
         );
