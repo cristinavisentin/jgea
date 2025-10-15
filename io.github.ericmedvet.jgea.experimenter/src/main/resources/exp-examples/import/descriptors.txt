@@ -1,0 +1,49 @@
+$THRESHOLD = 0.5
+$NEG_THRESHOLD = -0.5
+
+$TREE_DESCRIPTOR = [
+  ea.s.me.d.descriptor(f = ea.f.treeSize(of = ea.f.genotype()); min = 0; max = 250; nOfBins = 10);
+  ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = predicate.matches(f = f.toString(); regex = "i[0-9]+"))); min = 0; max = 30; nOfBins = 10)
+]
+
+$ANN_DESCRIPTORS = [
+  ea.s.me.d.descriptor(
+    f = f.mathOp(
+      op = divide;
+      args = [
+        f.size(of = f.filter(
+          of = f.flat(of = f.nTh(of = ds.f.weights(of = $BRAIN_EXTRACTOR); n = 0));
+          condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])
+        ));
+        f.size(
+          of = f.flat(of = f.nTh(of = ds.f.weights(of = $BRAIN_EXTRACTOR); n = 0))
+        )
+      ]
+    );
+    min = 0.0;
+    max = 1.0;
+    nOfBins = 8
+  );
+  ea.s.me.d.descriptor(
+    f = f.mathOp(
+      op = divide;
+      args = [
+        f.size(of = f.filter(
+          of = f.flat(of = f.nTh(of = ds.f.weights(of = $BRAIN_EXTRACTOR); n = 1));
+          condition = predicate.all(conditions = [predicate.lt(t = $THRESHOLD); predicate.gt(t = $NEG_THRESHOLD)])
+        ));
+        f.size(
+          of = f.flat(of = f.nTh(of = ds.f.weights(of = $BRAIN_EXTRACTOR); n = 1))
+        )
+      ]
+    );
+    min = 0.0;
+    max = 1.0;
+    nOfBins = 8
+  )
+]
+
+$VSR_BODY_DESCRIPTORS = [
+  ea.s.me.d.descriptor(f = f.gridCount(of = s.f.vsrBody(of = ea.f.supplied(of = ea.f.solution()))); min = 1; max = 16; nOfBins = 8);
+  ea.s.me.d.descriptor(f = f.gridElongation(of = s.f.vsrBody(of = ea.f.supplied(of = ea.f.solution()))); min = 0; max = 1; nOfBins = 8)
+]

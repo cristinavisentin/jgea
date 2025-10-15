@@ -1,0 +1,123 @@
+@import("import/pong-environment.txt")
+@import("import/shared-misc.txt")
+@import("import/descriptors.txt")
+@import("import/listeners.txt")
+
+ea.experiment(
+  runs =
+    (randomGenerator = (seed = $SEEDS) * [m.defaultRG()]) *
+    (solver = (stop = [ea.sc.nOfQualityEvaluations(n = $N_EVALS)]) * [
+      ea.s.biMapElites(
+        name = "bi-me-tree-random2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        emptyArchive = false;
+        descriptors = $TREE_DESCRIPTOR;
+        opponentsSelector = ea.misc.randomMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biMapElites(
+        name = "bi-me-ann-random2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        emptyArchive = false;
+        descriptors = $ANN_DESCRIPTORS;
+        opponentsSelector = ea.misc.randomMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biMapElites(
+        name = "bi-me-tree-farthest2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        emptyArchive = false;
+        descriptors = $TREE_DESCRIPTOR;
+        opponentsSelector = ea.misc.farthestMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biMapElites(
+        name = "bi-me-tree-nearest2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        emptyArchive = false;
+        descriptors = $TREE_DESCRIPTOR;
+        opponentsSelector = ea.misc.nearestMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biMapElites(
+        name = "bi-me-ann-farthest2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        emptyArchive = false;
+        descriptors = $ANN_DESCRIPTORS;
+        opponentsSelector = ea.misc.farthestMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biMapElites(
+        name = "bi-me-ann-nearest2";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        emptyArchive = false;
+        descriptors = $ANN_DESCRIPTORS;
+        opponentsSelector = ea.misc.nearestMESelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+
+      ea.s.ga(
+        name = "self-ga-tree";
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf())
+      );
+      ea.s.ga(
+        name = "self-ga-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP)
+      );
+
+      ea.s.mapElites(
+        name = "self-me-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        descriptors = $ANN_DESCRIPTORS
+      );
+      ea.s.mapElites(
+        name = "self-me-tree";
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        descriptors = $TREE_DESCRIPTOR
+      );
+
+      ea.s.biGa(
+        name = "bi-ga-ann";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        opponentsSelector = ea.misc.randomSelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      );
+      ea.s.biGa(
+        name = "bi-ga-tree";
+        fitnessReducer = ea.misc.lossyAverage();
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        opponentsSelector = ea.misc.randomSelector(nOfOpponents = 2);
+        fitnessAggregator = f.avg()
+      )
+    ]) *
+    (problem = [ea.p.biSimToBqb(
+      simulation = $SIMULATION;
+      qFunction1 = $QUALITY_F1;
+      qFunction2 = $QUALITY_F2;
+      tRange = misc.range(min = 0; max = 45);
+      dT = 0.05;
+      type = maximize
+    )]) *
+    [ea.run()];
+
+  listeners = + $GENERAL_LISTENERS + $PONG_LISTENERS
+)

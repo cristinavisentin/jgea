@@ -1,0 +1,14 @@
+$VS_SELF = ds.f.selfBiSimulator(
+  of = ea.f.solution();
+  tRange = misc.range(min = 0; max = 45);
+  dT = 0.05;
+  simulation = $SIMULATION
+)
+
+$VS_OPPONENT = ds.f.opponentBiSimulator(
+  of = ea.f.solution();
+  opponent = $OPPONENT;
+  tRange = misc.range(min = 0; max = 45);
+  dT = 0.05;
+  simulation = $SIMULATION
+)
