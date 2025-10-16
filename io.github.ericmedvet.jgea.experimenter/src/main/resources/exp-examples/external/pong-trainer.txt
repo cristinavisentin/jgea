@@ -35,6 +35,8 @@ ea.experiment(
       simulation = $SIMULATION;
       qFunction = $QUALITY_F1;
       trainingOpponent = m.supplier(of = $OPPONENT);
+      tRange = misc.range(min = 0; max = 45);
+      dT = 0.05;
       type = maximize
     )]) *
     [ea.run()];

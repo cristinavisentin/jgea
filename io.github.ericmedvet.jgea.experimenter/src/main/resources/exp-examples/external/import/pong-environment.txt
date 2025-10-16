@@ -25,8 +25,6 @@ $PONG_BI_PROBLEM = ea.p.biSimToBqb(
   simulation = $SIMULATION;
   qFunction1 = $QUALITY_F1;
   qFunction2 = $QUALITY_F2;
-  tRange = misc.range(min = 0; max = 45);
-  dT = 0.05;
   type = maximize
 )
 
