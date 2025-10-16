@@ -20,7 +20,6 @@
 package io.github.ericmedvet.jgea.experimenter.drawer;
 
 import io.github.ericmedvet.jgea.core.operator.Mutation;
-import io.github.ericmedvet.jgea.core.representation.programsynthesis.InstrumentedProgram;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ProgramExecutionException;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.ttpn.*;
 import io.github.ericmedvet.jgea.core.representation.programsynthesis.type.Base;
@@ -38,7 +37,7 @@ public class SingleMutationExperiments {
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
 
-    Network rIntSumgoodNetwork = new Network(
+    Network rIntSumGoodNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -55,7 +54,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network biLongestStringgoodNetwork = new Network(
+    Network biLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -81,7 +80,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network iArraySumgoodNetwork = new Network(
+    Network iArraySumGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
@@ -96,7 +95,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network iBiMaxgoodNetwork = new Network(
+    Network iBiMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -114,7 +113,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network iTriMaxgoodNetwork = new Network(
+    Network iTriMaxGoodNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -141,7 +140,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network vScProductgoodNetwork = new Network(
+    Network vScProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -165,7 +164,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network sLengthergoodNetwork = new Network(
+    Network sLengtherGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.splitter(),
@@ -189,7 +188,7 @@ public class SingleMutationExperiments {
     );
 
 
-    Network triLongestStringgoodNetwork = new Network(
+    Network triLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -231,14 +230,13 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network vProductgoodNetwork = new Network(
+    Network vProductGoodNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Composed.sequence(Base.REAL)),
             Gates.splitter(),
             Gates.splitter(),
-            Gates.queuer(),
-            Gates.rSMult(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
             Gates.rSPSum(),
             Gate.output(Base.REAL)
         ),
@@ -248,15 +246,14 @@ public class SingleMutationExperiments {
             Wire.of(2, 0, 4, 0),
             Wire.of(3, 0, 4, 1),
             Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 7, 0)
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
 
 
         )
     );
 
-    Network rIntSumbiggerNetwork = new Network(
+    Network rIntSumBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.REAL),
             Gate.input(Base.REAL),
@@ -290,7 +287,8 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network vScProductbiggerNetwork = new Network(
+
+    Network vScProductBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.REAL)),
             Gate.input(Base.REAL),
@@ -325,29 +323,30 @@ public class SingleMutationExperiments {
     );
 
 
-    Network iArraySumbiggerNetwork = new Network(
+    Network iArraySumBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
             Gates.splitter(),
             Gates.iSPSum(),
             Gate.output(Base.INT),
             Gates.noop(),
-            Gates.noop(),
+            Gates.iSPSum(),
             Gates.noop()
         ),
         Set.of(
             Wire.of(0, 0, 4, 0),
             Wire.of(4, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
             Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 2, 0),
             Wire.of(2, 0, 6, 0),
-            Wire.of(6, 0, 3, 0),
-            Wire.of(2, 0, 2, 1)
+            Wire.of(2, 0, 5, 1),
+            Wire.of(5, 0, 2, 1),
+            Wire.of(6, 0, 3, 0)
         )
     );
 
 
-    Network iTriMaxbiggerNetwork = new Network(
+    Network iTriMaxBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.INT),
             Gate.input(Base.INT),
@@ -387,7 +386,7 @@ public class SingleMutationExperiments {
     );
 
 
-    Network triLongestStringbiggerNetwork = new Network(
+    Network triLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -444,7 +443,7 @@ public class SingleMutationExperiments {
         )
     );
 
-    Network sLengtherbiggerNetwork = new Network(
+    Network sLengtherBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.STRING)),
             Gates.noop(),
@@ -474,7 +473,7 @@ public class SingleMutationExperiments {
     );
 
 
-    Network biLongestStringbiggerNetwork = new Network(
+    Network biLongestStringBiggerNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
             Gate.input(Base.STRING),
@@ -512,6 +511,91 @@ public class SingleMutationExperiments {
     );
 
 
+    Network iBiMaxBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.noop(),
+            Gates.iBefore(),
+            Gates.noop(),
+            Gates.select(),
+            Gates.repeater(),
+            Gates.noop(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(0, 0, 4, 0),
+            Wire.of(4, 0, 5, 1),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(1, 0, 5, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 5, 2),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 7, 0),
+            Wire.of(7, 0, 8, 0)
+        )
+    );
+
+    Network remainderGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
+    Network remainderBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT),
+            Gates.rSPMult()
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 6, 1),
+            Wire.of(2, 0, 9, 0),
+            Wire.of(9, 0, 4, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 8, 0)
+
+        )
+    );
+
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -542,41 +626,23 @@ public class SingleMutationExperiments {
     ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
+    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    );
 
-    Network goodNetwork = iBiMaxgoodNetwork;
-    ProgramSynthesisProblem psb = iBiMaxpsb;
-
+    Network goodNetwork = iArraySumGoodNetwork;
+    ProgramSynthesisProblem psb = iArraySumpsb;
+    int times = 10;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);
 
     drawer.show(goodNetwork);
 
-    System.out.println("Good network:");
-
-    psb.caseProvider()
-        .stream()
-        .forEach(
-            e -> {
-              InstrumentedProgram.InstrumentedOutcome outcome = runner.run(goodNetwork, e.input());
-              System.out.printf(
-                  "in=%s\tactualOut=%s\tpredOut=%s exc=%s%n",
-                  e.input(),
-                  e.output().outputs(),
-                  outcome.outputs(),
-                  outcome.exception()
-              );
-            }
-        );
-
-    System.out.println(psb.qualityFunction().apply(runner.asInstrumentedProgram(goodNetwork)));
-
-
     RandomGenerator rnd = new Random(3);
     Mutation<Network> giMutation = new GateInserterMutation(new LinkedHashSet<>(StatsMain.ALL_GATES), 30, 20, true);
     Mutation<Network> grMutation = new GateRemoverMutation(10, true);
     Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
-
 
     for (Mutation<Network> mutation : List.of(giMutation)) {
       double totalFailRate = 0;
@@ -586,11 +652,10 @@ public class SingleMutationExperiments {
       Set<Network> mutatedNetworks = new HashSet<>();
       int neutralCount = 0;
 
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < times; i++) {
         Network mutated = mutation.mutate(goodNetwork, rnd);
         mutatedNetworks.add(mutated);
         neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
-        drawer.show(mutated);
 
         Map<String, Double> qualityMetrics = psb.qualityFunction()
             .apply(runner.asInstrumentedProgram(mutated));
@@ -602,24 +667,17 @@ public class SingleMutationExperiments {
         totalFailRate += failRate;
         totalAvgRawDissimilarity += avgRawDissimilarity;
         totalProfileAvgSteps += profileAvgSteps;
-
-        System.out.println("1 Mutated");
-        System.out.print(psb.qualityFunction().apply(runner.asInstrumentedProgram(mutated)));
       }
 
       double uniqueness = mutatedNetworks.size();
       double neutrality = neutralCount;
 
-      System.out.print("Uniqueness");
-      System.out.print(uniqueness);
-      System.out.print("Neutrality");
-      System.out.print(neutrality);
+      System.out.printf("uniq %.1f\t\t\t", uniqueness / times);
+      System.out.printf("neut %.1f\t\t\t", neutrality / times);
 
-      System.out.print("Fail Rate & Avg Raw Diss & Steps");
-      System.out.print(totalFailRate / 10 + " ");
-      System.out.print(totalAvgRawDissimilarity / 10 + " ");
-      System.out.print(totalProfileAvgSteps / 10 + " ");
-
+      System.out.printf("FR %.1f\t\t\t", totalFailRate / times);
+      System.out.printf("ARD %.1f\t\t\t", totalAvgRawDissimilarity / times);
+      System.out.printf("steps %.1f\t\t\t\t\t", totalProfileAvgSteps / times);
     }
     System.out.println();
   }

@@ -31,8 +31,7 @@ import io.github.ericmedvet.jnb.core.NamedBuilder;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
-public class StepwiseMutations {
-
+public class Experiments {
   public static void main(
       String[] args
   ) throws NetworkStructureException, ProgramExecutionException, NoSuchMethodException, TypeException {
@@ -187,6 +186,7 @@ public class StepwiseMutations {
         )
     );
 
+
     Network triLongestStringGoodNetwork = new Network(
         List.of(
             Gate.input(Base.STRING),
@@ -286,6 +286,42 @@ public class StepwiseMutations {
         )
     );
 
+
+    Network vScProductBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Base.REAL),
+            Gates.length(),
+            Gates.repeater(),
+            Gates.queuer(),
+            Gates.noop(),
+            Gates.repeater(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.sPSequencer(),
+            Gates.noop(),
+            Gate.output(Composed.sequence(Base.REAL))
+        ),
+        Set.of(
+            Wire.of(1, 0, 6, 0),
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 3, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 7, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(2, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 8, 0),
+            Wire.of(7, 0, 8, 1),
+            Wire.of(8, 0, 9, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(9, 0, 10, 0),
+            Wire.of(10, 0, 11, 0)
+        )
+    );
+
+
     Network iArraySumBiggerNetwork = new Network(
         List.of(
             Gate.input(Composed.sequence(Base.INT)),
@@ -293,177 +329,21 @@ public class StepwiseMutations {
             Gates.iSPSum(),
             Gate.output(Base.INT),
             Gates.noop(),
-            Gates.noop(),
+            Gates.iSPSum(),
             Gates.noop()
         ),
         Set.of(
             Wire.of(0, 0, 4, 0),
             Wire.of(4, 0, 1, 0),
-            Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 2, 0),
-            Wire.of(2, 0, 6, 0),
-            Wire.of(6, 0, 3, 0),
-            Wire.of(2, 0, 2, 1)
-        )
-    );
-
-    //    Network vScProductBiggerNetwork = new Network(
-    //            List.of(
-    //                    Gate.input(Composed.sequence(Base.REAL)),
-    //                    Gate.input(Base.REAL),
-    //                    Gates.length(),
-    //                    Gates.repeater(),
-    //                    Gates.queuer(),
-    //                    Gates.noop(),
-    //                    Gates.repeater(),
-    //                    Gates.splitter(),
-    //                    Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
-    //                    Gates.sPSequencer(),
-    //                    Gates.noop(),
-    //                    Gate.output(Composed.sequence(Base.REAL))
-    //            ),
-    //            Set.of(
-    //                    Wire.of(1, 0, 6, 0),
-    //                    Wire.of(0, 0, 2, 0),
-    //                    Wire.of(0, 0, 3, 0),
-    //                    Wire.of(2,0,3,1),
-    //                    Wire.of(3,0,7,0),
-    //                    Wire.of(2,0,4,0),
-    //                    Wire.of(2,0,4,1),
-    //                    Wire.of(4, 0, 5, 0),
-    //                    Wire.of(5,0,6,1),
-    //                    Wire.of(6, 0, 8, 0),
-    //                    Wire.of(7, 0, 8, 1),
-    //                    Wire.of(8, 0, 9, 0),
-    //                    Wire.of(9, 0, 9, 1),
-    //                    Wire.of(9, 0, 10, 0),
-    //                    Wire.of(10,0,11,0)
-    //            )
-    //    );
-
-    Network sLengtherBiggerNetwork = new Network(
-        List.of(
-            Gate.input(Composed.sequence(Base.STRING)),
-            Gates.noop(),
-            Gates.splitter(),
-            Gates.sSplitter(),
-            Gates.noop(),
-            Gates.length(),
-            Gates.pairer(),
-            Gates.sPSequencer(),
-            Gates.noop(),
-            Gate.output(Composed.sequence(Composed.tuple(List.of(Base.STRING, Base.INT))))
-        ),
-        Set.of(
-            Wire.of(0, 0, 1, 0),
-            Wire.of(1, 0, 2, 0),
-            Wire.of(2, 0, 3, 0),
-            Wire.of(2, 0, 6, 0),
-            Wire.of(3, 0, 4, 0),
-            Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 1),
-            Wire.of(6, 0, 7, 0),
-            Wire.of(7, 0, 7, 1),
-            Wire.of(7, 0, 8, 0),
-            Wire.of(8, 0, 9, 0)
-
-        )
-    );
-
-    Network iBiMaxBiggerNetwork = new Network(
-        List.of(
-            Gate.input(Base.INT),
-            Gate.input(Base.INT),
-            Gates.noop(),
-            Gates.iBefore(),
-            Gates.noop(),
-            Gates.select(),
-            Gates.repeater(),
-            Gates.noop(),
-            Gate.output(Base.INT)
-        ),
-        Set.of(
-            Wire.of(0, 0, 3, 0),
-            Wire.of(0, 0, 4, 0),
-            Wire.of(4, 0, 5, 1),
             Wire.of(1, 0, 2, 0),
             Wire.of(1, 0, 5, 0),
-            Wire.of(2, 0, 3, 1),
-            Wire.of(3, 0, 5, 2),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(5, 0, 6, 1),
-            Wire.of(6, 0, 7, 0),
-            Wire.of(7, 0, 8, 0)
+            Wire.of(2, 0, 6, 0),
+            Wire.of(2, 0, 5, 1),
+            Wire.of(5, 0, 2, 1),
+            Wire.of(6, 0, 3, 0)
         )
     );
 
-    Network biLongestStringBiggerNetwork = new Network(
-        List.of(
-            Gate.input(Base.STRING),
-            Gate.input(Base.STRING),
-            Gates.sSplitter(),
-            Gates.length(),
-            Gates.iBefore(),
-            Gates.noop(),
-            Gates.sSplitter(),
-            Gates.length(),
-            Gates.bOr(),
-            Gates.select(),
-            Gates.noop(),
-            Gate.output(Base.STRING),
-            Gates.repeater()
-        ),
-        Set.of(
-            Wire.of(0, 0, 9, 1),
-            Wire.of(0, 0, 2, 0),
-            Wire.of(2, 0, 3, 0),
-            Wire.of(3, 0, 4, 0),
-            Wire.of(4, 0, 8, 0),
-            Wire.of(4, 0, 8, 1),
-            Wire.of(8, 0, 9, 2),
-            Wire.of(9, 0, 10, 0),
-            Wire.of(10, 0, 11, 0),
-            Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 7, 0),
-            Wire.of(7, 0, 4, 1),
-            Wire.of(1, 0, 12, 0),
-            Wire.of(7, 0, 12, 1),
-            Wire.of(12, 0, 9, 0)
-
-        )
-    );
-
-    Network vProductBiggerNetwork = new Network(
-        List.of(
-            Gate.input(Composed.sequence(Base.REAL)),
-            Gate.input(Composed.sequence(Base.REAL)),
-            Gates.splitter(),
-            Gates.splitter(),
-            Gates.queuer(),
-            Gates.rSMult(),
-            Gates.rSPSum(),
-            Gate.output(Base.REAL),
-            Gates.noop(),
-            Gates.noop(),
-            Gates.noop()
-        ),
-        Set.of(
-            Wire.of(2, 0, 4, 0),
-            Wire.of(3, 0, 4, 1),
-            Wire.of(4, 0, 5, 0),
-            Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(0, 0, 8, 0),
-            Wire.of(8, 0, 2, 0),
-            Wire.of(1, 0, 9, 0),
-            Wire.of(9, 0, 3, 0),
-            Wire.of(6, 0, 10, 0),
-            Wire.of(10, 0, 7, 0)
-
-
-        )
-    );
 
     Network iTriMaxBiggerNetwork = new Network(
         List.of(
@@ -503,6 +383,7 @@ public class StepwiseMutations {
             Wire.of(11, 0, 7, 0)
         )
     );
+
 
     Network triLongestStringBiggerNetwork = new Network(
         List.of(
@@ -561,35 +442,98 @@ public class StepwiseMutations {
         )
     );
 
-    Network vScProductBiggerNetwork = new Network(
+    Network sLengtherBiggerNetwork = new Network(
         List.of(
-            Gate.input(Composed.sequence(Base.REAL)),
-            Gate.input(Base.REAL),
-            Gates.length(),
-            Gates.repeater(),
+            Gate.input(Composed.sequence(Base.STRING)),
+            Gates.noop(),
             Gates.splitter(),
-            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.sSplitter(),
+            Gates.noop(),
+            Gates.length(),
+            Gates.pairer(),
             Gates.sPSequencer(),
-            Gate.output(Composed.sequence(Base.REAL)),
             Gates.noop(),
-            Gates.noop(),
-            Gates.noop(),
-            Gates.noop()
+            Gate.output(Composed.sequence(Composed.tuple(List.of(Base.STRING, Base.INT))))
         ),
         Set.of(
-            Wire.of(1, 0, 3, 0),
-            Wire.of(0, 0, 8, 0),
-            Wire.of(8, 0, 2, 0),
-            Wire.of(0, 0, 4, 0),
-            Wire.of(2, 0, 3, 1),
-            Wire.of(3, 0, 11, 0),
-            Wire.of(11, 0, 5, 0),
-            Wire.of(4, 0, 9, 0),
-            Wire.of(9, 0, 5, 1),
+            Wire.of(0, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(2, 0, 6, 0),
+            Wire.of(3, 0, 4, 0),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 7, 0),
+            Wire.of(7, 0, 7, 1),
+            Wire.of(7, 0, 8, 0),
+            Wire.of(8, 0, 9, 0)
+
+        )
+    );
+
+
+    Network biLongestStringBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.noop(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.bOr(),
+            Gates.select(),
+            Gates.noop(),
+            Gate.output(Base.STRING),
+            Gates.repeater()
+        ),
+        Set.of(
+            Wire.of(0, 0, 9, 1),
+            Wire.of(0, 0, 2, 0),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(3, 0, 4, 0),
+            Wire.of(4, 0, 8, 0),
+            Wire.of(4, 0, 8, 1),
+            Wire.of(8, 0, 9, 2),
+            Wire.of(9, 0, 10, 0),
+            Wire.of(10, 0, 11, 0),
+            Wire.of(1, 0, 5, 0),
             Wire.of(5, 0, 6, 0),
-            Wire.of(6, 0, 6, 1),
-            Wire.of(6, 0, 10, 0),
-            Wire.of(10, 0, 7, 0)
+            Wire.of(6, 0, 7, 0),
+            Wire.of(7, 0, 4, 1),
+            Wire.of(1, 0, 12, 0),
+            Wire.of(7, 0, 12, 1),
+            Wire.of(12, 0, 9, 0)
+
+        )
+    );
+
+
+    Network iBiMaxBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.noop(),
+            Gates.iBefore(),
+            Gates.noop(),
+            Gates.select(),
+            Gates.repeater(),
+            Gates.noop(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(0, 0, 4, 0),
+            Wire.of(4, 0, 5, 1),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(1, 0, 5, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 5, 2),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(6, 0, 7, 0),
+            Wire.of(7, 0, 8, 0)
         )
     );
 
@@ -650,6 +594,46 @@ public class StepwiseMutations {
         )
     );
 
+    Network vProductBiggerNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.queuer(),
+            Gates.rSMult(),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop()
+        ),
+        Set.of(
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 6, 1),
+            Wire.of(0, 0, 8, 0),
+            Wire.of(8, 0, 2, 0),
+            Wire.of(1, 0, 9, 0),
+            Wire.of(9, 0, 3, 0),
+            Wire.of(6, 0, 10, 0),
+            Wire.of(10, 0, 7, 0)
+
+
+        )
+    );
+
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    Runner runner = new Runner(100, 1000, 1000, 100, false);
+
+    RandomGenerator rnd = new Random(3);
+    Mutation<Network> giMutation = new GateInserterMutation(new LinkedHashSet<>(StatsMain.ALL_GATES), 30, 20, true);
+    Mutation<Network> grMutation = new GateRemoverMutation(10, true);
+    Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
+
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -669,64 +653,67 @@ public class StepwiseMutations {
     ProgramSynthesisProblem vScProductpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"vScProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
-    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
-    );
+
     ProgramSynthesisProblem triLongestStringpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    );
+
+    ProgramSynthesisProblem sLengtherpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"sLengther\"; metrics = [fail_rate; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
     ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
+    // vProductpsb has smooth_fail_rate
+    // sLengtherpsb does not have avg_raw_dissimilarity
 
-    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
-    Runner runner = new Runner(100, 1000, 1000, 100, false);
-
-
-    RandomGenerator rnd = new Random(3);
-    Mutation<Network> giMutation = new GateInserterMutation(new LinkedHashSet<>(StatsMain.ALL_GATES), 30, 20, true);
-    Mutation<Network> grMutation = new GateRemoverMutation(10, true);
-    Mutation<Network> wsMutation = new WireSwapperMutation(10, true);
-    List<Mutation<Network>> mutations = List.of(giMutation, grMutation, wsMutation);
-
-    // Specify the network
-    Network network = vProductGoodNetwork;
-    ProgramSynthesisProblem psb = vProductpsb;
+    Network goodNetwork = sLengtherBiggerNetwork;
+    ProgramSynthesisProblem psb = sLengtherpsb;
     int times = 100;
 
-    Random rnd_mutation = new Random();
-    Network mutated = network;
+    System.out.print(
+        psb.qualityFunction().apply(runner.asInstrumentedProgram((goodNetwork))).get("profile_avg_steps") + "\t\t\t"
+    );
+
+    drawer.show(goodNetwork);
+    //drawer.show(new ImageBuilder.ImageInfo(2000,1000), goodNetwork);
 
     double totalFailRate = 0;
+    //double totalAvgRawDissimilarity = 0;
+    double totalProfileAvgSteps = 0;
+
     Set<Network> mutatedNetworks = new HashSet<>();
     int neutralCount = 0;
 
     for (int i = 0; i < times; i++) {
-
-      for (int j = 0; j < 10; j++) {
-        Mutation<Network> mutation = mutations.get(rnd.nextInt(mutations.size()));
-        //System.out.print(mutation.getClass().getSimpleName());
-        mutated = mutation.mutate(mutated, rnd);
-        //drawer.show(mutated);
-      }
-
+      Network mutated = giMutation.mutate(goodNetwork, rnd);
       mutatedNetworks.add(mutated);
-      neutralCount += mutated.equals(network) ? 1 : 0;
+      neutralCount += mutated.equals(goodNetwork) ? 1 : 0;
 
       Map<String, Double> qualityMetrics = psb.qualityFunction()
           .apply(runner.asInstrumentedProgram(mutated));
+
       double failRate = qualityMetrics.get("fail_rate");
+      //double avgRawDissimilarity = qualityMetrics.get("avg_raw_dissimilarity");
+      double profileAvgSteps = qualityMetrics.get("profile_avg_steps");
+
       totalFailRate += failRate;
+      //totalAvgRawDissimilarity += avgRawDissimilarity;
+      totalProfileAvgSteps += profileAvgSteps;
     }
+
     double uniqueness = mutatedNetworks.size();
     double neutrality = neutralCount;
 
-    System.out.printf("uniq %.1f\t\t\t", uniqueness / times);
-    System.out.printf("neut %.1f\t\t\t", neutrality / times);
-    System.out.printf("FR %.1f\t\t\t", totalFailRate / times);
+    System.out.printf("uniq %.2f\t\t\t", uniqueness / times);
+    System.out.printf("neut %.2f\t\t\t", neutrality / times);
+    System.out.printf("FR %.2f\t\t\t", totalFailRate / times);
+    //System.out.printf("ARD %.2f\t\t\t", totalAvgRawDissimilarity / times);
+    System.out.printf("steps %.2f\t\t\t\t\t", totalProfileAvgSteps / times);
+
   }
 }

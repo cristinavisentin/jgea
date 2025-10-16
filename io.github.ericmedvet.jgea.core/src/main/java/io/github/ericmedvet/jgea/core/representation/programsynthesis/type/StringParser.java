@@ -99,7 +99,7 @@ public record StringParser(String s) {
   }
 
   private Node parseBase(int i) throws ParseException {
-    Token t = find(i, "[A-Z]");
+    Token t = find(i, "[a-z]");
     return Arrays.stream(Base.values())
         .filter(b -> b.toString().equals(t.s(s)))
         .findFirst()
@@ -108,7 +108,7 @@ public record StringParser(String s) {
   }
 
   private Node parseGeneric(int i) throws ParseException {
-    Token t = find(i, "[a-z][A-Za-z1-2]*");
+    Token t = find(i, "[A-Z][A-Za-z1-2]*");
     return n(Generic.of(t.s(s)), t);
   }
 
@@ -159,5 +159,4 @@ public record StringParser(String s) {
   private static Token t(int start, int end) {
     return new Token(start, end);
   }
-
 }

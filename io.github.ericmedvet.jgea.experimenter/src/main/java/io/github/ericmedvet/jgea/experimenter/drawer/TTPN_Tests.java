@@ -43,7 +43,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.random.RandomGenerator;
 
-public class TTPNMain {
+public class TTPN_Tests {
 
   private static void comparator() {
     ParetoDominance<Double> basePC = new ParetoDominance<>(
@@ -244,6 +244,224 @@ public class TTPNMain {
     //IntStream.range(0, 1000).forEach(i -> factory.build(rnd, n -> System.out.printf("======%n%s%n===%n", n)));
   }
 
+  private static void triLongestStringbiggerNetwork() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
+    Network n = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop()
+        ),
+        Set.of(
+            Wire.of(0, 0, 16, 0),
+            Wire.of(16, 0, 3, 0),
+
+            Wire.of(0, 0, 10, 1),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(1, 0, 10, 0),
+            Wire.of(3, 0, 6, 0),
+            Wire.of(4, 0, 7, 0),
+            Wire.of(6, 0, 9, 0),
+            Wire.of(7, 0, 18, 0),
+            Wire.of(18, 0, 9, 1),
+
+            Wire.of(9, 0, 10, 2),
+            Wire.of(10, 0, 17, 0),
+            Wire.of(17, 0, 11, 0),
+
+            Wire.of(10, 0, 14, 1),
+            Wire.of(2, 0, 5, 0),
+            Wire.of(5, 0, 19, 0),
+            Wire.of(19, 0, 8, 0),
+
+            Wire.of(8, 0, 13, 1),
+            Wire.of(2, 0, 14, 0),
+            Wire.of(11, 0, 12, 0),
+            Wire.of(12, 0, 13, 0),
+            Wire.of(13, 0, 14, 2),
+
+            Wire.of(14, 0, 20, 0),
+            Wire.of(20, 0, 15, 0)
+        )
+    );
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    drawer.show(n);
+    Runner runner = new Runner(100000, 100000, 100000, 10000, false);
+
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
+    System.out.println("Wire contents: " + outcome.wireContents());
+    System.out.println("Outputs: " + outcome.outputs());
+
+    TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
+    videoBuilder.save(new File("../ttpn-triLongestStringbiggerNetwork.mp4"), outcome);
+    System.out.println(outcome);
+    System.out.println(outcome.wireContents());
+  }
+
+  private static void triLongestString() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
+    Network n = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(0, 0, 10, 1),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(1, 0, 10, 0),
+            Wire.of(3, 0, 6, 0),
+            Wire.of(4, 0, 7, 0),
+            Wire.of(6, 0, 9, 0),
+            Wire.of(7, 0, 9, 1),
+            Wire.of(9, 0, 10, 2),
+            Wire.of(10, 0, 11, 0),
+            Wire.of(10, 0, 14, 1),
+            Wire.of(2, 0, 5, 0),
+            Wire.of(5, 0, 8, 0),
+            Wire.of(8, 0, 13, 1),
+            Wire.of(2, 0, 14, 0),
+            Wire.of(11, 0, 12, 0),
+            Wire.of(12, 0, 13, 0),
+            Wire.of(13, 0, 14, 2),
+            Wire.of(14, 0, 15, 0)
+        )
+    );
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    drawer.show(n);
+    Runner runner = new Runner(100000, 100000, 100000, 10000, false);
+
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            "somethingverylong",
+            "dog",
+            "ocean"
+        )
+    );
+    System.out.println("Wire contents: " + outcome.wireContents());
+    System.out.println("Outputs: " + outcome.outputs());
+
+    TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
+    videoBuilder.save(new File("../ttpn-triLongestStringGoodNetwork.mp4"), outcome);
+    System.out.println(outcome);
+    System.out.println(outcome.wireContents());
+  }
+
+
+  private static void vProduct() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
+    Network n = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
+
+
+        )
+    );
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    drawer.show(n);
+    Runner runner = new Runner(1000, 1000, 1000, 100, false);
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of(1.0, 2.0, 3.0),
+            List.of(4.0, 5.0, 6.0)
+        )
+    );
+    TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
+    videoBuilder.save(new File("../ttpn-vProduct.mp4"), outcome);
+    System.out.println(outcome);
+  }
+
+  private static void sLengther() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
+    Network n = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.STRING)),
+            Gates.splitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.pairer(),
+            Gates.sPSequencer(),
+            Gate.output(Composed.sequence(Composed.tuple(List.of(Base.STRING, Base.INT))))
+        ),
+        Set.of(
+            Wire.of(0, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
+
+        )
+    );
+    TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
+    drawer.show(n);
+    Runner runner = new Runner(1000, 1000, 1000, 100, false);
+    Runner.TTPNInstrumentedOutcome outcome = runner.run(
+        n,
+        List.of(
+            List.of("somethingverylong")
+        )
+    );
+    TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
+    videoBuilder.save(new File("../ttpn-sLengther.mp4"), outcome);
+    System.out.println(outcome);
+  }
+
+
   private static void iArraySum() throws NoSuchMethodException, NetworkStructureException, TypeException, ProgramExecutionException {
     Program target = Program.from(Problems.class.getMethod("iArraySum", List.class));
     Network n = new Network(
@@ -267,7 +485,7 @@ public class TTPNMain {
         )
     );
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
-    //drawer.show(n);
+    drawer.show(n);
     Runner runner = new Runner(1000, 1000, 1000, 100, false);
     Runner.TTPNInstrumentedOutcome outcome = runner.run(n, List.of(List.of(1, 2, 3, 4, 5, 6, 7, 8)));
     TTPNOutcomeVideoBuilder videoBuilder = new TTPNOutcomeVideoBuilder(TTPNOutcomeVideoBuilder.Configuration.DEFAULT);
@@ -340,8 +558,12 @@ public class TTPNMain {
     //doComputationStuff();
     //comparator();
     //xover();
-    iArraySum();
+    //iArraySum();
+    //triLongestString();
     //iBiMax();
+    vProduct();
+    //sLengther();
+    //triLongestStringbiggerNetwork();
   }
 
   private static void weirdOne() throws NetworkStructureException, TypeException {

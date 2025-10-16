@@ -1,38 +1,31 @@
-$nEvals = [5000]
+$nEvals = [20000]
 
 ea.experiment(
-  runs = (randomGenerator = (seed = [1:1:1]) * [m.defaultRG()]) *
+  runs = (randomGenerator = (seed = [1:1:30]) * [m.defaultRG()]) *
     (problem = (smoProblem = [
+      ea.p.ps.synthetic(name = "rIntSum"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
+      ea.p.ps.synthetic(name = "biLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "iArraySum"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
-      ea.p.ps.synthetic(name = "vProduct"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "iBiMax"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "iTriMax"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
-      ea.p.ps.synthetic(name = "rIntSum"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
+      ea.p.ps.synthetic(name = "vScProduct"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
       ea.p.ps.synthetic(name = "sLengther"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
-      ea.p.ps.synthetic(name = "biLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
-      ea.p.ps.synthetic(name = "triLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps])
+      ea.p.ps.synthetic(name = "triLongestString"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
+      ea.p.ps.synthetic(name = "vProduct"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps]);
+      ea.p.ps.synthetic(name = "remainder"; metrics = [avg_raw_dissimilarity; fail_rate; exception_error_rate; profile_avg_steps])
     ]) * [ea.p.smoToSubsettedSmo(objectives = [avg_raw_dissimilarity])]) *
     (solver = (nEval = $nEvals) * [
+      % ea.s.ga(
+      %   name = "ga";
+      %   representation = ea.r.ttpn(maxNOfGates = 40);
+      %   mapper = ea.m.ttpnToProgram();
+      %   crossoverP = 0.8
+      % );
       ea.s.ga(
-        representation = ea.r.ttpn(maxNOfGates = 10);
+        name = "ga-no-xover";
+        representation = ea.r.ttpn(maxNOfGates = 40);
         mapper = ea.m.ttpnToProgram();
-        crossoverP = 0.5;
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
-      );
-      ea.s.mapElites(
-        representation = ea.r.ttpn(maxNOfGates = 10);
-        mapper = ea.m.ttpnToProgram();
-        descriptors = [
-          ea.s.me.d.descriptor(f = ea.f.size(of = ea.f.genotype()); min = 0; max = 20; nOfBins = 10);
-          ea.s.me.d.descriptor(f = ea.f.ttpnNOfTypes(of = ea.f.genotype()); min = 1; max = 10; nOfBins = 10)
-        ];
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
-      );
-      ea.s.nsga2(
-        representation = ea.r.ttpn(maxNOfGates = 10);
-        mapper = ea.m.ttpnToProgram();
-        crossoverP = 0.5;
-        iComparators = [ea.comparator.pAscending(of = ea.f.ttpnDeadGatesRate(of = ea.f.genotype()))]
+        crossoverP = 0.0
       )
     ]) * [
     ea.run()
@@ -52,32 +45,6 @@ ea.experiment(
       ];
       onlyLast = false
     );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-fail_rate";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = fail_rate))
-    );
-    ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-avg_raw_dissimilarity";
-      plot = ea.plot.multi.quality(q = f.mapValue(key = avg_raw_dissimilarity))
-    );
-    ea.l.savePlotForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/objectives-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
-      plot = ea.plot.single.biObjectivePopulation(
-        x = f.mapValue(key = avg_raw_dissimilarity; of = ea.f.quality());
-        y = ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
-      );
-      processor = ea.f.imagePlotter(secondary = true)
-    );
-    ea.l.savePlotForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/archive-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
-      plot = ea.plot.single.me(
-        values = [
-          f.mapValue(key = fail_rate; of = ea.f.quality());
-          ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
-        ]
-      );
-      condition = predicate.matches(f = ea.f.runKey(key = "run.solver.name"); regex = "me.*")
-    );
     ea.l.savePlotForRun(
       path = "../../Documenti/experiments/{name}/{startTime}/profile-vs-dead-{run.problem.name}-{run.solver.name}-{run.randomGenerator.seed:%03d}";
       plot = ea.plot.single.biObjectivePopulation(
@@ -85,6 +52,44 @@ ea.experiment(
         y = ea.f.ttpnDeadGatesRate(of = ea.f.genotype())
       );
       processor = ea.f.imagePlotter(secondary = true)
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.qualityBoxplot(
+        q = f.mapValue(key = fail_rate)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/fail_rate-bp"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.qualityBoxplot(
+        q = f.mapValue(key = avg_raw_dissimilarity)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/avg_raw_dissimilarity-bp"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.quality(
+        x = ea.f.nOfEvals();
+        q = f.mapValue(key = fail_rate)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/fail_rate"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
+    );
+    ea.l.onExpDone(
+      of = ea.plot.multi.quality(
+        x = ea.f.nOfEvals();
+        q = f.mapValue(key = avg_raw_dissimilarity)
+      );
+      consumers = (path = ["../../Documenti/experiments/{name}/{startTime}/avg_raw_diss"]) * [
+        ea.c.saver(of = ea.f.imagePlotter());
+        ea.c.saver(of = ea.f.csvPlotter())
+      ]
     )
   ]
 )

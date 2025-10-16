@@ -36,7 +36,7 @@ import java.util.function.BiFunction;
 
 public interface ProgramSynthesisProblem extends SimpleEBMOProblem<Program, List<Object>, InstrumentedProgram.InstrumentedOutcome, ProgramSynthesisProblem.Outcome, Double> {
 
-  double SMOOTH_DISTANCE_THRESHOLD = 0.001d;
+  double SMOOTH_DISTANCE_THRESHOLD = 1e-1;
 
   enum Metric implements BiFunction<List<Outcome>, Distance<List<Object>>, Double> {
     SMOOTH_FAIL_RATE(

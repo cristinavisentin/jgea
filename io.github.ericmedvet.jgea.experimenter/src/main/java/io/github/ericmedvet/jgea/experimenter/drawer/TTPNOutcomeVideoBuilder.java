@@ -121,7 +121,7 @@ public class TTPNOutcomeVideoBuilder implements VideoBuilder<Runner.TTPNInstrume
         .max()
         .orElse(0);
     return new Video(
-        IntStream.range(0, steps + 1)
+        IntStream.range(0, steps + 2)
             .mapToObj(k -> buildImage(networkImage, wirePaths, wireTypes, k, outcome.wireContents()))
             .toList(),
         configuration.frameRate,

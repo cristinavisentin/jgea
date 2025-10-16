@@ -47,7 +47,7 @@ public class ProgramSynthesisProblems {
       @Param(value = "metrics", dSs = {"fail_rate"}) List<ProgramSynthesisProblem.Metric> metrics,
       @Param(value = "maxDissimilarity", dD = 1000d) double maxDissimilarity,
       @Param(value = "randomGenerator", dNPM = "m.defaultRG()") RandomGenerator randomGenerator,
-      @Param(value = "nOfCases", dI = 20) int nOfCases,
+      @Param(value = "nOfCases", dI = 50) int nOfCases,
       @Param(value = "nOfValidationCases", dI = 100) int nOfValidationCases,
       @Param(value = "maxExceptionRate", dD = 0.1d) double maxExceptionRate,
       @Param(value = "ints", dIs = {1, 2, 3, 5, 10}) List<Integer> ints,

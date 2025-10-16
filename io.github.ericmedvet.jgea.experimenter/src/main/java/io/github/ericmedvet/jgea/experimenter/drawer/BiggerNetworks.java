@@ -77,17 +77,18 @@ public class BiggerNetworks {
             Gates.iSPSum(),
             Gate.output(Base.INT),
             Gates.noop(),
-            Gates.noop(),
+            Gates.iSPSum(),
             Gates.noop()
         ),
         Set.of(
             Wire.of(0, 0, 4, 0),
             Wire.of(4, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
             Wire.of(1, 0, 5, 0),
-            Wire.of(5, 0, 2, 0),
             Wire.of(2, 0, 6, 0),
-            Wire.of(6, 0, 3, 0),
-            Wire.of(2, 0, 2, 1)
+            Wire.of(2, 0, 5, 1),
+            Wire.of(5, 0, 2, 1),
+            Wire.of(6, 0, 3, 0)
         )
     );
 
@@ -376,6 +377,282 @@ public class BiggerNetworks {
         )
     );
 
+
+    Network vProductgoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
+
+
+        )
+    );
+
+    Network remainderbiggerNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iToR(),
+            Gates.iToR(),
+            Gates.rPMathOperator(Element.Operator.DIVISION),
+            Gates.rToI(),
+            Gates.iPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.iPMathOperator(Element.Operator.SUBTRACTION),
+            Gate.output(Base.INT),
+            Gates.rSPMult(),
+            Gates.noop(),
+            Gates.noop(),
+            Gates.noop()
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 11, 0),
+            Wire.of(11, 0, 7, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(1, 0, 10, 0),
+            Wire.of(10, 0, 6, 1),
+            Wire.of(2, 0, 9, 0),
+            Wire.of(9, 0, 4, 0),
+            Wire.of(9, 0, 9, 1),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 7, 1),
+            Wire.of(7, 0, 12, 0),
+            Wire.of(12, 0, 8, 0)
+
+        )
+    );
+
+    Network rIntSumGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.REAL),
+            Gate.input(Base.REAL),
+            Gates.rPMathOperator(Element.Operator.ADDITION),
+            Gates.rToI(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 2, 1),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(3, 0, 4, 0)
+
+        )
+    );
+
+    Network biLongestStringGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 5, 0),
+            Wire.of(4, 0, 6, 0),
+            Wire.of(5, 0, 6, 1),
+            Wire.of(0, 0, 7, 1),
+            Wire.of(1, 0, 7, 0),
+            Wire.of(6, 0, 7, 2),
+            Wire.of(7, 0, 8, 0)
+        )
+    );
+
+    Network iArraySumGoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.INT)),
+            Gates.splitter(),
+            Gates.iSPSum(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(2, 0, 2, 1)
+        )
+    );
+
+    Network iBiMaxGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gate.output(Base.INT),
+            Gates.iBefore(),
+            Gates.select()
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(1, 0, 3, 1),
+            Wire.of(0, 0, 4, 1),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(3, 0, 4, 2),
+            Wire.of(4, 0, 2, 0)
+        )
+    );
+
+    Network iTriMaxGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gate.input(Base.INT),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.INT)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(1, 0, 3, 1),
+            Wire.of(0, 0, 4, 1),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(3, 0, 4, 2),
+
+            Wire.of(4, 0, 5, 0),
+            Wire.of(2, 0, 5, 1),
+            Wire.of(4, 0, 6, 1),
+            Wire.of(2, 0, 6, 0),
+            Wire.of(5, 0, 6, 2),
+            Wire.of(6, 0, 7, 0)
+        )
+    );
+
+    Network vScProductGoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Base.REAL),
+            Gates.length(),
+            Gates.repeater(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.sPSequencer(),
+            Gate.output(Composed.sequence(Base.REAL))
+        ),
+        Set.of(
+            Wire.of(1, 0, 3, 0),
+            Wire.of(0, 0, 2, 0),
+            Wire.of(0, 0, 4, 0),
+            Wire.of(2, 0, 3, 1),
+            Wire.of(3, 0, 5, 0),
+            Wire.of(4, 0, 5, 1),
+            Wire.of(5, 0, 6, 0),
+            Wire.of(6, 0, 6, 1),
+            Wire.of(6, 0, 7, 0)
+        )
+    );
+
+    Network sLengtherGoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.STRING)),
+            Gates.splitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.pairer(),
+            Gates.sPSequencer(),
+            Gate.output(Composed.sequence(Composed.tuple(List.of(Base.STRING, Base.INT))))
+        ),
+        Set.of(
+            Wire.of(0, 0, 1, 0),
+            Wire.of(1, 0, 2, 0),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(2, 0, 3, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
+
+        )
+    );
+
+
+    Network triLongestStringGoodNetwork = new Network(
+        List.of(
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gate.input(Base.STRING),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.length(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gates.sSplitter(),
+            Gates.length(),
+            Gates.iBefore(),
+            Gates.select(),
+            Gate.output(Base.STRING)
+        ),
+        Set.of(
+            Wire.of(0, 0, 3, 0),
+            Wire.of(0, 0, 10, 1),
+            Wire.of(1, 0, 4, 0),
+            Wire.of(1, 0, 10, 0),
+            Wire.of(3, 0, 6, 0),
+            Wire.of(4, 0, 7, 0),
+            Wire.of(6, 0, 9, 0),
+            Wire.of(7, 0, 9, 1),
+            Wire.of(9, 0, 10, 2),
+            Wire.of(10, 0, 11, 0),
+            Wire.of(10, 0, 14, 1),
+            Wire.of(2, 0, 5, 0),
+            Wire.of(5, 0, 8, 0),
+            Wire.of(8, 0, 13, 1),
+            Wire.of(2, 0, 14, 0),
+            Wire.of(11, 0, 12, 0),
+            Wire.of(12, 0, 13, 0),
+            Wire.of(13, 0, 14, 2),
+            Wire.of(14, 0, 15, 0)
+        )
+    );
+
+    Network vProductGoodNetwork = new Network(
+        List.of(
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gate.input(Composed.sequence(Base.REAL)),
+            Gates.splitter(),
+            Gates.splitter(),
+            Gates.rPMathOperator(Element.Operator.MULTIPLICATION),
+            Gates.rSPSum(),
+            Gate.output(Base.REAL)
+        ),
+        Set.of(
+            Wire.of(0, 0, 2, 0),
+            Wire.of(1, 0, 3, 0),
+            Wire.of(2, 0, 4, 0),
+            Wire.of(3, 0, 4, 1),
+            Wire.of(4, 0, 5, 0),
+            Wire.of(5, 0, 5, 1),
+            Wire.of(5, 0, 6, 0)
+
+
+        )
+    );
+
     NamedBuilder<?> nb = NamedBuilder.fromDiscovery();
     ProgramSynthesisProblem rIntSumpsb = (ProgramSynthesisProblem) nb.build(
         "ea.p.ps.synthetic(name = \"rIntSum\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
@@ -402,7 +679,7 @@ public class BiggerNetworks {
     );
 
     ProgramSynthesisProblem vProductpsb = (ProgramSynthesisProblem) nb.build(
-        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+        "ea.p.ps.synthetic(name = \"vProduct\"; metrics = [smooth_fail_rate; fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
     ProgramSynthesisProblem iTriMaxpsb = (ProgramSynthesisProblem) nb.build(
@@ -413,8 +690,12 @@ public class BiggerNetworks {
         "ea.p.ps.synthetic(name = \"triLongestString\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
     );
 
-    Network goodNetwork = iBiMaxbiggerNetwork;
-    ProgramSynthesisProblem psb = iBiMaxpsb;
+    ProgramSynthesisProblem remainderpsb = (ProgramSynthesisProblem) nb.build(
+        "ea.p.ps.synthetic(name = \"remainder\"; metrics = [fail_rate; avg_raw_dissimilarity; exception_error_rate; profile_avg_steps; profile_avg_tot_size])"
+    );
+
+    Network goodNetwork = triLongestStringGoodNetwork;
+    ProgramSynthesisProblem psb = triLongestStringpsb;
 
     TTPNDrawer drawer = new TTPNDrawer(TTPNDrawer.Configuration.DEFAULT);
     Runner runner = new Runner(100, 1000, 1000, 100, false);
@@ -441,3 +722,5 @@ public class BiggerNetworks {
     System.out.println(psb.qualityFunction().apply(runner.asInstrumentedProgram(goodNetwork)));
   }
 }
+
+// Just testing bigger networks

@@ -99,7 +99,7 @@ public enum Base implements Type {
 
   @Override
   public String toString() {
-    return "%s".formatted(name().substring(0, 1));
+    return "%s".formatted(name().substring(0, 1).toLowerCase());
   }
 
 }
