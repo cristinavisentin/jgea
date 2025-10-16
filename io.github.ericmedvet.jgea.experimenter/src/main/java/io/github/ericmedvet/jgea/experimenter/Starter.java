@@ -92,12 +92,12 @@ public class Starter {
     public List<String> expHeadLines = List.of();
 
     @Parameter(
-        names = {"--nOfFolds", "-nf"}, description = "Number of equal parts to split the list of runs into.")
-    public int nOfFolds = 1;
+        names = {"--nOfRunFolds", "-nrf"}, description = "Number of equal parts to split the list of runs into.")
+    public int nOfRunFolds = 1;
 
     @Parameter(
-        names = {"--foldIndex", "-fi"}, description = "Index (0-based) of the split part to execute. Must be between 1 and splitInto.")
-    public int foldIndex = 0;
+        names = {"--runFoldIndex", "-rfi"}, description = "Index (0-based) of the split part to execute. Must be between 0 and nOfRunFolds - 1.")
+    public int runFoldIndex = 0;
   }
 
   public static void main(String[] args) {
@@ -107,19 +107,17 @@ public class Starter {
     jc.setProgramName(Starter.class.getName());
     try {
       jc.parse(args);
-      if (configuration.foldIndex < 0 || configuration.foldIndex >= configuration.nOfFolds) {
-        L.severe(
-            String.format("Fold index %d out of bounds [0, %d]", configuration.foldIndex, configuration.nOfFolds - 1)
-        );
+      if (configuration.runFoldIndex < 0 || configuration.runFoldIndex >= configuration.nOfRunFolds) {
+        L.severe("Fold index %d out of bounds [0, %d]".formatted(configuration.runFoldIndex, configuration.nOfRunFolds - 1));
         System.exit(-1);
       }
-      if (configuration.nOfFolds <= 0) {
-        L.severe(String.format("Number of folds %d is negative", configuration.nOfFolds));
+      if (configuration.nOfRunFolds <= 0) {
+        L.severe("Number of folds %d is negative".formatted(configuration.nOfRunFolds));
         System.exit(-1);
       }
     } catch (ParameterException e) {
       e.usage();
-      L.severe(String.format("Cannot read command line options: %s", e));
+      L.severe("Cannot read command line options: %s".formatted(e));
       System.exit(-1);
     } catch (RuntimeException e) {
       L.severe(e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -205,14 +203,16 @@ public class Starter {
             "%1$tY-%1$tm-%1$td--%1$tH-%1$tM-%1$tS"
                 .formatted(Instant.now().toEpochMilli())
         );
-    Experiment allExperiment = (Experiment) nb.build(expNPM);
-    Experiment experiment = new Experiment(
-        allExperiment.name(),
-        allExperiment.startTime(),
-        Misc.fold(allExperiment.runs(), configuration.foldIndex, configuration.nOfFolds),
-        allExperiment.map(),
-        allExperiment.listeners()
-    );
+    Experiment experiment = (Experiment) nb.build(expNPM);
+    if (configuration.nOfRunFolds > 1) {
+      experiment = new Experiment(
+          experiment.name(),
+          experiment.startTime(),
+          Misc.fold(experiment.runs(), configuration.runFoldIndex, configuration.nOfRunFolds),
+          experiment.map(),
+          experiment.listeners()
+      );
+    }
     // check if just check
     if (configuration.check) {
       try {
