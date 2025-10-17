@@ -23,6 +23,7 @@ package io.github.ericmedvet.jgea.experimenter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jnb.core.BuilderException;
 import io.github.ericmedvet.jnb.core.NamedBuilder;
 import io.github.ericmedvet.jnb.core.NamedParamMap;
@@ -89,6 +90,14 @@ public class Starter {
     @Parameter(
         names = {"--expHeadLines"}, description = "Additional experiment description lines that will be put at the head of the experiment " + "description.", variableArity = true)
     public List<String> expHeadLines = List.of();
+
+    @Parameter(
+        names = {"--nOfRunFolds", "-nrf"}, description = "Number of equal parts to split the list of runs into.")
+    public int nOfRunFolds = 1;
+
+    @Parameter(
+        names = {"--runFoldIndex", "-rfi"}, description = "Index (0-based) of the split part to execute. Must be between 0 and nOfRunFolds - 1.")
+    public int runFoldIndex = 0;
   }
 
   public static void main(String[] args) {
@@ -98,9 +107,19 @@ public class Starter {
     jc.setProgramName(Starter.class.getName());
     try {
       jc.parse(args);
+      if (configuration.runFoldIndex < 0 || configuration.runFoldIndex >= configuration.nOfRunFolds) {
+        L.severe(
+            "Fold index %d out of bounds [0, %d]".formatted(configuration.runFoldIndex, configuration.nOfRunFolds - 1)
+        );
+        System.exit(-1);
+      }
+      if (configuration.nOfRunFolds <= 0) {
+        L.severe("Number of folds %d is negative".formatted(configuration.nOfRunFolds));
+        System.exit(-1);
+      }
     } catch (ParameterException e) {
       e.usage();
-      L.severe(String.format("Cannot read command line options: %s", e));
+      L.severe("Cannot read command line options: %s".formatted(e));
       System.exit(-1);
     } catch (RuntimeException e) {
       L.severe(e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -187,6 +206,15 @@ public class Starter {
                 .formatted(Instant.now().toEpochMilli())
         );
     Experiment experiment = (Experiment) nb.build(expNPM);
+    if (configuration.nOfRunFolds > 1) {
+      experiment = new Experiment(
+          experiment.name(),
+          experiment.startTime(),
+          Misc.fold(experiment.runs(), configuration.runFoldIndex, configuration.nOfRunFolds),
+          experiment.map(),
+          experiment.listeners()
+      );
+    }
     // check if just check
     if (configuration.check) {
       try {

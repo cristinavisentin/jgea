@@ -1,0 +1,45 @@
+@import("import/pong-environment.txt")
+@import("import/shared-misc.txt")
+@import("import/descriptors.txt")
+@import("import/listeners.txt")
+
+ea.experiment(
+  runs =
+    (randomGenerator = (seed = $SEEDS) * [m.defaultRG()]) *
+    (solver = (stop = [ea.sc.nOfQualityEvaluations(n = $N_EVALS)]) * [
+      ea.s.ga(
+        name = "trainer-ga-tree";
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf())
+      );
+      ea.s.ga(
+        name = "trainer-ga-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP)
+      );
+
+      ea.s.mapElites(
+        name = "trainer-me-ann";
+        representation = ea.r.doubleString();
+        mapper = ea.m.dsToNpnds(npnds = $MLP);
+        descriptors = $ANN_DESCRIPTORS
+      );
+      ea.s.mapElites(
+        name = "trainer-me-tree";
+        representation = ea.r.srTree();
+        mapper = ea.m.nurfToNds(of = ea.m.srTreeToNurf());
+        descriptors = $TREE_DESCRIPTOR
+      )
+    ]) *
+    (problem = [ea.p.biSimToQb(
+      simulation = $SIMULATION;
+      qFunction = $QUALITY_F1;
+      trainingOpponent = m.supplier(of = $OPPONENT);
+      tRange = misc.range(min = 0; max = 45);
+      dT = 0.05;
+      type = maximize
+    )]) *
+    [ea.run()];
+
+  listeners = + $GENERAL_LISTENERS + $PONG_LISTENERS
+)

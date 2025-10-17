@@ -1,0 +1,31 @@
+$N_RUN = 10
+
+$RANDOM = misc.sharedRG()
+
+$MLP = ds.num.mlp(innerLayerRatio = 2; nOfInnerLayers = 1)
+
+$QUALITY_F1 = ds.e.pong.shiftedScoreDiff1()
+$QUALITY_F2 = ds.e.pong.shiftedScoreDiff2()
+
+$SIMULATION = ds.bat.fromEnvironment(
+  environment = ds.e.pong(racketsInitialYRange = m.range(min=25.0;max=25.0); randomGenerator=$RANDOM);
+  stopCondition = predicate.not(condition = predicate.always())
+)
+
+$OPPONENT = ds.opponent.pong.simple()
+
+$PONG_PROBLEM = ea.p.biSimToQb(
+  simulation = $SIMULATION;
+  qFunction = $QUALITY_F1;
+  trainingOpponent = m.supplier(of = ds.opponent.pong.simple());
+  type = maximize
+)
+
+$PONG_BI_PROBLEM = ea.p.biSimToBqb(
+  simulation = $SIMULATION;
+  qFunction1 = $QUALITY_F1;
+  qFunction2 = $QUALITY_F2;
+  type = maximize
+)
+
+$BRAIN_EXTRACTOR = ea.f.solution()
