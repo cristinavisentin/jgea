@@ -58,7 +58,7 @@ public class Listeners {
   private Listeners() {
   }
 
-  private static class ListenerFactoryAndMonitor<E, K> implements ListenerFactory<E, K>, ProgressMonitor {
+  public static class ListenerFactoryAndMonitor<E, K> implements ListenerFactory<E, K>, ProgressMonitor {
 
     private final ListenerFactory<E, K> innerListenerFactory;
     private final ListenerFactory<E, K> outerListenerFactory;
@@ -351,13 +351,13 @@ public class Listeners {
           """ // spotless:on
   )
   @SuppressWarnings("unused")
-  public static <E, O, P> BiFunction<Experiment, Executor, ListenerFactory<E, Run<?, ?, ?, ?>>> onExpDone(
-      @Param("of") AccumulatorFactory<E, O, Run<?, ?, ?, ?>> accumulatorFactory,
+  public static <E, O, P, R, EX> BiFunction<EX, Executor, ListenerFactory<E, R>> onExpDone(
+      @Param("of") AccumulatorFactory<E, O, R> accumulatorFactory,
       @Param(value = "preprocessor", dNPM = "f.identity()") Function<? super O, ? extends P> preprocessor,
       @Param(
-          value = "consumers", dNPMs = {"ea.consumer.deaf()"}) List<TriConsumer<? super P, Run<?, ?, ?, ?>, Experiment>> consumers,
+          value = "consumers", dNPMs = {"ea.consumer.deaf()"}) List<TriConsumer<? super P, R, EX>> consumers,
       @Param(value = "deferred") boolean deferred,
-      @Param(value = "condition", dNPM = "predicate.always()") Predicate<Run<?, ?, ?, ?>> predicate
+      @Param(value = "condition", dNPM = "predicate.always()") Predicate<R> predicate
   ) {
     return (experiment, executor) -> new ListenerFactoryAndMonitor<>(
         accumulatorFactory.thenOnShutdown(
@@ -420,13 +420,13 @@ public class Listeners {
           """ // spotless:on
   )
   @SuppressWarnings("unused")
-  public static <E, O, P> BiFunction<Experiment, Executor, ListenerFactory<E, Run<?, ?, ?, ?>>> onRunDone(
-      @Param("of") AccumulatorFactory<E, O, Run<?, ?, ?, ?>> accumulatorFactory,
+  public static <E, O, P, R, EX> BiFunction<EX, Executor, ListenerFactory<E, R>> onRunDone(
+      @Param("of") AccumulatorFactory<E, O, R> accumulatorFactory,
       @Param(value = "preprocessor", dNPM = "f.identity()") Function<? super O, ? extends P> preprocessor,
       @Param(
-          value = "consumers", dNPMs = {"ea.consumer.deaf()"}) List<TriConsumer<? super P, Run<?, ?, ?, ?>, Experiment>> consumers,
+          value = "consumers", dNPMs = {"ea.consumer.deaf()"}) List<TriConsumer<? super P, R, EX>> consumers,
       @Param(value = "deferred") boolean deferred,
-      @Param(value = "condition", dNPM = "predicate.always()") Predicate<Run<?, ?, ?, ?>> predicate
+      @Param(value = "condition", dNPM = "predicate.always()") Predicate<R> predicate
   ) {
     return (experiment, executor) -> new ListenerFactoryAndMonitor<>(
         accumulatorFactory.thenOnDone(
