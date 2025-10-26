@@ -442,6 +442,18 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.doubleOp()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `dynamicalSystem.function.frozen()`
+
+`ds.f.frozen(name; of; format)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | `frozen` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.rl.FrozenableRLAgent">FrozenableRLAgent</abbr>&lt;I, O, ?&gt;&gt;</code> |
+| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.StatelessSystem">StatelessSystem</abbr>&lt;I, O&gt;&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.frozen()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `dynamicalSystem.function.inner()`
 
 `ds.f.inner(of)`
@@ -655,15 +667,18 @@ Aliases: `ds.rl`, `dynSys.rl`, `dynamicalSystem.rl`
 
 ### Builder `dynamicalSystem.rl.linearActorCritic()`
 
-`ds.rl.linearActorCritic(name; actorLearningRate; criticLearningRate; discountFactor; explorationNoise; initialWeightRange; randomGenerator)`
+`ds.rl.linearActorCritic(name; actorLearningRate; criticLearningRate; actorWeightDecay; criticWeightDecay; discountFactor; explorationNoise; maxGradLogProb; initialWeightRange; randomGenerator)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
 | `name` | s | interpolate `lAC[alr={actorLearningRate};clr={criticLearningRate};en={explorationNoise}]` | <code><abbr title="java.lang.String">String</abbr></code> |
 | `actorLearningRate` | d | `1.0E-4` | <code>double</code> |
 | `criticLearningRate` | d | `0.001` | <code>double</code> |
-| `discountFactor` | d | `0.95` | <code>double</code> |
+| `actorWeightDecay` | d | `1.0E-5` | <code>double</code> |
+| `criticWeightDecay` | d | `1.0E-4` | <code>double</code> |
+| `discountFactor` | d | `0.99` | <code>double</code> |
 | `explorationNoise` | d | `0.1` | <code>double</code> |
+| `maxGradLogProb` | d | `10.0` | <code>double</code> |
 | `initialWeightRange` | npm | `m.range(min = -0.2; max = 0.2)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
 
@@ -809,25 +824,23 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.listener.AccumulatorF
 
 ### Builder `ea.accumulator.last()`
 
-`ea.a.last(eFunction; listFunction)`
+`ea.a.last(function)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
-| `eFunction` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;E, F&gt;</code> |
-| `listFunction` | npm | `f.nTh(n = -1)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;F&gt;, O&gt;</code> |
+| `function` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;E, O&gt;</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jgea.core.listener.AccumulatorFactory">AccumulatorFactory</abbr>&lt;E, O, R&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Accumulators.all()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.listener.AccumulatorFactory">AccumulatorFactory</abbr>&lt;E, O, R&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Accumulators.last()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.accumulator.lastBest()`
 
-`ea.a.lastBest(eFunction; listFunction)`
+`ea.a.lastBest(function)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
-| `eFunction` | npm | `ea.f.best()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;E, F&gt;</code> |
-| `listFunction` | npm | `f.nTh(n = -1)` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;F&gt;, O&gt;</code> |
+| `function` | npm | `ea.f.best()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;E, O&gt;</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jgea.core.listener.AccumulatorFactory">AccumulatorFactory</abbr>&lt;E, O, R&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Accumulators.all()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.listener.AccumulatorFactory">AccumulatorFactory</abbr>&lt;E, O, R&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Accumulators.last()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.accumulator.lastPopulationMap()`
 
