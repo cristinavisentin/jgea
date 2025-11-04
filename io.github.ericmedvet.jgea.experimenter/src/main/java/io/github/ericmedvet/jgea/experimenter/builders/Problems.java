@@ -50,7 +50,7 @@ public class Problems {
   @SuppressWarnings("unused")
   @Cacheable
   //bi simulation to homogeneous bi quality based problem
-  public static <S, B extends BiSimulation.Outcome<BS>, BS, Q, C extends Comparable<C>> TotalOrderQualityBasedBiProblem<S, B, Q> biSimToBqb(
+  public static <S, B extends BiSimulation.Outcome<BS>, BS, Q, C extends Comparable<C>> TotalOrderQualityBasedBiProblem<S, B, Q> biSimToBiQb(
       @Param(value = "name", iS = "{simulation.name}") String name,
       @Param("simulation") HomogeneousBiSimulation<S, BS, B> simulation,
       @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,

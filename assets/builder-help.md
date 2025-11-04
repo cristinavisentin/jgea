@@ -3320,9 +3320,9 @@ Produces <code><abbr title="java.util.function.Predicate">Predicate</abbr>&lt;X&
 
 Aliases: `ea.p`, `ea.problem`
 
-### Builder `ea.problem.biSimToBqb()`
+### Builder `ea.problem.biSimToBiQb()`
 
-`ea.p.biSimToBqb(name; simulation; cFunction; type; qFunction1; qFunction2; dT; tRange)`
+`ea.p.biSimToBiQb(name; simulation; cFunction; type; qFunction1; qFunction2; dT; tRange)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -3335,7 +3335,7 @@ Aliases: `ea.p`, `ea.problem`
 | `dT` | d |  | <code>double</code> |
 | `tRange` | npm |  | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedBiProblem">TotalOrderQualityBasedBiProblem</abbr>&lt;S, B, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.biSimToBqb()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedBiProblem">TotalOrderQualityBasedBiProblem</abbr>&lt;S, B, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.biSimToBiQb()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.problem.biSimToQb()`
 
