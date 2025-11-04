@@ -174,6 +174,24 @@ public class Problems {
 
   @SuppressWarnings("unused")
   @Cacheable
+  public static <S, Q, C extends Comparable<C>> TotalOrderQualityBasedProblem<S, Q> functionToTo(
+      @Param(value = "name", iS = "{qFunction.name}") String name,
+      @Param("qFunction") Function<S, Q> qualityFunction,
+      @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,
+      @Param(value = "type", dS = "minimize") OptimizationType type,
+      @Param(value = "example", dNPM = "ea.misc.nullValue()") S example
+  ) {
+    return TotalOrderQualityBasedProblem.from(
+        qualityFunction,
+        null,
+        type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
+            .reversed() : Comparator.comparing(comparableFunction),
+        Optional.ofNullable(example)
+    );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
   public static <S, Q, O> TotalOrderQualityBasedProblem<S, Q> moToSo(
       @Param(value = "name", iS = "{moProblem.name}[{objective}]") String name,
       @Param("objective") String objective,
@@ -370,24 +388,6 @@ public class Problems {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <S, Q, C extends Comparable<C>> TotalOrderQualityBasedProblem<S, Q> totalOrder(
-      @Param(value = "name", iS = "{qFunction.name}") String name,
-      @Param("qFunction") Function<S, Q> qualityFunction,
-      @Param(value = "cFunction", dNPM = "f.identity()") Function<Q, C> comparableFunction,
-      @Param(value = "type", dS = "minimize") OptimizationType type,
-      @Param(value = "example", dNPM = "ea.misc.nullValue()") S example
-  ) {
-    return TotalOrderQualityBasedProblem.from(
-        qualityFunction,
-        null,
-        type.equals(OptimizationType.MAXIMIZE) ? Comparator.comparing(comparableFunction)
-            .reversed() : Comparator.comparing(comparableFunction),
-        Optional.ofNullable(example)
-    );
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <C extends ReinforcementLearningAgent<O, A, ?>, O, A> TotalOrderQualityBasedProblem<C, Double> srlatToTo(
       @Param(value = "name", iS = "{task.name}") String name,
       @Param("task") SingleRLAgentTask<C, O, A, ?> task,
@@ -395,6 +395,11 @@ public class Problems {
       @Param("tRange") DoubleRange tRange
   ) {
     return new TotalOrderQualityBasedProblem<>() {
+      @Override
+      public Optional<C> example() {
+        return task.example();
+      }
+
       @Override
       public Function<C, Double> qualityFunction() {
         return c -> task.simulate(c, dT, tRange)
@@ -413,11 +418,6 @@ public class Problems {
       @Override
       public Comparator<Double> totalOrderComparator() {
         return ((Comparator<Double>) Double::compareTo).reversed();
-      }
-
-      @Override
-      public Optional<C> example() {
-        return task.example();
       }
     };
   }

@@ -3365,6 +3365,20 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQua
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem">TotalOrderQualityBasedProblem</abbr>&lt;S, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.biSimToTo()` by jgea-experimenter:2.7.1-SNAPSHOT
 
+### Builder `ea.problem.functionToTo()`
+
+`ea.p.functionToTo(name; qFunction; cFunction; type; example)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `{qFunction.name}` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `qFunction` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;S, Q&gt;</code> |
+| `cFunction` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;Q, C&gt;</code> |
+| `type` | e | `MINIMIZE` | <code><abbr title="io.github.ericmedvet.jgea.experimenter.builders.Problems$OptimizationType">Problems$OptimizationType</abbr></code> |
+| `example` | npm | `ea.misc.nullValue()` | <code>S</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem">TotalOrderQualityBasedProblem</abbr>&lt;S, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.functionToTo()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `ea.problem.moToSo()`
 
 `ea.p.moToSo(name; objective; moProblem)`
@@ -3473,20 +3487,6 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.SimpleMOProbl
 | `tRange` | npm |  | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem">TotalOrderQualityBasedProblem</abbr>&lt;C, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.srlatToTo()` by jgea-experimenter:2.7.1-SNAPSHOT
-
-### Builder `ea.problem.totalOrder()`
-
-`ea.p.totalOrder(name; qFunction; cFunction; type; example)`
-
-| Param | Type | Default | Java type |
-| --- | --- | --- | --- |
-| `name` | s | interpolate `{qFunction.name}` | <code><abbr title="java.lang.String">String</abbr></code> |
-| `qFunction` | npm |  | <code><abbr title="java.util.function.Function">Function</abbr>&lt;S, Q&gt;</code> |
-| `cFunction` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;Q, C&gt;</code> |
-| `type` | e | `MINIMIZE` | <code><abbr title="io.github.ericmedvet.jgea.experimenter.builders.Problems$OptimizationType">Problems$OptimizationType</abbr></code> |
-| `example` | npm | `ea.misc.nullValue()` | <code>S</code> |
-
-Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem">TotalOrderQualityBasedProblem</abbr>&lt;S, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.totalOrder()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ## Package `ea.problem.multivariateRegression`
 
