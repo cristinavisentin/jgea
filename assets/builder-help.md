@@ -1877,6 +1877,16 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 
 ## Package `ea.grammar`
 
+### Builder `ea.grammar.fromFile()`
+
+`ea.grammar.fromFile(path)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `path` | s |  | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.representation.grammar.string.StringGrammar">StringGrammar</abbr>&lt;<abbr title="java.lang.String">String</abbr>&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Grammars.fromFile()` by jgea-experimenter:2.7.1-SNAPSHOT
+
 ### Builder `ea.grammar.fromProblem()`
 
 `ea.grammar.fromProblem(problem)`
