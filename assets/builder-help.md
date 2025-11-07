@@ -287,7 +287,7 @@ Aliases: `ds.e.n.reward`, `ds.e.nav.reward`, `ds.e.navigation.reward`, `ds.env.n
 
 ### Builder `dynamicalSystem.environment.navigation.reward.reaching()`
 
-`ds.e.n.reward.reaching(of; targetProximityRadius; targetProximityReward; collisionPenalty; distanceWeight; format)`
+`ds.e.n.reward.reaching(of; targetProximityRadius; targetProximityReward; collisionPenalty; format)`
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
@@ -295,10 +295,9 @@ Aliases: `ds.e.n.reward`, `ds.e.nav.reward`, `ds.e.navigation.reward`, `ds.env.n
 | `targetProximityRadius` | d | `0.1` | <code>double</code> |
 | `targetProximityReward` | d | `1.0` | <code>double</code> |
 | `collisionPenalty` | d | `0.01` | <code>double</code> |
-| `distanceWeight` | d | `0.1` | <code>double</code> |
 | `format` | s | `%5.3f` | <code><abbr title="java.lang.String">String</abbr></code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.NavigationRewards.reaching()` by jgea-experimenter:2.7.1-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.NevigationRewards.reaching()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ## Package `dynamicalSystem.environment.pong`
 
@@ -443,18 +442,6 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.doubleOp()` by jgea-experimenter:2.7.1-SNAPSHOT
 
-### Builder `dynamicalSystem.function.frozen()`
-
-`ds.f.frozen(name; of; format)`
-
-| Param | Type | Default | Java type |
-| --- | --- | --- | --- |
-| `name` | s | `frozen` | <code><abbr title="java.lang.String">String</abbr></code> |
-| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.rl.FrozenableRLAgent">FrozenableRLAgent</abbr>&lt;I, O, ?&gt;&gt;</code> |
-| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
-
-Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.DynamicalSystem">DynamicalSystem</abbr>&lt;I, O, ?&gt;&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.frozen()` by jgea-experimenter:2.7.1-SNAPSHOT
-
 ### Builder `dynamicalSystem.function.inner()`
 
 `ds.f.inner(of)`
@@ -464,6 +451,18 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 | `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.composed.Composed">Composed</abbr>&lt;C&gt;&gt;</code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, C&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.inner()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `dynamicalSystem.function.nonLearning()`
+
+`ds.f.nonLearning(name; of; format)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | `non.learning` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.rl.FrozenableRLAgent">FrozenableRLAgent</abbr>&lt;I, O, ?&gt;&gt;</code> |
+| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.DynamicalSystem">DynamicalSystem</abbr>&lt;I, O, ?&gt;&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.nonLearning()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `dynamicalSystem.function.opponentBiSimulator()`
 
@@ -519,6 +518,18 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 | `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, O&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.simulate()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `dynamicalSystem.function.stateless()`
+
+`ds.f.stateless(name; of; format)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | `stateless` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.FrozenableDynamicalSystem">FrozenableDynamicalSystem</abbr>&lt;I, O, ?&gt;&gt;</code> |
+| `format` | s | `%s` | <code><abbr title="java.lang.String">String</abbr></code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.StatelessSystem">StatelessSystem</abbr>&lt;I, O&gt;&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.stateless()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `dynamicalSystem.function.unwrappedRl()`
 
@@ -3413,6 +3424,21 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQua
 | `example` | npm | `ea.misc.nullValue()` | <code>S</code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.TotalOrderQualityBasedProblem">TotalOrderQualityBasedProblem</abbr>&lt;S, Q&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.functionToTo()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `ea.problem.functionsToScbmo()`
+
+`ea.p.functionsToScbmo(name; cases; validationCases; toMinObjectives; toMaxObjectives; example)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `cases` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `cases` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.util.function.Function">Function</abbr>&lt;S, CQ&gt;&gt;</code> |
+| `validationCases` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.util.function.Function">Function</abbr>&lt;S, CQ&gt;&gt;</code> |
+| `toMinObjectives` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;CQ&gt;, O&gt;&gt;</code> |
+| `toMaxObjectives` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.util.function.Function">Function</abbr>&lt;<abbr title="java.util.List">List</abbr>&lt;CQ&gt;, O&gt;&gt;</code> |
+| `example` | npm | `ea.misc.nullValue()` | <code>S</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.SimpleCBMOProblem">SimpleCBMOProblem</abbr>&lt;S, <abbr title="java.util.function.Function">Function</abbr>&lt;S, CQ&gt;, CQ, O&gt;</code>; built from `io.github.ericmedvet.jgea.experimenter.builders.Problems.functionsToScbmo()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `ea.problem.moToSo()`
 
