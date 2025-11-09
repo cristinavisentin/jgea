@@ -29,21 +29,15 @@ $exampleRLagent = ds.misc.simExample(simulation = ds.srlat.fromNumericalEnvironm
 ))
 
 ea.experiment(
-  runs = (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()])
-  * (solver = (stop = ea.sc.nOfQualityEvaluations(n = 2500))
-  * (representation = [ea.representation.doubleString()]) * [
-    ea.s.ga(
-      name = "ga+linear-zeroq";
-      mapper = ea.mapper.ndsToNrla(of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = true)))
-    );
-    ea.s.ga(
-      name = "ga+linear";
-      mapper = ea.mapper.ndsToNrla(of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = false)))
-    );
-    ea.s.ga(
-      name = "ga+mlp";
-      mapper = ea.mapper.ndsToNrla(of = ea.mapper.dsToNpnds(npnds = ds.num.mlp(innerLayers = [8])))
-    )
+  runs = (randomGenerator = (seed = [1:1:3]) * [m.defaultRG()])
+  * (solver = (stop = ea.sc.nOfQualityEvaluations(n = 500))
+  * (representation = [ea.representation.doubleString()])
+  * (mapper = [
+    ea.mapper.ndsToNrla(name = "linear-zeroq"; of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = true)));
+    ea.mapper.ndsToNrla(name = "linear"; of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = false)));
+    ea.mapper.ndsToNrla(name = "mlp"; of = ea.mapper.dsToNpnds(npnds = ds.num.mlp(innerLayers = [8])))
+  ])
+  * [ea.s.ga(name = ""ga+{mapper.name}"")
   ])
   * (problem = [
     ea.p.functionsToScbmo(
