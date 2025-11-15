@@ -19,14 +19,14 @@
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.experimenter.listener.plot.AggregatedXYDataSeriesMRPAF;
-import io.github.ericmedvet.jgea.experimenter.listener.plot.DistributionMRPAF;
-import io.github.ericmedvet.jgea.experimenter.listener.plot.EAggregatedXYDataSeriesMRPAF;
-import io.github.ericmedvet.jgea.experimenter.listener.plot.RAggregatedXYDataSeriesMRPAF;
-import io.github.ericmedvet.jgea.experimenter.listener.plot.ScatterMRPAF;
 import io.github.ericmedvet.jnb.core.*;
 import io.github.ericmedvet.jnb.datastructure.DoubleRange;
 import io.github.ericmedvet.jviz.core.plot.XYDataSeries;
+import io.github.ericmedvet.jviz.core.plot.accumulator.AggregatedXYDataSeriesMKPAF;
+import io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMRPAF;
+import io.github.ericmedvet.jviz.core.plot.accumulator.EAggregatedXYDataSeriesMKPAF;
+import io.github.ericmedvet.jviz.core.plot.accumulator.KAggregatedXYDataSeriesMKPAF;
+import io.github.ericmedvet.jviz.core.plot.accumulator.ScatterMRPAF;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -100,7 +100,7 @@ public class MultiPlots {
           """
               xyExp(y = f.uniqueness(of = f.each(mapF = ea.f.genotype(); of = ea.f.all())))
               """) // spotless:on
-  public static <E, R> AggregatedXYDataSeriesMRPAF<E, R, String> xy(
+  public static <E, R> AggregatedXYDataSeriesMKPAF<E, R, String> xy(
       @Param("xSubplot") Function<? super R, String> xSubplotFunction,
       @Param("ySubplot") Function<? super R, String> ySubplotFunction,
       @Param("line") Function<? super R, String> lineFunction,
@@ -118,7 +118,7 @@ public class MultiPlots {
         .identity();
     if (useRunForX) {
       //noinspection unchecked
-      return new RAggregatedXYDataSeriesMRPAF<>(
+      return new KAggregatedXYDataSeriesMKPAF<>(
           xSubplotFunction,
           ySubplotFunction,
           lineFunction,
@@ -133,7 +133,7 @@ public class MultiPlots {
       );
     }
     //noinspection unchecked
-    return new EAggregatedXYDataSeriesMRPAF<>(
+    return new EAggregatedXYDataSeriesMKPAF<>(
         xSubplotFunction,
         ySubplotFunction,
         lineFunction,

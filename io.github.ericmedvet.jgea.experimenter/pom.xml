@@ -38,6 +38,11 @@
       <artifactId>java-telegram-bot-api</artifactId>
       <version>8.3.0</version>
     </dependency>
+    <dependency>
+      <groupId>io.github.ericmedvet</groupId>
+      <artifactId>jviz.core</artifactId>
+      <version>${jviz.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
