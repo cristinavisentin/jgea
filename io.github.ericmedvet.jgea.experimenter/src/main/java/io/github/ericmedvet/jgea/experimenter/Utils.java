@@ -20,7 +20,6 @@
 
 package io.github.ericmedvet.jgea.experimenter;
 
-import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jnb.core.Interpolator;
 import io.github.ericmedvet.jnb.core.MapNamedParamMap;
 import io.github.ericmedvet.jnb.core.NamedParamMap;
@@ -48,7 +47,7 @@ public class Utils {
   public static void save(Object o, String filePath, boolean overwrite) {
     File file = null;
     try {
-      file = Misc.robustGetFile(filePath, overwrite);
+      file = io.github.ericmedvet.jnb.datastructure.Utils.robustGetFile(filePath, overwrite);
       switch (o) {
         case BufferedImage image -> {
           ImageIO.write(image, "png", file);

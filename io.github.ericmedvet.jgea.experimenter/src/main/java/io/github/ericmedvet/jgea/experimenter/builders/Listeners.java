@@ -20,19 +20,19 @@
 
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.listener.*;
+import io.github.ericmedvet.jgea.core.ProgressMonitor;
 import io.github.ericmedvet.jgea.core.solver.Individual;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.util.Progress;
 import io.github.ericmedvet.jgea.experimenter.Experiment;
 import io.github.ericmedvet.jgea.experimenter.Run;
 import io.github.ericmedvet.jgea.experimenter.Utils;
-import io.github.ericmedvet.jgea.experimenter.listener.CSVPrinter;
 import io.github.ericmedvet.jgea.experimenter.listener.decoupled.*;
 import io.github.ericmedvet.jgea.experimenter.listener.net.NetMultiSink;
 import io.github.ericmedvet.jnb.core.*;
 import io.github.ericmedvet.jnb.core.ParamMap.Type;
 import io.github.ericmedvet.jnb.datastructure.AccumulatorFactory;
+import io.github.ericmedvet.jnb.datastructure.CSVPrinter;
 import io.github.ericmedvet.jnb.datastructure.FormattedFunction;
 import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Listener;
@@ -61,7 +61,8 @@ public class Listeners {
   private Listeners() {
   }
 
-  public static class ListenerFactoryAndMonitor<E, K> implements ListenerFactory<E, K>, ProgressMonitor {
+  public static class ListenerFactoryAndMonitor<E, K> implements ListenerFactory<E, K>,
+      ProgressMonitor {
 
     private final ListenerFactory<E, K> innerListenerFactory;
 

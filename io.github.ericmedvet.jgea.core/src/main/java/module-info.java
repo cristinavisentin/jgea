@@ -26,7 +26,6 @@ module io.github.ericmedvet.jgea.core {
   exports io.github.ericmedvet.jgea.core;
   exports io.github.ericmedvet.jgea.core.distance;
   exports io.github.ericmedvet.jgea.core.fitness;
-  exports io.github.ericmedvet.jgea.core.listener;
   exports io.github.ericmedvet.jgea.core.operator;
   exports io.github.ericmedvet.jgea.core.order;
   exports io.github.ericmedvet.jgea.core.representation.grammar;

@@ -20,7 +20,7 @@
 
 package io.github.ericmedvet.jgea.experimenter;
 
-import io.github.ericmedvet.jgea.core.listener.ProgressMonitor;
+import io.github.ericmedvet.jgea.core.ProgressMonitor;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.experimenter.listener.ScreenProgressMonitor;
 import io.github.ericmedvet.jnb.core.MapNamedParamMap;

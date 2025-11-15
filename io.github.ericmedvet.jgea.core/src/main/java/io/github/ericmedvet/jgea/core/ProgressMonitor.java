@@ -18,7 +18,7 @@
  * =========================LICENSE_END==================================
  */
 
-package io.github.ericmedvet.jgea.core.listener;
+package io.github.ericmedvet.jgea.core;
 
 import io.github.ericmedvet.jgea.core.util.Progress;
 import java.util.List;
