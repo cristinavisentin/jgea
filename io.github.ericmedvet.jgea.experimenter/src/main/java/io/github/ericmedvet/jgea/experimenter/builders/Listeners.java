@@ -20,13 +20,13 @@
 
 package io.github.ericmedvet.jgea.experimenter.builders;
 
-import io.github.ericmedvet.jgea.core.ProgressMonitor;
 import io.github.ericmedvet.jgea.core.solver.Individual;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.util.Progress;
 import io.github.ericmedvet.jgea.experimenter.Experiment;
 import io.github.ericmedvet.jgea.experimenter.Run;
 import io.github.ericmedvet.jgea.experimenter.Utils;
+import io.github.ericmedvet.jgea.experimenter.listener.ProgressMonitor;
 import io.github.ericmedvet.jgea.experimenter.listener.decoupled.*;
 import io.github.ericmedvet.jgea.experimenter.listener.net.NetMultiSink;
 import io.github.ericmedvet.jnb.core.*;
@@ -125,8 +125,34 @@ import java.util.stream.Stream;
 )
 @Alias(
     name = "console", value = // spotless:off
-    """
+    """       
        listener.console(
+         defaultEFunctions = [
+           ea.f.nOfIterations();
+           ea.f.nOfEvals();
+           ea.f.nOfBirths();
+           ea.f.elapsedSecs();
+           f.size(of = ea.f.all());
+           f.size(of = ea.f.firsts());
+           f.size(of = ea.f.lasts());
+           f.uniqueness(of = f.each(mapF = ea.f.genotype(); of = ea.f.all()));
+           f.uniqueness(of = f.each(mapF = ea.f.solution(); of = ea.f.all()));
+           f.uniqueness(of = f.each(mapF = ea.f.quality(); of = ea.f.all()))
+         ];
+         defaultKFunctions = [
+           ea.f.globalProgress();
+           ea.f.runKey(key = "run.problem.name");
+           ea.f.runKey(key = "run.solver.name");
+           ea.f.runKey(key = "run.randomGenerator.seed")
+         ];
+         eToKsFunction = ea.f.runs()
+       )
+       """ // spotless:on
+)
+@Alias(
+    name = "csv", value = // spotless:off
+    """
+       listener.csv(
          defaultEFunctions = [
            ea.f.nOfIterations();
            ea.f.nOfEvals();
@@ -143,8 +169,7 @@ import java.util.stream.Stream;
            ea.f.runKey(key = "run.problem.name");
            ea.f.runKey(key = "run.solver.name");
            ea.f.runKey(key = "run.randomGenerator.seed")
-         ];
-         eToKsFunction = ea.f.runs()
+         ]
        )
        """ // spotless:on
 )
@@ -286,44 +311,6 @@ public class Listeners {
           onlyLast
       );
     };
-  }
-
-  @SuppressWarnings("unused")
-  public static <G, S, Q> BiFunction<Experiment, Executor, ListenerFactory<POCPopulationState<?, G, S, Q, ?>, Run<?, G, S, Q>>> bestCsv(
-      @Param("path") String path,
-      @Param(value = "errorString", dS = "NA") String errorString,
-      @Param(value = "intFormat", dS = "%d") String intFormat,
-      @Param(value = "doubleFormat", dS = "%.5e") String doubleFormat,
-      @Param(
-          value = "defaultFunctions", dNPMs = {"ea.f.nOfIterations()", "ea.f.nOfEvals()", "ea.f.nOfBirths()", "ea.f" + ".elapsedSecs()", "f.size(of=ea.f.all())", "f.size(of=ea.f.firsts())", "f.size(of=ea.f.lasts())", "f" + ".uniqueness(of=f.each(mapF=ea.f.genotype();of=ea.f.all()))", "f.uniqueness(of=f.each(mapF=ea.f.solution();" + "of=ea.f.all()))", "f.uniqueness(of=f.each(mapF=ea.f.quality();of=ea.f.all()))"
-          }) List<Function<? super POCPopulationState<?, G, S, Q, ?>, ?>> defaultStateFunctions,
-      @Param(value = "functions") List<Function<? super POCPopulationState<?, G, S, Q, ?>, ?>> stateFunctions,
-      @Param(
-          value = "defaultRunFunctions", dNPMs = {"ea.f.runKey(key = \"run.problem.name\")", "ea.f.runKey(key = \"run" + ".solver.name\")", "ea.f.runKey(key = " + "\"run.randomGenerator.seed\")"
-          }) List<Function<? super Run<?, G, S, Q>, ?>> defaultRunFunctions,
-      @Param("runFunctions") List<Function<? super Run<?, G, S, Q>, ?>> runFunctions,
-      @Param(value = "deferred") boolean deferred,
-      @Param(value = "onlyLast") boolean onlyLast,
-      @Param(value = "runCondition", dNPM = "predicate.always()") Predicate<Run<?, G, S, Q>> runPredicate,
-      @Param(value = "stateCondition", dNPM = "predicate.always()") Predicate<POCPopulationState<?, G, S, Q, ?>> statePredicate
-  ) {
-    return (experiment, executor) -> new ListenerFactoryAndMonitor<>(
-        new CSVPrinter<>(
-            Stream.of(defaultStateFunctions, stateFunctions)
-                .flatMap(List::stream)
-                .toList(),
-            Stream.concat(defaultRunFunctions.stream(), runFunctions.stream())
-                .toList(),
-            Utils.interpolate(path, experiment, null),
-            errorString,
-            intFormat,
-            doubleFormat
-        ),
-        runPredicate,
-        statePredicate,
-        deferred ? executor : null,
-        onlyLast
-    );
   }
 
   public static <G, S, Q> BiFunction<Experiment, Executor, ListenerFactory<POCPopulationState<?, G, S, Q, ?>, Run<?, G, S, Q>>> net(

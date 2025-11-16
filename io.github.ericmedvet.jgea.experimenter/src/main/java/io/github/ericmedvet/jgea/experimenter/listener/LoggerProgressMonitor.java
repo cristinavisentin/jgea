@@ -20,7 +20,6 @@
 
 package io.github.ericmedvet.jgea.experimenter.listener;
 
-import io.github.ericmedvet.jgea.core.ProgressMonitor;
 import io.github.ericmedvet.jgea.core.util.Progress;
 import io.github.ericmedvet.jgea.core.util.TextPlotter;
 import java.util.logging.Logger;

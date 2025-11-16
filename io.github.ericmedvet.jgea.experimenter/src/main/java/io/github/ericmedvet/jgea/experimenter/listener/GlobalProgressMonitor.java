@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * jgea-core
+ * jgea-experimenter
  * %%
  * Copyright (C) 2018 - 2025 Eric Medvet
  * %%
@@ -17,34 +17,40 @@
  * limitations under the License.
  * =========================LICENSE_END==================================
  */
-
-package io.github.ericmedvet.jgea.core;
+package io.github.ericmedvet.jgea.experimenter.listener;
 
 import io.github.ericmedvet.jgea.core.util.Progress;
-import java.util.List;
 
-@FunctionalInterface
-public interface ProgressMonitor {
+public class GlobalProgressMonitor implements ProgressMonitor {
 
-  void notify(Progress progress, String message);
+  private Progress lastProgress;
+  private String lastMessage;
+  static GlobalProgressMonitor instance;
 
-  static ProgressMonitor all(List<ProgressMonitor> progressMonitors) {
-    return (progress, message) -> progressMonitors.forEach(m -> m.notify(progress, message));
+  private GlobalProgressMonitor() {
+    lastProgress = Progress.NA;
+    lastMessage = "";
   }
 
-  default ProgressMonitor and(ProgressMonitor other) {
-    return all(List.of(this, other));
+  @Override
+  public void notify(Progress progress, String message) {
+    lastProgress = progress;
+    lastMessage = message;
   }
 
-  default void notify(int i, int n, String message) {
-    notify(new Progress(0, n, i), message);
+  public Progress progress() {
+    return lastProgress;
   }
 
-  default void notify(int i, int n) {
-    notify(new Progress(0, n, i));
+  public String lastMessage() {
+    return lastMessage;
   }
 
-  default void notify(Progress progress) {
-    notify(progress, "");
+  public static GlobalProgressMonitor get() {
+    if (instance == null) {
+      instance = new GlobalProgressMonitor();
+    }
+    return instance;
   }
+
 }

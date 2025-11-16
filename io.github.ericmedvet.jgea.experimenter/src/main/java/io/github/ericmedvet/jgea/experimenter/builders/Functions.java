@@ -39,6 +39,7 @@ import io.github.ericmedvet.jgea.core.util.*;
 import io.github.ericmedvet.jgea.experimenter.Experiment;
 import io.github.ericmedvet.jgea.experimenter.Run;
 import io.github.ericmedvet.jgea.experimenter.Utils;
+import io.github.ericmedvet.jgea.experimenter.listener.GlobalProgressMonitor;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
 import io.github.ericmedvet.jnb.core.Param;
@@ -389,6 +390,34 @@ public class Functions {
   ) {
     Function<Individual<G, ?, ?>, G> f = Individual::genotype;
     return FormattedNamedFunction.from(f, format, "genotype").compose(beforeF);
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static FormattedNamedFunction<Object, TextPlotter.Miniplot> globalProgress(
+      @Param(value = "name", dS = "global.progress") String name,
+      @Param(value = "l", dI = 8) int l
+  ) {
+    GlobalProgressMonitor globalProgressMonitor = GlobalProgressMonitor.get();
+    return FormattedNamedFunction.from(
+        o -> TextPlotter.horizontalBar(globalProgressMonitor.progress().rate(), 0, 1, l),
+        "%" + l + "s",
+        name
+    );
+  }
+
+  @SuppressWarnings("unused")
+  @Cacheable
+  public static FormattedNamedFunction<Object, Double> globalProgressRate(
+      @Param(value = "name", dS = "global.progress.rate") String name,
+      @Param(value = "format", dS = "%4.2f") String format
+  ) {
+    GlobalProgressMonitor globalProgressMonitor = GlobalProgressMonitor.get();
+    return FormattedNamedFunction.from(
+        o -> globalProgressMonitor.progress().rate(),
+        format,
+        name
+    );
   }
 
   @SuppressWarnings("unused")
@@ -854,6 +883,7 @@ public class Functions {
     };
     return FormattedNamedFunction.from(f, format, "size").compose(beforeF);
   }
+
 
   @SuppressWarnings("unused")
   @Cacheable

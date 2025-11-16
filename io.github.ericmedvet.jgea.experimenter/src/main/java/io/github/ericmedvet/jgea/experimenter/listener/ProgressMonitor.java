@@ -1,6 +1,6 @@
 /*-
  * ========================LICENSE_START=================================
- * jgea-experimenter
+ * jgea-core
  * %%
  * Copyright (C) 2018 - 2025 Eric Medvet
  * %%
@@ -21,19 +21,30 @@
 package io.github.ericmedvet.jgea.experimenter.listener;
 
 import io.github.ericmedvet.jgea.core.util.Progress;
-import io.github.ericmedvet.jgea.core.util.TextPlotter;
-import java.io.PrintStream;
+import java.util.List;
 
-public class ScreenProgressMonitor implements ProgressMonitor {
+@FunctionalInterface
+public interface ProgressMonitor {
 
-  private final PrintStream ps;
+  void notify(Progress progress, String message);
 
-  public ScreenProgressMonitor(PrintStream ps) {
-    this.ps = ps;
+  static ProgressMonitor all(List<ProgressMonitor> progressMonitors) {
+    return (progress, message) -> progressMonitors.forEach(m -> m.notify(progress, message));
   }
 
-  @Override
-  public void notify(Progress progress, String message) {
-    ps.printf("Progress: %s %s%n", TextPlotter.horizontalBar(progress.rate(), 0, 1, 8), message);
+  default ProgressMonitor and(ProgressMonitor other) {
+    return all(List.of(this, other));
+  }
+
+  default void notify(int i, int n, String message) {
+    notify(new Progress(0, n, i), message);
+  }
+
+  default void notify(int i, int n) {
+    notify(new Progress(0, n, i));
+  }
+
+  default void notify(Progress progress) {
+    notify(progress, "");
   }
 }

@@ -20,9 +20,9 @@
 
 package io.github.ericmedvet.jgea.experimenter;
 
-import io.github.ericmedvet.jgea.core.ProgressMonitor;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
-import io.github.ericmedvet.jgea.experimenter.listener.ScreenProgressMonitor;
+import io.github.ericmedvet.jgea.experimenter.listener.GlobalProgressMonitor;
+import io.github.ericmedvet.jgea.experimenter.listener.ProgressMonitor;
 import io.github.ericmedvet.jnb.core.ProjectInfoProvider;
 import io.github.ericmedvet.jnb.datastructure.ListenerFactory;
 import java.time.Duration;
@@ -87,11 +87,12 @@ public class Experimenter {
         .filter(f -> f instanceof ProgressMonitor)
         .map(f -> (ProgressMonitor) f)
         .toList();
-    ProgressMonitor progressMonitor = progressMonitors.isEmpty() ? new ScreenProgressMonitor(
-        System.out
-    ) : ProgressMonitor.all(progressMonitors);
+    ProgressMonitor progressMonitor = ProgressMonitor
+        .all(progressMonitors)
+        .and(GlobalProgressMonitor.get());
     // start experiments
-    record RunOutcome(Run<?, ?, ?, ?> run, Future<Collection<?>> future) {}
+    record RunOutcome(Run<?, ?, ?, ?> run, Future<Collection<?>> future) {
+    }
     List<RunOutcome> runOutcomes = experiment.runs()
         .stream()
         .map(run -> new RunOutcome(run, experimentExecutorService.submit(() -> {
