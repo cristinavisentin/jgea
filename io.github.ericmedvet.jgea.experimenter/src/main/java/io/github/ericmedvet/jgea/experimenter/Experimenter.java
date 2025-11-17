@@ -78,7 +78,7 @@ public class Experimenter {
     List<? extends ListenerFactory<? super POCPopulationState<?, ?, ?, ?, ?>, Run<?, ?, ?, ?>>> factories = experiment
         .listeners()
         .stream()
-        .map(l -> l.apply(experiment, listenerExecutorService))
+        .map(l -> l.apply(listenerExecutorService))
         .toList();
     ListenerFactory<? super POCPopulationState<?, ?, ?, ?, ?>, Run<?, ?, ?, ?>> factory = ListenerFactory.all(
         factories

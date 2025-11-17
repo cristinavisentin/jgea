@@ -38,7 +38,6 @@ import io.github.ericmedvet.jgea.core.solver.mapelites.*;
 import io.github.ericmedvet.jgea.core.util.*;
 import io.github.ericmedvet.jgea.experimenter.Experiment;
 import io.github.ericmedvet.jgea.experimenter.Run;
-import io.github.ericmedvet.jgea.experimenter.Utils;
 import io.github.ericmedvet.jgea.experimenter.listener.GlobalProgressMonitor;
 import io.github.ericmedvet.jnb.core.Cacheable;
 import io.github.ericmedvet.jnb.core.Discoverable;
@@ -47,21 +46,13 @@ import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Sized;
-import io.github.ericmedvet.jviz.core.drawer.Drawer;
-import io.github.ericmedvet.jviz.core.drawer.Video;
-import io.github.ericmedvet.jviz.core.drawer.VideoBuilder;
 import io.github.ericmedvet.jviz.core.plot.*;
 import io.github.ericmedvet.jviz.core.plot.csv.*;
 import io.github.ericmedvet.jviz.core.plot.image.*;
-import io.github.ericmedvet.jviz.core.plot.image.Configuration;
 import io.github.ericmedvet.jviz.core.plot.video.*;
-import io.github.ericmedvet.jviz.core.util.VideoUtils;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 @Discoverable(prefixTemplate = "ea.function|f")
 public class Functions {
@@ -271,46 +262,6 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X, P extends XYPlot<D>, D> NamedFunction<X, String> csvPlotter(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, P> beforeF,
-      @Param(value = "columnNameJoiner", dS = ".") String columnNameJoiner,
-      @Param(value = "doubleFormat", dS = "%.3e") String doubleFormat,
-      @Param(value = "delimiter", dS = "\t") String delimiter,
-      @Param(value = "missingDataString", dS = "nan") String missingDataString,
-      @Param(value = "mode", dS = "paper_friendly") io.github.ericmedvet.jviz.core.plot.csv.Configuration.Mode mode
-  ) {
-    io.github.ericmedvet.jviz.core.plot.csv.Configuration configuration = new io.github.ericmedvet.jviz.core.plot.csv.Configuration(
-        columnNameJoiner,
-        doubleFormat,
-        delimiter,
-        List.of(new io.github.ericmedvet.jviz.core.plot.csv.Configuration.Replacement("\\W+", ".")),
-        missingDataString
-    );
-    Function<P, String> f = p -> {
-      if (p instanceof DistributionPlot dp) {
-        return new DistributionPlotCsvBuilder(configuration, mode).apply(dp);
-      }
-      if (p instanceof LandscapePlot lsp) {
-        return new LandscapePlotCsvBuilder(configuration, mode).apply(lsp);
-      }
-      if (p instanceof XYDataSeriesPlot xyp) {
-        return new XYDataSeriesPlotCsvBuilder(configuration, mode).apply(xyp);
-      }
-      if (p instanceof UnivariateGridPlot ugp) {
-        return new UnivariateGridPlotCsvBuilder(configuration, mode).apply(ugp);
-      }
-      if (p instanceof VectorialFieldPlot vfp) {
-        return new VectorialFieldPlotCsvBuilder(configuration, mode).apply(vfp);
-      }
-      throw new IllegalArgumentException(
-          "Unsupported type of plot %s".formatted(p.getClass().getSimpleName())
-      );
-    };
-    return NamedFunction.from(f, "csv.plotter").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X> FormattedNamedFunction<X, Double> cumulativeFidelity(
       @Param(value = "of", dNPM = "f.identity()") Function<X, POCPopulationState<?, ?, ?, ?, ?>> beforeF,
       @Param(value = "format", dS = "%8.1f") String format
@@ -457,77 +408,6 @@ public class Functions {
   ) {
     Function<Individual<?, ?, ?>, Long> f = Individual::id;
     return FormattedNamedFunction.from(f, format, "id").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X, P extends XYPlot<D>, D> NamedFunction<X, Object> imagePlotter(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, P> beforeF,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "configuration", dNPM = "ea.plot.configuration.image()") Configuration configuration,
-      @Param("secondary") boolean secondary,
-      @Param(value = "type", dS = "png") String type
-  ) {
-    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
-        w == -1 ? ii.w() : w,
-        h == -1 ? ii.h() : h
-    );
-    class ConditionedDrawer<Y> implements BiFunction<Drawer<Y>, Y, Object> {
-
-      @Override
-      public Object apply(Drawer<Y> drawer, Y y) {
-        return switch (type.toLowerCase()) {
-          case "png" -> drawer.buildRaster(iiAdapter.apply(drawer.imageInfo(y)), y);
-          case "svg" -> drawer.buildVectorial(iiAdapter.apply(drawer.imageInfo(y)), y);
-          default -> throw new IllegalArgumentException(
-              "Invalid type '%s', which is not 'png' nor 'svg'".formatted(type)
-          );
-        };
-      }
-    }
-    Function<P, Object> f = p -> {
-      if (p instanceof DistributionPlot dp) {
-        return new ConditionedDrawer<DistributionPlot>().apply(
-            new BoxPlotDrawer(configuration),
-            dp
-        );
-      }
-      if (p instanceof LandscapePlot lsp) {
-        return new ConditionedDrawer<LandscapePlot>().apply(
-            new LandscapePlotDrawer(configuration),
-            lsp
-        );
-      }
-      if (p instanceof XYDataSeriesPlot xyp) {
-        if (secondary) {
-          return new ConditionedDrawer<XYDataSeriesPlot>().apply(
-              new PointsPlotDrawer(configuration),
-              xyp
-          );
-        }
-        return new ConditionedDrawer<XYDataSeriesPlot>().apply(
-            new LinesPlotDrawer(configuration),
-            xyp
-        );
-      }
-      if (p instanceof UnivariateGridPlot ugp) {
-        return new ConditionedDrawer<UnivariateGridPlot>().apply(
-            new UnivariateGridPlotDrawer(configuration),
-            ugp
-        );
-      }
-      if (p instanceof VectorialFieldPlot vfp) {
-        return new ConditionedDrawer<VectorialFieldPlot>().apply(
-            new VectorialFieldPlotDrawer(configuration),
-            vfp
-        );
-      }
-      throw new IllegalArgumentException(
-          "Unsupported type of plot %s".formatted(p.getClass().getSimpleName())
-      );
-    };
-    return NamedFunction.from(f, "image.plotter").compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -830,34 +710,6 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, String> runKey(
-      @Param(value = "name", iS = "{key}") String name,
-      @Param("key") String key,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, Run<?, ?, ?, ?>> beforeF,
-      @Param(value = "format", dS = "%s") String format
-  ) {
-    Function<Run<?, ?, ?, ?>, String> f = run -> Utils.interpolate(
-        "{%s}".formatted(key),
-        null,
-        run
-    );
-    return FormattedNamedFunction.from(f, format, name).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X> FormattedNamedFunction<X, String> runString(
-      @Param(value = "name", iS = "{s}") String name,
-      @Param("s") String s,
-      @Param(value = "of", dNPM = "f.identity()") Function<X, Run<?, ?, ?, ?>> beforeF,
-      @Param(value = "format", dS = "%s") String format
-  ) {
-    Function<Run<?, ?, ?, ?>, String> f = run -> Utils.interpolate(s, null, run);
-    return FormattedNamedFunction.from(f, format, name).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X> NamedFunction<X, List<Run<?, ?, ?, ?>>> runs(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Experiment> beforeF,
       @Param(value = "name", dS = "runs") String name,
@@ -929,14 +781,6 @@ public class Functions {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <X> FormattedNamedFunction<X, LocalDateTime> timestamp(
-      @Param(value = "format", dS = "%1$tH:%1$tM:%1$tS") String format
-  ) {
-    return FormattedNamedFunction.from(x -> LocalDateTime.now(), format, "timestamp");
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
   public static <X, Z> NamedFunction<X, List<Double>> toDoubleString(
       @Param(value = "of", dNPM = "f.identity()") Function<X, Z> beforeF
   ) {
@@ -965,105 +809,6 @@ public class Functions {
       );
     };
     return NamedFunction.from(f, "to.double.string").compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X, D> NamedFunction<X, Object> toImage(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, D> beforeF,
-      @Param("drawer") Drawer<D> drawer,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "type", dS = "png") String type
-  ) {
-    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
-        w == -1 ? ii.w() : w,
-        h == -1 ? ii.h() : h
-    );
-    Function<D, Object> f = d -> switch (type.toLowerCase()) {
-      case "png" -> drawer.buildRaster(iiAdapter.apply(drawer.imageInfo(d)), d);
-      case "svg" -> drawer.buildVectorial(iiAdapter.apply(drawer.imageInfo(d)), d);
-      default -> throw new IllegalArgumentException(
-          "Invalid type '%s', which is not 'png' nor 'svg'".formatted(type)
-      );
-    };
-    return NamedFunction.from(f, "to.image[%s]".formatted(drawer)).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X, D> NamedFunction<X, Video> toImagesVideo(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, List<D>> beforeF,
-      @Param("drawer") Drawer<D> drawer,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "frameRate", dD = 10) double frameRate,
-      @Param(value = "encoder", dS = "default") VideoUtils.EncoderFacility encoder
-  ) {
-    UnaryOperator<VideoBuilder.VideoInfo> viAdapter = vi -> new VideoBuilder.VideoInfo(
-        w == -1 ? vi.w() : w,
-        h == -1 ? vi.h() : h,
-        encoder
-    );
-    VideoBuilder<List<D>> videoBuilder = VideoBuilder.from(
-        drawer,
-        Function.identity(),
-        frameRate
-    );
-    Function<List<D>, Video> f = ds -> {
-      if (w == -1 && h == -1) {
-        return videoBuilder.apply(ds);
-      }
-      return videoBuilder.build(viAdapter.apply(videoBuilder.videoInfo(ds)), ds);
-    };
-    return NamedFunction.from(f, "to.images.video[%s]".formatted(drawer))
-        .compose(beforeF);
-  }
-
-  public static <X, D> NamedFunction<X, Object> toMultiImage(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, List<D>> beforeF,
-      @Param("drawer") Drawer<D> drawer,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "type", dS = "png") String type,
-      @Param(value = "arrangement", dS = "horizontal") Drawer.Arrangement arrangement
-  ) {
-    UnaryOperator<Drawer.ImageInfo> iiAdapter = ii -> new Drawer.ImageInfo(
-        w == -1 ? ii.w() : w,
-        h == -1 ? ii.h() : h
-    );
-    Drawer<List<D>> multiDrawer = drawer.multi(arrangement);
-    Function<List<D>, Object> f = ds -> switch (type.toLowerCase()) {
-      case "png" -> multiDrawer.buildRaster(iiAdapter.apply(multiDrawer.imageInfo(ds)), ds);
-      case "svg" -> multiDrawer.buildVectorial(iiAdapter.apply(multiDrawer.imageInfo(ds)), ds);
-      default -> throw new IllegalArgumentException(
-          "Invalid type '%s', which is not 'png' nor 'svg'".formatted(type)
-      );
-    };
-    return NamedFunction.from(f, "to.image[%s]".formatted(drawer)).compose(beforeF);
-  }
-
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X, D> NamedFunction<X, Video> toVideo(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, D> beforeF,
-      @Param("video") VideoBuilder<D> videoBuilder,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "encoder", dS = "default") VideoUtils.EncoderFacility encoder
-  ) {
-    UnaryOperator<VideoBuilder.VideoInfo> viAdapter = vi -> new VideoBuilder.VideoInfo(
-        w == -1 ? vi.w() : w,
-        h == -1 ? vi.h() : h,
-        encoder
-    );
-    Function<D, Video> f = d -> {
-      if (w == -1 && h == -1) {
-        return videoBuilder.apply(d);
-      }
-      return videoBuilder.build(viAdapter.apply(videoBuilder.videoInfo(d)), d);
-    };
-    return NamedFunction.from(f, "to.video[%s]".formatted(videoBuilder)).compose(beforeF);
   }
 
   @SuppressWarnings("unused")
@@ -1168,69 +913,4 @@ public class Functions {
     return NamedFunction.from(f, "validation.quality").compose(beforeF);
   }
 
-  @SuppressWarnings("unused")
-  @Cacheable
-  public static <X, P extends XYPlot<D>, D> NamedFunction<X, Video> videoPlotter(
-      @Param(value = "of", dNPM = "f.identity()") Function<X, P> beforeF,
-      @Param(value = "w", dI = -1) int w,
-      @Param(value = "h", dI = -1) int h,
-      @Param(value = "encoder", dS = "default") VideoUtils.EncoderFacility encoder,
-      @Param(value = "frameRate", dD = 10) double frameRate,
-      @Param(value = "configuration", dNPM = "ea.plot.configuration.image()") Configuration iConfiguration,
-      @Param("secondary") boolean secondary
-  ) {
-    UnaryOperator<VideoBuilder.VideoInfo> viAdapter = vi -> new VideoBuilder.VideoInfo(
-        w == -1 ? vi.w() : w,
-        h == -1 ? vi.h() : h,
-        encoder
-    );
-    io.github.ericmedvet.jviz.core.plot.video.Configuration vConfiguration = new io.github.ericmedvet.jviz.core.plot.video.Configuration(
-        io.github.ericmedvet.jviz.core.plot.video.Configuration.DEFAULT.splitType(),
-        frameRate
-    );
-    Function<P, Video> f = p -> {
-      if (p instanceof DistributionPlot dp) {
-        BoxPlotVideoBuilder vb = new BoxPlotVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        );
-        return vb.build(viAdapter.apply(vb.videoInfo(dp)), dp);
-      }
-      if (p instanceof LandscapePlot lsp) {
-        LandscapePlotVideoBuilder vb = new LandscapePlotVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        );
-        return vb.build(viAdapter.apply(vb.videoInfo(lsp)), lsp);
-      }
-      if (p instanceof XYDataSeriesPlot xyp) {
-        AbstractXYDataSeriesPlotVideoBuilder vb = (!secondary) ? new LinesPlotVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        ) : new PointsPlotVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        );
-        return vb.build(viAdapter.apply(vb.videoInfo(xyp)), xyp);
-      }
-      if (p instanceof UnivariateGridPlot ugp) {
-        UnivariatePlotVideoBuilder vb = new UnivariatePlotVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        );
-        return vb.build(viAdapter.apply(vb.videoInfo(ugp)), ugp);
-      }
-      if (p instanceof VectorialFieldPlot vfp) {
-        VectorialFieldVideoBuilder vb = new VectorialFieldVideoBuilder(
-            vConfiguration,
-            iConfiguration
-        );
-        return vb.build(viAdapter.apply(vb.videoInfo(vfp)), vfp);
-      }
-      throw new IllegalArgumentException(
-          "Unsupported type of plot %s".formatted(p.getClass().getSimpleName())
-      );
-    };
-    return NamedFunction.from(f, "video.plotter").compose(beforeF);
-  }
 }

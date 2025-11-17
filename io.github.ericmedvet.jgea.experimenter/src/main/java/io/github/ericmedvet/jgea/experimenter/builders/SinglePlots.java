@@ -37,7 +37,7 @@ import java.util.function.Predicate;
     name = "fieldRun", value = // spotless:off
     """
         viz.plot.single.field(
-          title = ea.f.runString(name = title; s = "{run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "{solver.name} on {problem.name} (seed={randomGenerator.seed})");
           predicateValue = f.quantized(of = ea.f.rate(of = ea.f.progress()); q = 0.05; format = "%.2f");
           condition = predicate.inD(values = [0; 0.1; 0.25; 0.50; 1])
         )
@@ -46,7 +46,7 @@ import java.util.function.Predicate;
     name = "coMeStrategies", value = // spotless:off
     """
         ea.plot.single.fieldRun(
-          title = ea.f.runString(name = title; s = "Strategies (2D fields) of {run.solver.name} on {run.problem.name} (seed={runrandomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Strategies (2D fields) of {solver.name} on {problem.name} (seed={runrandomGenerator.seed})");
           fields = [ea.f.coMeStrategy1Field(); ea.f.coMeStrategy2Field()];
           pointPairs = [f.identity()]
         )
@@ -55,7 +55,7 @@ import java.util.function.Predicate;
     name = "gridRun", value = // spotless:off
     """
         viz.plot.single.grid(
-          title = ea.f.runString(name = title; s = "{run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "{solver.name} on {problem.name} (seed={randomGenerator.seed})");
           predicateValue = f.quantized(of = ea.f.rate(of = ea.f.progress()); q = 0.05; format = "%.2f");
           condition = predicate.inD(values = [0; 0.1; 0.25; 0.50; 1])
         )
@@ -65,7 +65,7 @@ import java.util.function.Predicate;
     }, value = // spotless:off
     """
         ea.plot.single.gridRun(
-          title = ea.f.runString(name = title; s = "Archive of {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Archive of {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           values = [f.composition(of = ea.f.quality(); then = $q)];
           grids = [ea.f.archiveToGrid(of = ea.f.meArchive())]
         )
@@ -75,7 +75,7 @@ import java.util.function.Predicate;
     }, value = // spotless:off
     """
         ea.plot.single.gridRun(
-          title = ea.f.runString(name = title; s = "Archives of {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Archives of {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           values = [f.composition(of = ea.f.quality(); then = $q)];
           grids = [ea.f.archiveToGrid(of = ea.f.coMeArchive1()); ea.f.archiveToGrid(of = ea.f.coMeArchive2())]
         )
@@ -85,7 +85,7 @@ import java.util.function.Predicate;
     }, value = // spotless:off
     """
         ea.plot.single.gridRun(
-          title = ea.f.runString(name = title; s = "Archives of {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Archives of {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           values = [f.composition(of = ea.f.quality(); then = $q)];
           grids = [ea.f.archiveToGrid(of = ea.f.maMeArchive(n = 0)); ea.f.archiveToGrid(of = ea.f.maMeArchive(n = 1))]
         )
@@ -95,7 +95,7 @@ import java.util.function.Predicate;
     }, value = // spotless:off
     """
         ea.plot.single.gridRun(
-          title = ea.f.runString(name = title; s = "Grid population of {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Grid population of {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           values = [f.composition(of = ea.f.quality(); then = $q)];
           grids = [ea.f.stateGrid()]
         )
@@ -104,7 +104,7 @@ import java.util.function.Predicate;
     name = "biObjectivePopulation", value = // spotless:off
     """
         viz.plot.single.xyes(
-          title = ea.f.runString(name = title; s = "Fronts with {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Fronts with {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           x = f.nThMapValue(of = ea.f.quality(); n = 0);
           y = f.nThMapValue(of = ea.f.quality(); n = 1);
           points = [
@@ -121,7 +121,7 @@ import java.util.function.Predicate;
     }, value = // spotless:off
     """
         viz.plot.single.xyes(
-          title = ea.f.runString(name = title; s = "Population validation of {run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "Population validation of {solver.name} on {problem.name} (seed={randomGenerator.seed})");
           x = f.composition(of = ea.f.quality(); then = $q);
           y = f.composition(of = f.composition(of = ea.f.solution(); then = $v); then = $q);
           points = [ea.f.all()];
@@ -133,7 +133,7 @@ import java.util.function.Predicate;
     name = "xyrsRun", value = // spotless:off
     """
         viz.plot.single.xyrs(
-          title = ea.f.runString(name = title; s = "{run.solver.name} on {run.problem.name} (seed={run.randomGenerator.seed})");
+          title = f.interpolated(name = title; s = "{solver.name} on {problem.name} (seed={randomGenerator.seed})");
           x = ea.f.nOfEvals()
         )
         """) // spotless:on
@@ -162,7 +162,7 @@ public class SinglePlots {
   @SuppressWarnings("unused")
   public static <X, Q, P extends QualityBasedProblem<S, Q>, S> LandscapeSEPAF<POCPopulationState<Individual<List<Double>, S, Q>, List<Double>, S, Q, P>, Run<?, List<Double>, S, Q>, X, Individual<List<Double>, S, Q>> landscape(
       @Param(
-          value = "title", dNPM = "ea.f.runString(name=title;s=\"{run.solver.name} on {run.problem.name} (seed={run.randomGenerator" + ".seed})\")") Function<? super Run<?, List<Double>, S, Q>, String> titleFunction,
+          value = "title", dNPM = "f.interpolated(name=title;s=\"{solver.name} on {problem.name} (seed={randomGenerator" + ".seed})\")") Function<? super Run<?, List<Double>, S, Q>, String> titleFunction,
       @Param(
           value = "predicateValue", dNPM = "f.quantized(of=ea.f.rate(of=ea.f.progress());q=0.05;format=\"%.2f\")") Function<POCPopulationState<Individual<List<Double>, S, Q>, List<Double>, S, Q, P>, X> predicateValueFunction,
       @Param(value = "condition", dNPM = "predicate.inD(values=[0;0.1;0.25;0.50;1])") Predicate<X> condition,

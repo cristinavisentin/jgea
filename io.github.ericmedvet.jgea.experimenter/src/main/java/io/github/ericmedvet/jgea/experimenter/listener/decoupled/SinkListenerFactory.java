@@ -31,6 +31,7 @@ import io.github.ericmedvet.jnb.datastructure.Pair;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -86,8 +87,8 @@ public class SinkListenerFactory<G, S, Q> implements ListenerFactory<POCPopulati
         () -> new Pair<>(
             experimentKey(),
             new ExperimentInfo(
-                experiment.map().toString(),
-                experiment.runs().size(),
+                Objects.isNull(experiment) ? "" : experiment.map().toString(),
+                Objects.isNull(experiment) ? 0 : experiment.runs().size(),
                 Stream.of(runFunctions, stateFunctions)
                     .flatMap(List::stream)
                     .map(f -> new Pair<>(NamedFunction.name(f), FormattedFunction.format(f)))

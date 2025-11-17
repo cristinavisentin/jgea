@@ -1,3 +1,4 @@
+$basePath = ''../../Documenti/experiments/{^^.name}/{^^.startTime}/''
 $dT = 0.1
 $tRange = m.range(min = 0; max = 30)
 
@@ -33,8 +34,8 @@ ea.experiment(
   * (solver = (stop = ea.sc.nOfQualityEvaluations(n = 500))
   * (representation = [ea.representation.doubleString()])
   * (mapper = [
-    ea.mapper.ndsToNrla(name = "linear-zeroq"; of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = true)));
     ea.mapper.ndsToNrla(name = "linear"; of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = false)));
+    ea.mapper.ndsToNrla(name = "linear-zeroq"; of = ea.mapper.dsToNpnds(npnds = ds.num.linear(zeroQ = true)));
     ea.mapper.ndsToNrla(name = "mlp"; of = ea.mapper.dsToNpnds(npnds = ds.num.mlp(innerLayers = [8])))
   ])
   * [ea.s.ga(name = ''ga+{mapper.name}'')
@@ -58,14 +59,14 @@ ea.experiment(
       onlyLast = false
     );
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
+      path = ''../../Documenti/experiments/{^.name}/{^.startTime}/'' + "best-fitness.svg";
       plot = ea.plot.multi.quality(q = f.mapValue(key = avg));
       type = svg
     );
     ea.l.saveForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/{run.solver.name}/best-frozen-learning-trajs-{run.randomGenerator.seed:%02d}.svg";
+      path = $basePath + "{solver.name}/best-frozen-learning-trajs-{randomGenerator.seed:%02d}.svg";
       of = ea.acc.lastBest();
-      processor = ea.f.toMultiImage(
+      processor = viz.f.toMultiImage(
         drawer = ds.d.navigation();
         of = f.all(
           of = ds.f.nonLearning(of = ea.f.solution());

@@ -26,9 +26,9 @@ import io.github.ericmedvet.jnb.core.*;
     name = "scatterExp", value = // spotless:off
     """
         viz.plot.multi.scatter(
-          xSubplot = ea.f.runString(name = problem; s = "{run.problem.name}");
-          ySubplot = ea.f.runString(name = none; s = "_");
-          group = ea.f.runString(name = solver; s = "{run.solver.name}");
+          xSubplot = f.interpolated(name = problem; s = "{problem.name}");
+          ySubplot = f.interpolated(name = none; s = "_");
+          group = f.interpolated(name = solver; s = "{solver.name}");
           predicateValue = ea.f.rate(of = ea.f.progress());
           condition = predicate.gtEq(t = 1)
         )
@@ -37,9 +37,9 @@ import io.github.ericmedvet.jnb.core.*;
     name = "xyExp", passThroughParams = {@PassThroughParam(name = "xQuantization", value = "1", type = ParamMap.Type.INT)}, value = // spotless:off
     """
         viz.plot.multi.xy(
-          xSubplot = ea.f.runString(name = problem; s = "{run.problem.name}");
-          ySubplot = ea.f.runString(name = none; s = "_");
-          line = ea.f.runString(name = solver; s = "{run.solver.name}");
+          xSubplot = f.interpolated(name = problem; s = "{problem.name}");
+          ySubplot = f.interpolated(name = none; s = "_");
+          line = f.interpolated(name = solver; s = "{solver.name}");
           x = f.quantized(of = ea.f.nOfEvals(); q = $xQuantization)
         )
         """) // spotless:on
@@ -57,9 +57,9 @@ import io.github.ericmedvet.jnb.core.*;
     name = "yBoxplotExp", value = // spotless:off
     """
         viz.plot.multi.yBoxplot(
-          xSubplot = ea.f.runString(name = problem; s = "{run.problem.name}");
-          ySubplot = ea.f.runString(name = none; s = "_");
-          box = ea.f.runString(name = solver; s = "{run.solver.name}");
+          xSubplot = f.interpolated(name = problem; s = "{problem.name}");
+          ySubplot = f.interpolated(name = none; s = "_");
+          box = f.interpolated(name = solver; s = "{solver.name}");
           predicateValue = ea.f.rate(of = ea.f.progress());
           condition = predicate.gtEq(t = 1)
         )

@@ -19,6 +19,7 @@
  */
 package io.github.ericmedvet.jgea.core.util;
 
+import io.github.ericmedvet.jnb.datastructure.Utils;
 import java.util.*;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
@@ -70,7 +71,7 @@ public interface IndexedProvider<T> {
 
   default IndexedProvider<T> fold(int j, int n) {
     IndexedProvider<T> thisIndexedProvider = this;
-    List<Integer> foldIndexes = Misc.fold(indexes(), j, n);
+    List<Integer> foldIndexes = Utils.fold(indexes(), j, n);
     return new IndexedProvider<>() {
       @Override
       public T get(int i) {
@@ -86,7 +87,7 @@ public interface IndexedProvider<T> {
 
   default IndexedProvider<T> negatedFold(int j, int n) {
     IndexedProvider<T> thisIndexedProvider = this;
-    List<Integer> foldIndexes = Misc.negatedFold(indexes(), j, n);
+    List<Integer> foldIndexes = Utils.negatedFold(indexes(), j, n);
     return new IndexedProvider<>() {
       @Override
       public T get(int i) {

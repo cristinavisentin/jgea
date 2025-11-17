@@ -22,12 +22,13 @@ package io.github.ericmedvet.jgea.experimenter;
 
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jnb.core.Discoverable;
+import io.github.ericmedvet.jnb.core.Mappable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.core.ParamMap;
 import io.github.ericmedvet.jnb.datastructure.ListenerFactory;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Discoverable(prefixTemplate = "ea")
 public record Experiment(
@@ -37,6 +38,6 @@ public record Experiment(
     @Param(value = "", injection = Param.Injection.MAP_WITH_DEFAULTS) ParamMap map,
     @Param(
         value = "listeners", dNPMs = {
-            "ea.l.console()"}) List<BiFunction<Experiment, ExecutorService, ListenerFactory<? super POCPopulationState<?, ?, ?, ?, ?>, Run<?, ?, ?, ?>>>> listeners
-){
+            "ea.l.console()"}) List<Function<ExecutorService, ListenerFactory<? super POCPopulationState<?, ?, ?, ?, ?>, Run<?, ?, ?, ?>>>> listeners
+) implements Mappable{
 }

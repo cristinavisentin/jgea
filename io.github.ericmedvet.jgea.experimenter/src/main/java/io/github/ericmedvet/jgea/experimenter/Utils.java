@@ -20,81 +20,16 @@
 
 package io.github.ericmedvet.jgea.experimenter;
 
-import io.github.ericmedvet.jnb.core.Interpolator;
-import io.github.ericmedvet.jnb.core.MapNamedParamMap;
-import io.github.ericmedvet.jnb.core.NamedParamMap;
-import io.github.ericmedvet.jnb.core.ParamMap;
-import io.github.ericmedvet.jviz.core.drawer.Video;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 public class Utils {
 
   protected static final Logger L = Logger.getLogger(Utils.class.getName());
 
   private Utils() {
-  }
-
-  public static void save(Object o, String filePath, boolean overwrite) {
-    File file = null;
-    try {
-      file = io.github.ericmedvet.jnb.datastructure.Utils.robustGetFile(filePath, overwrite);
-      switch (o) {
-        case BufferedImage image -> {
-          ImageIO.write(image, "png", file);
-        }
-        case String s -> {
-          Files.writeString(
-              file.toPath(),
-              s,
-              StandardOpenOption.WRITE,
-              StandardOpenOption.CREATE,
-              StandardOpenOption.TRUNCATE_EXISTING
-          );
-        }
-        case Video video -> {
-          Files.write(
-              file.toPath(),
-              video.data(),
-              StandardOpenOption.WRITE,
-              StandardOpenOption.CREATE,
-              StandardOpenOption.TRUNCATE_EXISTING
-          );
-        }
-        case byte[] data -> {
-          try (OutputStream os = new FileOutputStream(file)) {
-            os.write(data);
-          }
-        }
-        case NamedParamMap npm -> {
-          Files.writeString(
-              file.toPath(),
-              MapNamedParamMap.prettyToString(npm),
-              StandardOpenOption.WRITE,
-              StandardOpenOption.CREATE,
-              StandardOpenOption.TRUNCATE_EXISTING
-          );
-        }
-        case null -> throw new IllegalArgumentException("Cannot save null data of type %s");
-        default -> throw new IllegalArgumentException(
-            "Cannot save data of type %s".formatted(o.getClass().getSimpleName())
-        );
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(
-          "Cannot save '%s'".formatted(Objects.isNull(file) ? filePath : file.getPath()),
-          e
-      );
-    }
   }
 
   public static String getCredentialFromFile(File credentialFile) {
@@ -121,17 +56,4 @@ public class Utils {
     }
   }
 
-  public static String interpolate(String format, Experiment experiment, Run<?, ?, ?, ?> run) {
-    ParamMap map = new MapNamedParamMap("experiment", Map.of());
-    if (experiment != null) {
-      map = experiment.map();
-    }
-    if (run != null) {
-      map = map.with(
-          "run",
-          run.map().with("index", run.index())
-      );
-    }
-    return Interpolator.interpolate(format, map, "_");
-  }
 }

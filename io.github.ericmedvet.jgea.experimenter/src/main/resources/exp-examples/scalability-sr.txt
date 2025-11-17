@@ -1,3 +1,5 @@
+$basePath = ''../../Documenti/experiments/{^^.name}/{^^.startTime}/''
+
 $treeDesc1 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = ea.predicate.isSrConstant())); min = 1; max = 32; nOfBins = 8)
 $treeDesc2 = ea.s.me.d.descriptor(f = f.size(of = f.filter(of = ea.f.treeLeaves(of = ea.f.genotype()); condition = ea.predicate.isSrVariable())); min = 1; max = 32; nOfBins = 8)
 
@@ -23,27 +25,28 @@ ea.experiment(
   ];
   listeners = [
     ea.l.console(
-      runFunctions = [ea.f.runKey(key = "run.nOfThreads")];
-      functions = [
+      kFunctions = [f.mappableKey(key = "nOfThreads")];
+      eFunctions = [
         ea.f.cumulativeFidelity();
         ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
         f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
         f.percentile(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())); p = 75; format = "%6.2f");
         ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
-        f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f")
+        f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f");
+        f.timestamp()
       ];
       onlyLast = true
     );
     ea.l.savePlotForRun(
-      path = "../../Documenti/experiments/{name}/{startTime}/elapsed.svg";
+      path = $basePath + "elapsed.svg";
       plot = ea.plot.multi.xyExp(
-        ySubplot = ea.f.runString(name = solver; s = "{run.solver.name}");
-        x = ea.f.asDouble(of = ea.f.runKey(key = "run.nOfThreads"));
+        ySubplot = f.interpolated(name = solver; s = "{solver.name}");
+        x = ea.f.asDouble(of = f.mappableKey(key = "nOfThreads"));
         y = ea.f.elapsedSecs();
-        useRunForX = true
+        useKForX = true
       );
       type = svg;
-      configuration = ea.plot.conf.image(
+      configuration = viz.plot.conf.image(
         axesShow = all;
         axesIndependences = [all];
         linesMarkers = true

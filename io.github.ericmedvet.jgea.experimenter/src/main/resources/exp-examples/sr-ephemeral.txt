@@ -1,3 +1,5 @@
+$basePath = ''../../Documenti/experiments/{^^.name}/{^^.startTime}/''
+
 ea.experiment(
   runs = (randomGenerator = (seed = [1:1:5]) * [m.defaultRG()]) *
     (problem = [
@@ -24,39 +26,39 @@ ea.experiment(
   ];
   listeners = [
     ea.l.console(
-      functions = [
+      eFunctions = [
         ea.f.size(of = ea.f.genotype(of = ea.f.best()); format = "%3d");
         f.mapValue(key = mse; of = ea.f.quality(of = ea.f.best()); format = "%6.2f");
         ea.f.hist(of = f.each(of = ea.f.all(); mapF = f.mapValue(key = mse; of = ea.f.quality())));
         f.mapValue(key = mse; of = ea.f.validationQuality(); format = "%6.2f");
-        ea.f.timestamp()
+        f.timestamp()
       ];
       onlyLast = true
     );
 
     % ========= CONVERGENCE PLOTS
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-fitness.svg";
+      path = $basePath + "best-fitness.svg";
       plot = ea.plot.multi.quality(q = f.mapValue(key = mse));
       type = svg
     );
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/best-validation.svg";
+      path = $basePath + "best-validation.svg";
       plot = ea.plot.multi.xyExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
       type = svg
     );
 
     % ========= BOX PLOTS
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/final-best-fitness.svg";
+      path = $basePath + "final-best-fitness.svg";
       plot = ea.plot.multi.qualityBoxplot(q = f.mapValue(key = mse));
-      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      configuration = viz.plot.conf.image(axesShow = all; axesIndependences = [all]);
       type = svg
     );
     ea.l.savePlotForExp(
-      path = "../../Documenti/experiments/{name}/{startTime}/final-best-validation.svg";
+      path = $basePath + "final-best-validation.svg";
       plot = ea.plot.multi.yBoxplotExp(y = f.mapValue(key = mse; of = ea.f.validationQuality()));
-      configuration = ea.plot.conf.image(axesShow = all; axesIndependences = [all]);
+      configuration = viz.plot.conf.image(axesShow = all; axesIndependences = [all]);
       type = svg
     )
   ]

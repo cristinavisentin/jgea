@@ -25,6 +25,7 @@ import io.github.ericmedvet.jgea.core.solver.AbstractPopulationBasedIterativeSol
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.SolverException;
 import io.github.ericmedvet.jnb.core.Discoverable;
+import io.github.ericmedvet.jnb.core.Mappable;
 import io.github.ericmedvet.jnb.core.Param;
 import io.github.ericmedvet.jnb.core.ParamMap;
 import io.github.ericmedvet.jnb.datastructure.Listener;
@@ -43,7 +44,7 @@ public record Run<P extends QualityBasedProblem<S, Q>, G, S, Q>(
     @Param("randomGenerator") RandomGenerator randomGenerator,
     @Param(value = "nOfThreads", dI = -1) int nOfThreads,
     @Param(value = "", injection = Param.Injection.MAP_WITH_DEFAULTS) ParamMap map
-) {
+) implements Mappable {
 
   public Collection<S> run(
       Executor executor,

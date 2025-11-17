@@ -68,17 +68,6 @@ public class Misc {
     return ts.iterator().next();
   }
 
-  public static <E> List<E> fold(List<E> items, int fold, int n) {
-    return folds(items, List.of(fold), n);
-  }
-
-  public static <E> List<E> folds(List<E> items, List<Integer> folds, int n) {
-    return IntStream.range(0, items.size())
-        .filter(i -> folds.contains(i % n))
-        .mapToObj(items::get)
-        .toList();
-  }
-
   public static double hypervolume2D(Collection<List<Double>> points, List<Double> reference) {
     Point min = new Point(reference.get(0), reference.get(1));
     List<Point> ps = points.stream()
@@ -144,10 +133,6 @@ public class Misc {
                 Misc::union
             )
         );
-  }
-
-  public static <E> List<E> negatedFold(List<E> items, int fold, int n) {
-    return folds(items, IntStream.range(0, n).filter(j -> j != fold).boxed().toList(), n);
   }
 
   public static <K> K percentile(Collection<K> ks, Comparator<? super K> comparator, double p) {
