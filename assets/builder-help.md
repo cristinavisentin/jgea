@@ -511,16 +511,6 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.doubleOp()` by jgea-experimenter:2.7.1-SNAPSHOT
 
-### Builder `dynamicalSystem.function.inner()`
-
-`ds.f.inner(of)`
-
-| Param | Type | Default | Java type |
-| --- | --- | --- | --- |
-| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jsdynsym.core.composed.Composed">Composed</abbr>&lt;C&gt;&gt;</code> |
-
-Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, C&gt;</code>; built from `io.github.ericmedvet.jsdynsym.buildable.builders.Functions.inner()` by jgea-experimenter:2.7.1-SNAPSHOT
-
 ### Builder `dynamicalSystem.function.nonLearning()`
 
 `ds.f.nonLearning(name; of; format)`
@@ -678,7 +668,7 @@ Produces <code><abbr title="io.github.ericmedvet.jsdynsym.buildable.builders.Num
 | `innerLayers` | i[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.lang.Integer">Integer</abbr>&gt;</code> |
 | `learningRate` | d | `0.01` | <code>double</code> |
 | `activationFunction` | e | `TANH` | <code><abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.MultiLayerPerceptron$ActivationFunction">MultiLayerPerceptron$ActivationFunction</abbr></code> |
-| `initialWeightRange` | npm | `m.range(max = 1; min = -1)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
+| `initialWeightRange` | npm | `m.range(max = 0.1; min = -0.1)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `randomGenerator` | npm | `m.defaultRG()` | <code><abbr title="java.util.random.RandomGenerator">RandomGenerator</abbr></code> |
 | `parametrizationType` | e | `SYNAPSE` | <code><abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.HebbianMultilayerPerceptron$ParametrizationType">HebbianMultilayerPerceptron$ParametrizationType</abbr></code> |
 | `weightInitializationType` | e | `PARAMS` | <code><abbr title="io.github.ericmedvet.jsdynsym.core.numerical.ann.HebbianMultilayerPerceptron$WeightInitializationType">HebbianMultilayerPerceptron$WeightInitializationType</abbr></code> |
@@ -5095,6 +5085,17 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 `f.identity()`
 
 Produces <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, X&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.identity()` by jgea-experimenter:2.7.1-SNAPSHOT
+
+### Builder `function.inner()`
+
+`f.inner(name; of)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `name` | s | interpolate `inner` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, <abbr title="io.github.ericmedvet.jnb.datastructure.Composed">Composed</abbr>&lt;C&gt;&gt;</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;X, C&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.inner()` by jgea-experimenter:2.7.1-SNAPSHOT
 
 ### Builder `function.interpolated()`
 
