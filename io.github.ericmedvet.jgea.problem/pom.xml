@@ -23,11 +23,6 @@
       <artifactId>jsdynsym.control</artifactId>
       <version>${jsdynsym.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-csv</artifactId>
-      <version>1.14.0</version>
-    </dependency>
   </dependencies>
 
 </project>
