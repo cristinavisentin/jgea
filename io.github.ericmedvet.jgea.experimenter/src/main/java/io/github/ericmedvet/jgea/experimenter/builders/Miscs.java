@@ -60,19 +60,19 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> bestMESelector(
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<Individual<G, S, Q>, S, Q, O> bestSelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> {
-      Collection<MEIndividual<G, S, Q>> evaluatedPopulation = population.stream()
+      Collection<Individual<G, S, Q>> evaluatedPopulation = population.stream()
           .filter(i -> i.quality() != null)
           .toList();
-      Collection<MEIndividual<G, S, Q>> nullQualityPopulation = population.stream()
+      Collection<Individual<G, S, Q>> nullQualityPopulation = population.stream()
           .filter(i -> i.quality() == null)
           .toList();
-      PartialComparator<MEIndividual<G, S, Q>> partialComparator = (me1, me2) -> problem.qualityComparator()
+      PartialComparator<Individual<G, S, Q>> partialComparator = (me1, me2) -> problem.qualityComparator()
           .compare(me1.quality(), me2.quality());
-      List<Collection<MEIndividual<G, S, Q>>> fronts = new ArrayList<>(
+      List<Collection<Individual<G, S, Q>>> fronts = new ArrayList<>(
           PartiallyOrderedCollection
               .from(evaluatedPopulation, partialComparator)
               .fronts()
@@ -80,9 +80,9 @@ public class Miscs {
       if (!nullQualityPopulation.isEmpty()) {
         fronts.add(nullQualityPopulation);
       }
-      List<MEIndividual<G, S, Q>> opponents = new ArrayList<>();
-      for (Collection<MEIndividual<G, S, Q>> front : fronts) {
-        for (MEIndividual<G, S, Q> individualFromFront : front) {
+      List<Individual<G, S, Q>> opponents = new ArrayList<>();
+      for (Collection<Individual<G, S, Q>> front : fronts) {
+        for (Individual<G, S, Q> individualFromFront : front) {
           if (opponents.size() >= nOfOpponents) {
             break;
           }
@@ -315,11 +315,11 @@ public class Miscs {
 
   @SuppressWarnings("unused")
   @Cacheable
-  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<MEIndividual<G, S, Q>, S, Q, O> oldestMESelector(
+  public static <G, S, Q, O> AbstractBiEvolver.OpponentsSelector<Individual<G, S, Q>, S, Q, O> oldestSelector(
       @Param(value = "nOfOpponents", dI = 1) int nOfOpponents
   ) {
     return (population, individual, problem, random) -> population.stream()
-        .sorted(Comparator.comparingLong(MEIndividual::genotypeBirthIteration))
+        .sorted(Comparator.comparingLong(Individual::genotypeBirthIteration))
         .limit(nOfOpponents)
         .collect(Collectors.toList());
   }
