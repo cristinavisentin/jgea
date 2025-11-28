@@ -2742,7 +2742,7 @@ Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.Aggr
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 | `q` | npm | `f.identity()` | <code><abbr title="java.lang.String">String</abbr></code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMRPAF">DistributionMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMKPAF">DistributionMKPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ### Builder `ea.plot.multi.scatterExp()`
 
@@ -2761,7 +2761,7 @@ Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.Dist
 | `yRange` | npm | `m.range(max = Infinity; min = -Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.ScatterMRPAF">ScatterMRPAF</abbr>&lt;E, K, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.scatter()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.ScatterMKPAF">ScatterMKPAF</abbr>&lt;E, K, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.scatter()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ### Builder `ea.plot.multi.uniqueness()`
 
@@ -2800,7 +2800,7 @@ Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.Aggr
 | `yRange` | npm | `m.range(max = Infinity; min = -Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMRPAF">DistributionMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMKPAF">DistributionMKPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ### Builder `ea.plot.multi.xyExp()`
 
@@ -2839,7 +2839,7 @@ Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.Aggr
 | `yRange` | npm | `m.range(max = Infinity; min = -Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMRPAF">DistributionMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMKPAF">DistributionMKPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ## Package `ea.plot.single`
 
@@ -4793,6 +4793,16 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.avg()` by jgea-experimenter:2.8.2-SNAPSHOT
 
+### Builder `function.cached()`
+
+`f.cached(of)`
+
+| Param | Type | Default | Java type |
+| --- | --- | --- | --- |
+| `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;T, R&gt;</code> |
+
+Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.NamedFunction">NamedFunction</abbr>&lt;T, R&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.cached()` by jgea-experimenter:2.8.2-SNAPSHOT
+
 ### Builder `function.classSimpleName()`
 
 `f.classSimpleName(of)`
@@ -5147,7 +5157,7 @@ Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedName
 | --- | --- | --- | --- |
 | `of` | npm | `f.identity()` | <code><abbr title="java.util.function.Function">Function</abbr>&lt;X, Y&gt;</code> |
 | `args` | npm[] | `[]` | <code><abbr title="java.util.List">List</abbr>&lt;<abbr title="java.util.function.Function">Function</abbr>&lt;Y, ? extends <abbr title="java.lang.Number">Number</abbr>&gt;&gt;</code> |
-| `op` | e |  | <code><abbr title="io.github.ericmedvet.jnb.core.MathOp">MathOp</abbr></code> |
+| `op` | e |  | <code><abbr title="io.github.ericmedvet.jnb.buildable.MathOp">MathOp</abbr></code> |
 | `format` | s | `%.1f` | <code><abbr title="java.lang.String">String</abbr></code> |
 
 Produces <code><abbr title="io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction">FormattedNamedFunction</abbr>&lt;X, <abbr title="java.lang.Double">Double</abbr>&gt;</code>; built from `io.github.ericmedvet.jnb.buildable.Functions.mathOp()` by jgea-experimenter:2.8.2-SNAPSHOT
@@ -5958,7 +5968,7 @@ Aliases: `viz.plot.m`, `viz.plot.multi`
 | `yRange` | npm | `m.range(max = Infinity; min = -Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.ScatterMRPAF">ScatterMRPAF</abbr>&lt;E, K, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.scatter()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.ScatterMKPAF">ScatterMKPAF</abbr>&lt;E, K, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.scatter()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ### Builder `viz.plot.multi.xy()`
 
@@ -5996,7 +6006,7 @@ Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.Aggr
 | `yRange` | npm | `m.range(max = Infinity; min = -Infinity)` | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `limitOneYForK` | b | `true` | <code>boolean</code> |
 
-Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMRPAF">DistributionMRPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
+Produces <code><abbr title="io.github.ericmedvet.jviz.core.plot.accumulator.DistributionMKPAF">DistributionMKPAF</abbr>&lt;E, R, <abbr title="java.lang.String">String</abbr>, X&gt;</code>; built from `io.github.ericmedvet.jviz.buildable.builders.MultiPlots.yBoxplot()` by jgea-experimenter:2.8.2-SNAPSHOT
 
 ## Package `viz.plot.single`
 
