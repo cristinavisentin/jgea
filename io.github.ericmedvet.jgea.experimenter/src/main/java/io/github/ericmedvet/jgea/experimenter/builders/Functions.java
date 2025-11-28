@@ -1,21 +1,17 @@
-/*-
- * ========================LICENSE_START=================================
- * jgea-experimenter
- * %%
- * Copyright (C) 2018 - 2025 Eric Medvet
- * %%
+/*
+ * Copyright 2025 eric
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * =========================LICENSE_END==================================
  */
 package io.github.ericmedvet.jgea.experimenter.builders;
 
@@ -34,7 +30,13 @@ import io.github.ericmedvet.jgea.core.solver.MultiFidelityPOCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.POCPopulationState;
 import io.github.ericmedvet.jgea.core.solver.State;
 import io.github.ericmedvet.jgea.core.solver.cabea.GridPopulationState;
-import io.github.ericmedvet.jgea.core.solver.mapelites.*;
+import io.github.ericmedvet.jgea.core.solver.mapelites.Archive;
+import io.github.ericmedvet.jgea.core.solver.mapelites.CoMEPopulationState;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MAMEPopulationState;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MEIndividual;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MEPopulationState;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MapElites;
+import io.github.ericmedvet.jgea.core.solver.mapelites.MultiFidelityMEPopulationState;
 import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.core.util.Progress;
 import io.github.ericmedvet.jgea.core.util.TextPlotter;
@@ -48,7 +50,11 @@ import io.github.ericmedvet.jnb.datastructure.FormattedNamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Grid;
 import io.github.ericmedvet.jnb.datastructure.NamedFunction;
 import io.github.ericmedvet.jnb.datastructure.Sized;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
