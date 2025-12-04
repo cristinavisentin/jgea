@@ -1,30 +1,26 @@
-/*-
- * ========================LICENSE_START=================================
- * jgea-problem
- * %%
- * Copyright (C) 2018 - 2025 Eric Medvet
- * %%
+/*
+ * Copyright 2025 eric
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * =========================LICENSE_END==================================
  */
 
 package io.github.ericmedvet.jgea.problem.regression.multivariate;
 
 import io.github.ericmedvet.jgea.core.problem.SimpleEBMOProblem;
 import io.github.ericmedvet.jgea.core.util.IndexedProvider;
-import io.github.ericmedvet.jgea.core.util.Misc;
 import io.github.ericmedvet.jgea.problem.regression.univariate.UnivariateRegressionProblem;
 import io.github.ericmedvet.jnb.datastructure.TriFunction;
+import io.github.ericmedvet.jnb.datastructure.Utils;
 import io.github.ericmedvet.jsdynsym.core.numerical.MultivariateRealFunction;
 import io.github.ericmedvet.jsdynsym.core.numerical.named.NamedMultivariateRealFunction;
 import java.util.List;
@@ -35,42 +31,11 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public interface MultivariateRegressionProblem extends SimpleEBMOProblem<NamedMultivariateRealFunction, Map<String, Double>, Map<String, Double>, MultivariateRegressionProblem.Outcome, Double> {
-  record Outcome(Map<String, Double> actual, Map<String, Double> predicted) {
-    public Map<String, UnivariateRegressionProblem.Outcome> toUROutcomes() {
-      return actual.keySet()
-          .stream()
-          .collect(
-              Misc.toSequencedMap(
-                  yVarName -> new UnivariateRegressionProblem.Outcome(
-                      actual.get(yVarName),
-                      predicted.get(yVarName)
-                  )
-              )
-          );
-    }
-  }
-
-  List<UnivariateRegressionProblem.Metric> metrics();
-
-  static MultivariateRegressionProblem from(
-      List<UnivariateRegressionProblem.Metric> metrics,
-      IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> caseProvider,
-      IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> validationCaseProvider
-  ) {
-    record HardMultivariateRegressionProblem(
-        List<UnivariateRegressionProblem.Metric> metrics,
-        IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> caseProvider,
-        IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> validationCaseProvider
-    ) implements MultivariateRegressionProblem {
-    }
-    return new HardMultivariateRegressionProblem(metrics, caseProvider, validationCaseProvider);
-  }
-
   @Override
   default SequencedMap<String, Objective<List<Outcome>, Double>> aggregateObjectives() {
     return metrics().stream()
         .collect(
-            Misc.toSequencedMap(
+            Utils.toSequencedMap(
                 Enum::toString,
                 m -> new Objective<>(
                     outcomes -> {
@@ -96,6 +61,37 @@ public interface MultivariateRegressionProblem extends SimpleEBMOProblem<NamedMu
                 )
             )
         );
+  }
+
+  List<UnivariateRegressionProblem.Metric> metrics();
+
+  static MultivariateRegressionProblem from(
+      List<UnivariateRegressionProblem.Metric> metrics,
+      IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> caseProvider,
+      IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> validationCaseProvider
+  ) {
+    record HardMultivariateRegressionProblem(
+        List<UnivariateRegressionProblem.Metric> metrics,
+        IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> caseProvider,
+        IndexedProvider<Example<Map<String, Double>, Map<String, Double>>> validationCaseProvider
+    ) implements MultivariateRegressionProblem {
+    }
+    return new HardMultivariateRegressionProblem(metrics, caseProvider, validationCaseProvider);
+  }
+
+  record Outcome(Map<String, Double> actual, Map<String, Double> predicted) {
+    public Map<String, UnivariateRegressionProblem.Outcome> toUROutcomes() {
+      return actual.keySet()
+          .stream()
+          .collect(
+              Utils.toSequencedMap(
+                  yVarName -> new UnivariateRegressionProblem.Outcome(
+                      actual.get(yVarName),
+                      predicted.get(yVarName)
+                  )
+              )
+          );
+    }
   }
 
   @Override
