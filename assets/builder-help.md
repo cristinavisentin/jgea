@@ -3194,7 +3194,7 @@ Produces <code><abbr title="io.github.ericmedvet.jgea.core.problem.SimpleMFBBMOP
 
 | Param | Type | Default | Java type |
 | --- | --- | --- | --- |
-| `name` | s | interpolate `{simulation.name}[dT={dTRange.min}--{dTRange.min}]` | <code><abbr title="java.lang.String">String</abbr></code> |
+| `name` | s | interpolate `{simulation.name}[dT={dTRange.min}--{dTRange.max}]` | <code><abbr title="java.lang.String">String</abbr></code> |
 | `simulation` | npm |  | <code><abbr title="io.github.ericmedvet.jsdynsym.control.Simulation">Simulation</abbr>&lt;S, BS, B&gt;</code> |
 | `dTRange` | npm |  | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
 | `tRange` | npm |  | <code><abbr title="io.github.ericmedvet.jnb.datastructure.DoubleRange">DoubleRange</abbr></code> |
